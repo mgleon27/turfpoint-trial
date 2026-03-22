@@ -2,6 +2,7 @@
 
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { useState } from "react";
+import { LeafletMouseEvent } from "leaflet";
 
 export default function LocationPicker({
   onSelect,
@@ -12,7 +13,7 @@ export default function LocationPicker({
 
   function MapClick() {
     useMapEvents({
-      click(e) {
+      click(e: LeafletMouseEvent) {
         const { lat, lng } = e.latlng;
         setPosition([lat, lng]);
         onSelect(lat, lng);
@@ -23,7 +24,7 @@ export default function LocationPicker({
 
   return (
     <MapContainer
-      center={[8.1833, 77.4119]} // default Nagercoil
+      center={[8.1833, 77.4119]}
       zoom={13}
       className="h-[300px] w-full rounded-lg"
     >
