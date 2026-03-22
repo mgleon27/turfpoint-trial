@@ -1,0 +1,396 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import dynamic from "next/dynamic";
+import { useLocation } from "@/lib/locationContext";
+import Header from "@/components/Header";
+
+import { useUser } from "@/lib/userContext";
+
+// ✅ MOBILE COMPONENTS
+import MobileHeader from "@/components/MobileHeader";
+import MobileNav from "@/components/MobileNav";
+import MobileTurfCard from "@/components/homeMobileTurfCard";
+
+const LocationPicker = dynamic(
+  () => import("@/components/LocationPicker"),
+  { ssr: false }
+);
+
+// ================= TYPES =================
+type Turf = {
+  id: string;
+  name: string;
+  locality: string;
+  address: string;
+  price: number;
+  image_url?: string;
+  map_lat: number;
+  map_lng: number;
+  is_24_7: boolean;
+  reviews?: { rating: number }[];
+  turf_sports?: { sports?: { name?: string } }[];
+};
+
+// ================= DISTANCE =================
+function getDistance(lat1:number, lon1:number, lat2:number, lon2:number) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(dLat/2)**2 +
+    Math.cos((lat1*Math.PI)/180) *
+    Math.cos((lat2*Math.PI)/180) *
+    Math.sin(dLon/2)**2;
+
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+const banners = ["/banner1.jpg", "/banner2.jpg", "/banner3.jpg"];
+
+export default function Home() {
+  const router = useRouter();
+
+  const [turfs, setTurfs] = useState<Turf[]>([]);
+  const [bookingCounts, setBookingCounts] = useState<Record<string, number>>({});
+  const [pageLoading, setPageLoading] = useState(true);
+
+  const { user } = useUser();
+  const [search, setSearch] = useState("");
+  const [current, setCurrent] = useState(0);
+
+  const { city, location, setLocationData } = useLocation();
+  const [showLocationModal, setShowLocationModal] = useState(false);
+
+  const [touchStart, setTouchStart] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+
+  const nextSlide = () => setCurrent((prev) => prev + 1);
+  const prevSlide = () => setCurrent((prev) => prev - 1);
+
+  // ================= LOAD =================
+  useEffect(() => {
+    const loadData = async () => {
+      const { data } = await supabase
+        .from("turfs")
+        .select(`
+          *,
+          reviews ( rating ),
+          turf_sports (
+            sports ( name )
+          )
+        `);
+
+      if (data) setTurfs(data);
+
+      const { data: bookings } = await supabase.from("bookings").select("turf_id");
+
+      if (bookings) {
+        const counts: Record<string, number> = {};
+        bookings.forEach((b) => {
+          counts[b.turf_id] = (counts[b.turf_id] || 0) + 1;
+        });
+        setBookingCounts(counts);
+      }
+
+      setPageLoading(false);
+    };
+
+    loadData();
+  }, []);
+
+  // ================= FILTER =================
+  const filteredTurfs = useMemo(() => {
+    return turfs.filter((t) =>
+      !search ||
+      t.name.toLowerCase().includes(search.toLowerCase()) ||
+      t.address.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [turfs, search]);
+
+  const trendingTurfs = useMemo(() => {
+    return [...filteredTurfs]
+      .sort((a, b) => (bookingCounts[b.id] || 0) - (bookingCounts[a.id] || 0))
+      .slice(0, 7);
+  }, [filteredTurfs, bookingCounts]);
+
+  const nearbyTurfs = useMemo(() => {
+    if (!location) return filteredTurfs;
+
+    return [...filteredTurfs].sort((a, b) => {
+      const d1 = getDistance(location.lat, location.lng, a.map_lat, a.map_lng);
+      const d2 = getDistance(location.lat, location.lng, b.map_lat, b.map_lng);
+      return d1 - d2;
+    });
+  }, [filteredTurfs, location]);
+
+  const allTurfs = filteredTurfs.slice(0, 7);
+
+  // ================= CAROUSEL =================
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => prev + 1);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ================= UI =================
+  return (
+    <>
+      {/* ================= 📱 MOBILE ================= */}
+      <div className="md:hidden bg-white min-h-screen">
+
+        <MobileHeader />
+        <MobileNav />
+
+        {/* BANNER */}
+        <div className="px-4 mt-4">
+          <img src="/banner1.jpg" className="rounded-xl w-full" />
+        </div>
+
+        {/* SECTIONS */}
+        <MobileSection title="Trending Turfs" turfs={trendingTurfs} router={router} />
+        <MobileSection title="Nearby Turfs" turfs={nearbyTurfs} router={router} />
+        <MobileSection title="All Turfs" turfs={allTurfs} router={router} />
+
+      </div>
+
+      {/* ================= 💻 DESKTOP (UNCHANGED) ================= */}
+      <div className="hidden md:block bg-white-100 min-h-screen">
+
+        <Header
+          search={search}
+          setSearch={setSearch}
+          setShowLocationModal={setShowLocationModal}
+        />
+{/* ================= 🔥 PREMIUM CAROUSEL ================= */}
+      <div className="bg-white py-6">
+        <div className="relative max-w-[1200px] mx-auto overflow-hidden">
+
+          <div
+            className={`flex ${isTransitioning ? "transition-transform duration-500" : ""}`}
+            style={{ transform: `translateX(-${(current + 1) * 60}%)` }}
+            onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
+            onTouchEnd={(e) => {
+              const diff = touchStart - e.changedTouches[0].clientX;
+              if (diff > 50) nextSlide();
+              if (diff < -50) prevSlide();
+            }}
+          >
+            <Slide src={banners[banners.length - 1]} isActive={false} />
+
+            {banners.map((b, i) => (
+              <Slide key={i} src={b} isActive={i === current} />
+            ))}
+
+            <Slide src={banners[0]} isActive={false} />
+          </div>
+
+          <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow">
+            ◀
+          </button>
+
+          <button onClick={nextSlide} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow">
+            ▶
+          </button>
+        </div>
+      </div>
+
+      {/* ================= TRENDING ================= */}
+      <Section title="Trending Turfs">
+        {trendingTurfs.map((t) => (
+          <TurfCard key={t.id} turf={t} router={router} />
+        ))}
+      </Section>
+
+      {/* ================= NEARBY ================= */}
+      <Section title="Nearby You">
+        {nearbyTurfs.slice(0, 4).map((t) => (
+          <TurfCard key={t.id} turf={t} router={router} />
+        ))}
+      </Section>
+
+      {/* ================= ALL ================= */}
+      <Section title="All Turfs">
+        {allTurfs.map((t) => (
+          <TurfCard key={t.id} turf={t} router={router} />
+        ))}
+      </Section>
+
+
+      {showLocationModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white p-5 rounded-xl w-[400px]">
+
+      <h2 className="font-semibold mb-3">Select Location</h2>
+
+      <LocationPicker
+        onSelect={(lat, lng) => {
+          setLocationData({ lat, lng }, city); // temp
+        }}
+      />
+
+      <div className="flex justify-between mt-4">
+        <button onClick={() => setShowLocationModal(false)}>
+          Cancel
+        </button>
+
+        <button
+          onClick={async () => {
+            if (!location) return;
+
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${location.lat}&lon=${location.lng}&format=json`
+            );
+            const data = await res.json();
+
+            const newCity =
+              data.address.city ||
+              data.address.town ||
+              data.address.village ||
+              "Selected Location";
+
+            // 🔥 GLOBAL UPDATE
+            setLocationData(location, newCity);
+
+            setShowLocationModal(false);
+          }}
+          className="bg-green-500 text-white px-3 py-1 rounded"
+        >
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+      </div>
+    </>
+  );
+}
+
+
+
+// ================= SLIDE =================
+function Slide({ src, isActive }: { src: string; isActive: boolean }) {
+  return (
+    <div className="flex-shrink-0 w-[60%] px-3">
+      <div className={`${isActive ? "scale-100" : "scale-90 opacity-60"} transition-all`}>
+        <img src={src} className="w-full h-[200px] md:h-[350px] object-cover rounded-2xl" />
+      </div>
+    </div>
+  );
+}
+
+
+// ================= MOBILE SECTION =================
+function MobileSection({
+  title,
+  turfs,
+  router,
+}: {
+  title: string;
+  turfs: Turf[];
+  router: AppRouterInstance;
+}) {
+  return (
+    <div className="px-4 mt-6">
+      <h2 className="font-semibold mb-3">{title}</h2>
+
+      <div className="flex gap-4 overflow-x-auto pb-2">
+        {turfs.map((t) => (
+          <MobileTurfCard key={t.id} turf={t} router={router} />
+        ))}
+      </div>
+    </div>
+  );
+}
+//////////////////////////////////////////////////////////////
+// SECTION (UNCHANGED)
+//////////////////////////////////////////////////////////////
+
+function Section({
+  title,
+  children,
+  right,
+}: {
+  title: string;
+  children: React.ReactNode;
+  right?: React.ReactNode;
+}) {
+  return (
+    <div className="max-w-[1200px] mx-auto px-4 md:px-6 mb-10">
+      <div className="flex justify-between mb-4">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        {right}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+
+/// HOME PAGE TURF CARD
+
+
+function TurfCard({ turf, router }: { turf: Turf; router: AppRouterInstance }) {
+  const avg =
+    turf.reviews?.length
+      ? turf.reviews.reduce((s, r) => s + r.rating, 0) / turf.reviews.length
+      : 0;
+
+const sports = turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()).filter(Boolean) || [];
+
+
+  return (
+    <div
+      onClick={() => router.push(`/turf/${turf.id}`)}
+      className="bg-white rounded-xl shadow cursor-pointer overflow-hidden"
+    >
+      <img
+        src={turf.image_url || "/turf.jpg"}
+        className="h-47 w-full object-cover"
+      />
+
+      <div className="p-3">
+
+        <div className="flex justify-between text-sm">
+          <div>
+            <span className="bg-yellow-400 px-3 py-2 rounded text-xs">{avg.toFixed(1)}</span>
+            <span className="ml-2 text-gray-500">{turf.reviews?.length || 0} reviews</span>
+          </div>
+          <span>📍 {turf.locality}</span>
+        </div>
+
+        <h2 className="text-lg font-semibold mt-2">{turf.name}</h2>
+
+        <div className="text-sm text-gray-600">
+          {turf.address.split(",").map((l, i) => (
+            <div key={i}>{l.trim()}</div>
+          ))}
+        </div>
+
+        {turf.is_24_7 && <p className="text-sm mt-1">🕒 24/7 Available</p>}
+
+        <div className="flex gap-2 mt-2">
+          {sports.includes("football") && "⚽"}
+          {sports.includes("cricket") && "🏏"}
+          {sports.includes("badminton") && "🏸"}
+          {sports.includes("volleyball") && "🏐"}
+        </div>
+ 
+        <div className="flex justify-between items-center mt-3">
+          <p className="text-black font-semibold" >₹{turf.price}/hr</p>
+          <button className="bg-green-500 text-white px-4 py-1 rounded-full">Book Now</button>
+        </div>
+        
+      </div>
+    </div>
+  );
+}
