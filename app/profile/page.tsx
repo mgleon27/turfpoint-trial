@@ -52,133 +52,86 @@ export default function ProfilePage() {
   }
 
   // ================= NOT LOGGED IN =================
-  if (!user) {
-    return (
-      <div className="bg-gray-100 min-h-screen">
 
-        <Header
-          search={search}
-          setSearch={setSearch}
-          setShowLocationModal={setShowLocationModal}
-        />
-
-        <div className="max-w-[600px] mx-auto mt-10 bg-white p-6 rounded-xl shadow text-center">
-          <h2 className="text-xl font-semibold mb-2">
-            Please login to view profile
-          </h2>
-
-          <button
-            onClick={() => router.push("/login")}
-            className="bg-green-500 text-white px-5 py-2 rounded-full"
-          >
-            Login
-          </button>
-        </div>
-
-      </div>
-    );
-  }
 
   // ================= LOGGED IN UI =================
   return (
   <div className="bg-gray-100 min-h-screen">
 
     {/* ================= MOBILE ================= */}
-    <div className="md:hidden">
-      <MobileHeader />
-      <MobileNav />
+    <div className="md:hidden bg-gray-100 min-h-screen pt-2">
 
-      {/* ❌ NOT LOGGED IN */}
-      {!user && (
-        <div className="px-4 mt-6">
-          <div className="bg-white p-6 rounded-xl shadow text-center">
-            <h2 className="text-lg font-semibold mb-3">
-              Please login to view profile
-            </h2>
+  <MobileHeader />
+  <MobileNav />
 
-            <button
-              onClick={() => router.push("/login")}
-              className="bg-green-500 text-white px-5 py-2 rounded-full"
-            >
-              Login
-            </button>
-          </div>
-        </div>
-      )}
+  {/* ❌ NOT LOGGED IN */}
+  {!user && (
+    <div className="flex flex-col items-center justify-center mt-20 px-6 text-center">
 
-      {/* ✅ LOGGED IN */}
-      {user && (
-        <div className="px-4 mt-6">
+      <img src="/profile.png" className="w-24 h-24 mb-4 opacity-80" />
 
-          <div className="bg-white p-5 rounded-xl shadow">
+      <h2 className="text-lg font-semibold mb-2">
+        Login to access your profile
+      </h2>
 
-            {/* PROFILE */}
-            <div className="flex flex-col items-center">
-              <img
-                src={profile?.avatar_url || "/profile.png"}
-                className="w-20 h-20 rounded-full object-cover border"
-              />
+      <p className="text-gray-500 text-sm mb-5">
+        View bookings, favourites and manage your account
+      </p>
 
-              <h2 className="text-lg font-semibold mt-3">
-                {profile?.full_name || "User"}
-              </h2>
-
-              <p className="text-gray-500 text-sm">
-                {user.email}
-              </p>
-            </div>
-
-            {/* ACTIONS */}
-            <div className="mt-6 flex flex-col gap-3">
-
-              <button
-                onClick={() => router.push("/profile")}
-                className="bg-gray-100 p-3 rounded text-sm"
-              >
-                Edit Profile
-              </button>
-
-              <button
-                onClick={() => router.push("/bookings")}
-                className="bg-gray-100 p-3 rounded text-sm"
-              >
-                My Bookings
-              </button>
-
-              <button
-                onClick={() => router.push("/favourites")}
-                className="bg-gray-100 p-3 rounded text-sm"
-              >
-                Favourites
-              </button>
-
-              <button
-                onClick={() => router.push("/help")}
-                className="bg-gray-100 p-3 rounded text-sm"
-              >
-                Contact Help
-              </button>
-
-              <button
-                onClick={() => router.push("/faq")}
-                className="bg-gray-100 p-3 rounded text-sm"
-              >
-                FAQ(s)
-              </button>
-
-              <button
-                onClick={logout}
-                className="bg-red-500 text-white p-3 rounded mt-4"
-              >
-                Logout
-              </button>
-
-            </div>
-
-          </div>
-        </div>
-      )}
+      <button
+        onClick={() => router.push("/login")}
+        className="bg-green-500 text-white px-6 py-2 rounded-full"
+      >
+        Login
+      </button>
     </div>
+  )}
+
+  {/* ✅ LOGGED IN */}
+  {user && (
+    <div className="px-4 mt-4">
+
+      {/* PROFILE CARD */}
+      <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4">
+
+        <img
+          src={profile?.avatar_url || "/profile.png"}
+          className="w-16 h-16 rounded-full object-cover"
+        />
+
+        <div>
+          <h2 className="font-semibold text-lg">
+            {profile?.full_name || "User"}
+          </h2>
+
+          <p className="text-sm text-gray-500">
+            {user.email}
+          </p>
+        </div>
+      </div>
+
+      {/* MENU LIST */}
+      <div className="mt-6 flex flex-col gap-3">
+
+        <MenuItem title="Edit Profile" onClick={() => router.push("/profile")} />
+        <MenuItem title="My Bookings" onClick={() => router.push("/bookings")} />
+        <MenuItem title="Favourites" onClick={() => router.push("/favourites")} />
+        <MenuItem title="Contact Help" onClick={() => router.push("/help")} />
+        <MenuItem title="FAQ(s)" onClick={() => router.push("/faq")} />
+
+      </div>
+
+      {/* LOGOUT */}
+      <button
+        onClick={logout}
+        className="w-full bg-red-500 text-white py-3 rounded-xl mt-8"
+      >
+        Logout
+      </button>
+
+    </div>
+  )}
+</div>
 
     {/* ================= DESKTOP (UNCHANGED) ================= */}
     <div className="hidden md:block">
@@ -320,6 +273,27 @@ export default function ProfilePage() {
       </div>
     )}
 
+    
+
   </div>
+
+  
 );
+}
+function MenuItem({
+  title,
+  onClick,
+}: {
+  title: string;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center cursor-pointer active:scale-[0.98] transition"
+    >
+      <span className="text-sm font-medium">{title}</span>
+      <span className="text-gray-400">›</span>
+    </div>
+  );
 }
