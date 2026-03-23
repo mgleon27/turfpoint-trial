@@ -149,7 +149,7 @@ if (loading) {
               }}
               className={`min-w-[110px] h-38 rounded-2xl border-2 ${
                 selectedSport === s.name.toLowerCase()
-                  ? "border-green-500 border-4"
+                  ? "border-green-500 border-3"
                   : "border-gray-200"
               }`}
             >

@@ -33,14 +33,23 @@ export default function ProfilePage() {
 
   const [search, setSearch] = useState("");
 
+  const [showEditToast, setShowEditToast] = useState(false); //Edit profile
+
+  const [showLogoutToast, setShowLogoutToast] = useState(false); // Logout
+
   const { city, location, setLocationData } = useLocation();
   const [showLocationModal, setShowLocationModal] = useState(false);
 
   // ================= LOGOUT =================
   const logout = async () => {
-    await supabase.auth.signOut();
-    router.push("/"); // optional redirect
-  };
+  await supabase.auth.signOut();
+
+  setShowLogoutToast(true);
+
+  setTimeout(() => {
+    router.refresh();
+  }, 1000);
+};
 
   // ================= LOADING =================
   if (loading) {
@@ -113,7 +122,16 @@ export default function ProfilePage() {
       {/* MENU LIST */}
       <div className="mt-6 flex flex-col gap-3">
 
-        <MenuItem title="Edit Profile" onClick={() => router.push("/profile")} />
+        <MenuItem
+  title="Edit Profile"
+  onClick={() => {
+    setShowEditToast(true);
+
+    setTimeout(() => {
+      setShowEditToast(false);
+    }, 2000);
+  }}
+/>
         <MenuItem title="My Bookings" onClick={() => router.push("/bookings")} />
         <MenuItem title="Favourites" onClick={() => router.push("/favourites")} />
         <MenuItem title="Contact Help" onClick={() => router.push("/help")} />
@@ -273,9 +291,22 @@ export default function ProfilePage() {
       </div>
     )}
 
-    
+    {showLogoutToast && (
+  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full shadow-lg animate-fadeIn">
+    Logged out successfully ✅
+  </div>
+)}
+
+
+    {showEditToast && (
+  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full shadow-lg text-sm">
+    Profile can be edited from the application 📱
+  </div>
+)}
 
   </div>
+
+  
 
   
 );
