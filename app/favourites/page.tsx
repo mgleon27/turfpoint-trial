@@ -8,6 +8,8 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
 
+import { useUser } from "@/lib/userContext";
+
 import dynamic from "next/dynamic";
 
 // ✅ MOBILE COMPONENTS
@@ -55,11 +57,10 @@ function getDistance(lat1:number, lon1:number, lat2:number, lon2:number) {
 export default function FavouritesPage() {
   const router = useRouter();
 
-  const [userId, setUserId] = useState<string | null>(null);
   const [turfs, setTurfs] = useState<Turf[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
   const [search, setSearch] = useState("");
+
+   const { user, loading } = useUser(); // ✅ GLOBAL AUTH
 
   const { city, location, setLocationData } = useLocation();
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -69,64 +70,50 @@ export default function FavouritesPage() {
   const [removedTurf, setRemovedTurf] = useState<Turf | null>(null);
 
   // ================= LOAD =================
-  useEffect(() => {
-    const load = async () => {
-      const { data, error } = await supabase.auth.getUser();
-
-      if (error || !data.user) {
-        setLoggedIn(false);
-        setUserId(null);        // ✅ added
-        setTurfs([]);           // ✅ added
-        setLoading(false);
-        return;
-      }
-
-      const user = data.user;
-      setLoggedIn(true);
-      setUserId(user.id);
-
-      const { data: favs } = await supabase
-        .from("favorites")
-        .select("turf_id")
-        .eq("user_id", user.id);
-
-      if (!favs || favs.length === 0) {
-        setTurfs([]);
-        setLoading(false);
-        return;
-      }
-
-      const turfIds = favs.map((f) => f.turf_id);
-
-      const { data: turfData } = await supabase
-        .from("turfs")
-        .select(`
-          *,
-          reviews ( rating ),
-          turf_sports (
-            sports ( name )
-          )
-        `)
-        .in("id", turfIds);
-
-      setTurfs((turfData as Turf[]) || []);
-      setLoading(false);
-    };
-
-    load();
-  }, []);
 
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setLoggedIn(!!session?.user);
-      }
-    );
+  const load = async () => {
+    if (!user) {
+      setTurfs([]);
+      return;
+    }
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
+    const { data: favs } = await supabase
+      .from("favorites")
+      .select("turf_id")
+      .eq("user_id", user.id);
+
+    if (!favs || favs.length === 0) {
+      setTurfs([]);
+      return;
+    }
+
+    const turfIds = favs.map((f) => f.turf_id);
+
+    const { data: turfData } = await supabase
+      .from("turfs")
+      .select(`
+        *,
+        reviews ( rating ),
+        turf_sports (
+          sports ( name )
+        )
+      `)
+      .in("id", turfIds);
+
+    setTurfs((turfData as Turf[]) || []);
+  };
+
+  if (!loading) load(); // ✅ IMPORTANT FIX
+}, [user, loading]);
+  
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
 
   // ================= SEARCH =================
   const filteredTurfs = turfs.filter((t) => {
@@ -167,7 +154,7 @@ export default function FavouritesPage() {
 
   // ================= REMOVE =================
   const handleRemove = async (turf: Turf) => {
-    if (!userId) return;
+    if (!user) return;
 
     setTurfs((prev) => prev.filter((t) => t.id !== turf.id));
     setRemovedTurf(turf);
@@ -175,24 +162,24 @@ export default function FavouritesPage() {
     await supabase
       .from("favorites")
       .delete()
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .eq("turf_id", turf.id);
 
     setTimeout(() => setRemovedTurf(null), 4000);
   };
 
   const handleUndo = async () => {
-    if (!removedTurf) return;
+  if (!removedTurf || !user) return;
 
-    setTurfs((prev) => [removedTurf, ...prev]);
+  setTurfs((prev) => [removedTurf, ...prev]);
 
-    await supabase.from("favorites").insert({
-      user_id: userId,
-      turf_id: removedTurf.id,
-    });
+  await supabase.from("favorites").insert({
+    user_id: user.id,
+    turf_id: removedTurf.id,
+  });
 
-    setRemovedTurf(null);
-  };
+  setRemovedTurf(null);
+};
 
   return (
   <div className="bg-white min-h-screen">
@@ -210,7 +197,7 @@ export default function FavouritesPage() {
         </h2>
 
         {/* ❌ NOT LOGGED IN */}
-        {!loggedIn && (
+        {!user && (
           <div className="bg-gray-100 rounded-xl p-6 text-center shadow">
             <p className="mb-4 text-sm">
               Please Login to View Your Favourites...
@@ -226,7 +213,7 @@ export default function FavouritesPage() {
         )}
 
         {/* ✅ LOGGED IN */}
-        {loggedIn && (
+        {user && (
           <div className="grid grid-cols-2 gap-3">
             {sortedTurfs.map((t) => (
               <MobileFavCard
@@ -261,7 +248,7 @@ export default function FavouritesPage() {
       />
 
       {/* 🔥 NOT LOGGED IN UI */}
-      {!loggedIn && (
+      {!user && (
         <div className="max-w-[1200px] mx-auto px-6 mt-10">
           <div className="bg-white p-6 rounded-xl shadow text-center">
             <h2 className="text-xl font-semibold mb-2">
@@ -283,7 +270,7 @@ export default function FavouritesPage() {
       )}
 
       {/* 🔥 LOGGED IN UI */}
-      {loggedIn && (
+      {user && (
         <div className="max-w-[1200px] mx-auto px-6 py-6">
 
           {/* SORT */}

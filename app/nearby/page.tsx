@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
+import { useUser } from "@/lib/userContext";
 
 const LocationPicker = dynamic(() => import("@/components/LocationPicker"), { ssr: false });
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
@@ -44,8 +45,9 @@ function getDistance(lat1:number, lon1:number, lat2:number, lon2:number) {
 export default function NearbyPage() {
   const router = useRouter();
   const { city, location, setLocationData } = useLocation();
-  const [loggedIn, setLoggedIn] = useState(false);
   const [search, setSearch] = useState("");
+
+  const { user, loading } = useUser(); // ✅ GLOBAL AUTH
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -68,6 +70,8 @@ export default function NearbyPage() {
     load();
   }, []);
 
+
+
   // ================= SEARCH =================
   const filteredTurfs = turfs.filter((t) => {
     if (!search) return true;
@@ -85,6 +89,14 @@ export default function NearbyPage() {
     const d2 = getDistance(location.lat, location.lng, b.map_lat, b.map_lng);
     return d1 - d2;
   });
+
+  if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
 
   return (
     <div className="bg-white min-h-screen">

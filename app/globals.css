@@ -26,3 +26,16 @@ body {
 }
 
 @import "leaflet/dist/leaflet.css";
+
+
+
+/* Hide scrollbar (Chrome, Safari, Edge) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar (Firefox) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

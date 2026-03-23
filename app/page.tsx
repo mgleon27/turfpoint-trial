@@ -59,7 +59,7 @@ export default function Home() {
   const [bookingCounts, setBookingCounts] = useState<Record<string, number>>({});
   const [pageLoading, setPageLoading] = useState(true);
 
-  const { user } = useUser();
+  const { user, loading } = useUser();
   const [search, setSearch] = useState("");
   const [current, setCurrent] = useState(0);
 
@@ -137,6 +137,14 @@ export default function Home() {
     }, 3000);
     return () => clearInterval(interval);
   }, []);
+
+  if (loading || pageLoading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
 
   // ================= UI =================
   return (
@@ -297,10 +305,10 @@ function MobileSection({
   router: AppRouterInstance;
 }) {
   return (
-    <div className="px-4 mt-6">
+    <div className="px-4 mt-6 ">
       <h2 className="font-semibold mb-3">{title}</h2>
 
-      <div className="flex gap-4 overflow-x-auto pb-2">
+      <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
         {turfs.map((t) => (
           <MobileTurfCard key={t.id} turf={t} router={router} />
         ))}

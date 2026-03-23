@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
 import dynamic from "next/dynamic";
+import { useUser } from "@/lib/userContext";
 
 // ✅ MOBILE COMPONENTS
 import MobileHeader from "@/components/MobileHeader";
@@ -36,56 +37,47 @@ type Booking = {
 export default function BookingsPage() {
   const router = useRouter();
 
-  const [userId, setUserId] = useState<string | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [search, setSearch] = useState("");
-  const [loggedIn, setLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">("upcoming");
+
+  const { user, loading } = useUser(); // ✅ GLOBAL AUTH
 
   const { city, location, setLocationData } = useLocation();
   const [showLocationModal, setShowLocationModal] = useState(false);
 
   // ================= AUTH =================
-  useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase.auth.getUser();
+  
+useEffect(() => {
+  const loadBookings = async () => {
+    if (!user) return;
 
-      if (!data.user) {
-        setLoggedIn(false);
-        return;
-      }
+    const { data: bookingsData } = await supabase
+      .from("bookings")
+      .select(`
+        *,
+        turfs (
+          name,
+          locality,
+          image_url
+        )
+      `)
+      .eq("user_id", user.id)
+      .order("booking_date", { ascending: true });
 
-      setLoggedIn(true);
-      setUserId(data.user.id);
+    if (bookingsData) setBookings(bookingsData);
+  };
 
-      const { data: bookingsData } = await supabase
-        .from("bookings")
-        .select(`
-          *,
-          turfs (
-            name,
-            locality,
-            image_url
-          )
-        `)
-        .eq("user_id", data.user.id)
-        .order("booking_date", { ascending: true });
+  loadBookings();
+}, [user]);
 
-      if (bookingsData) setBookings(bookingsData);
-    };
-
-    load();
-  }, []);
-
-  useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setLoggedIn(!!session?.user);
-      }
-    );
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
 
   // ================= FILTER =================
   const now = new Date();
@@ -113,7 +105,7 @@ export default function BookingsPage() {
           <h2 className="text-lg font-semibold mb-4">Your Bookings</h2>
 
           {/* ❌ NOT LOGGED IN */}
-          {!loggedIn && (
+          {!user && (
             <div className="bg-gray-100 rounded-xl p-6 text-center shadow">
               <p className="mb-4 text-sm">
                 Please Login to View Your Bookings...
@@ -129,7 +121,7 @@ export default function BookingsPage() {
           )}
 
           {/* ✅ LOGGED IN */}
-          {loggedIn && (
+          {user && (
             <>
               {/* TABS */}
               <div className="flex gap-3 mb-4">
@@ -176,7 +168,7 @@ export default function BookingsPage() {
         />
 
         {/* 🔥 NOT LOGGED IN UI (BELOW HEADER) */}
-    {!loggedIn && (
+    {!user && (
       <div className="max-w-[1200px] mx-auto px-6 mt-10">
 
         <div className="bg-white p-6 rounded-xl shadow text-center">
@@ -201,7 +193,7 @@ export default function BookingsPage() {
     )}
 
     {/* 🔥 LOGGED IN UI */}
-    {loggedIn && (
+    {user && (
       <>
         {/* TABS */}
         <div className="max-w-[1200px] mx-auto px-6 mt-6 flex gap-4 ">

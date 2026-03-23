@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
+import { useUser } from "@/lib/userContext";
 
 import { useLocation } from "@/lib/locationContext";
 
@@ -41,9 +42,9 @@ export default function TurfsPage() {
   const router = useRouter();
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
   const [search, setSearch] = useState("");
+
+    const { user, loading } = useUser(); // ✅ GLOBAL AUTH
 
   const { city, location, setLocationData } = useLocation();
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -51,22 +52,7 @@ export default function TurfsPage() {
 
 
   // ================= LOAD DATA =================
-  useEffect(() => {
-    const loadData = async () => {
-      const { data } = await supabase.from("turfs").select("*");
 
-      if (data) {
-        setTurfs(data); // ✅ ONLY THIS (FIXED)
-      }
-
-      const userRes = await supabase.auth.getUser();
-      setLoggedIn(!!userRes.data.user);
-
-      setLoading(false);
-    };
-
-    loadData();
-  }, []);
 
   // ================= SEARCH =================
   const filteredTurfs = turfs.filter((t) => {
@@ -80,25 +66,35 @@ export default function TurfsPage() {
 
 
   // ================= FETCH =================
-  useEffect(() => {
-    const load = async () => {
-      const { data: turfData } = await supabase
-        .from("turfs")
-        .select(`
-          *,
-          reviews ( rating ),
-          turf_sports (
-            sports ( name )
-          )
-        `);
+ useEffect(() => {
+  const load = async () => {
+    const { data: turfData } = await supabase
+      .from("turfs")
+      .select(`
+        *,
+        reviews ( rating ),
+        turf_sports (
+          sports ( name )
+        )
+      `);
 
-      if (turfData) {
-        setTurfs(turfData);
-      }
-    };
+    if (turfData) {
+      setTurfs(turfData);
+    }
+  };
 
-    load();
-  }, []);
+  load();
+}, []);
+
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
+
+
 
 return (
   <div className="bg-white-100 min-h-screen">

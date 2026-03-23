@@ -6,6 +6,7 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { useRouter } from "next/navigation";
 import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
+import { useUser } from "@/lib/userContext";
 
 import dynamic from "next/dynamic";
 
@@ -47,34 +48,19 @@ export default function SportsPage() {
 
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
   const [filtered, setFiltered] = useState<Turf[]>([]);
   const [search, setSearch] = useState("");
+
+  const { user, loading } = useUser(); // ✅ GLOBAL AUTH
 
   const { city, location, setLocationData } = useLocation();
   const [showLocationModal, setShowLocationModal] = useState(false);
 
 
   // ================= LOAD DATA =================
-  useEffect(() => {
-    const loadData = async () => {
-      const { data } = await supabase.from("turfs").select("*");
 
-      if (data) {
-        setTurfs(data); // ✅ ONLY THIS (FIXED)
-      }
-
-      const userRes = await supabase.auth.getUser();
-      setLoggedIn(!!userRes.data.user);
-
-      setLoading(false);
-    };
-
-    loadData();
-  }, []);
 
   // ================= SEARCH =================
   const filteredTurfs = turfs.filter((t) => {
@@ -91,28 +77,38 @@ export default function SportsPage() {
   
   // ================= FETCH =================
   useEffect(() => {
-    const load = async () => {
-      const { data: sportsData } = await supabase.from("sports").select("*");
+  const load = async () => {
+    const { data: sportsData } = await supabase.from("sports").select("*");
 
-      const { data: turfData } = await supabase
-        .from("turfs")
-        .select(`
-          *,
-          reviews ( rating ),
-          turf_sports (
-            sports ( name )
-          )
-        `);
+    const { data: turfData } = await supabase
+      .from("turfs")
+      .select(`
+        *,
+        reviews ( rating ),
+        turf_sports (
+          sports ( name )
+        )
+      `);
 
-      if (sportsData) setSports(sportsData);
-      if (turfData) {
-        setTurfs(turfData);
-        setFiltered(turfData);
-      }
-    };
+    if (sportsData) setSports(sportsData);
 
-    load();
-  }, []);
+    if (turfData) {
+      setTurfs(turfData);
+      setFiltered(turfData);
+    }
+  };
+
+  load();
+}, []);
+
+if (loading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      Loading...
+    </div>
+  );
+}
+
 
   return (
   <div className="bg-white-100 min-h-screen">
@@ -123,10 +119,10 @@ export default function SportsPage() {
       <MobileHeader />
       <MobileNav />
 
-      <div className="px-4 mt-4">
+      <div className="px-4 mt-2">
 
         {/* SPORTS SCROLL */}
-        <div className="flex gap-3 overflow-x-auto pb-2">
+        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
           {sports.map((s) => (
             <div
               key={s.id}
@@ -151,9 +147,9 @@ export default function SportsPage() {
 
                 setFiltered(data);
               }}
-              className={`min-w-[120px] h-32 rounded-xl border-2 ${
+              className={`min-w-[110px] h-38 rounded-2xl border-2 ${
                 selectedSport === s.name.toLowerCase()
-                  ? "border-green-500"
+                  ? "border-green-500 border-4"
                   : "border-gray-200"
               }`}
             >
@@ -173,7 +169,7 @@ export default function SportsPage() {
 
         {/* SELECTED TEXT */}
         {selectedSport && (
-          <p className="mt-3 text-gray-500 text-sm">
+          <p className="mt-2 text-gray-500 text-sm pl-2">
             Showing turfs for{" "}
             <span className="text-black font-semibold">
               {selectedSport}
@@ -182,7 +178,7 @@ export default function SportsPage() {
         )}
 
         {/* TURF GRID (3 PER ROW) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-1">
           {filtered.map((t) => (
             <MobileTurfCard key={t.id} turf={t} router={router} />
           ))}
