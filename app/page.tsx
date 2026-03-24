@@ -69,8 +69,13 @@ export default function Home() {
   const [touchStart, setTouchStart] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
 
-  const nextSlide = () => setCurrent((prev) => prev + 1);
-  const prevSlide = () => setCurrent((prev) => prev - 1);
+  const nextSlide = () => {
+  setCurrent((prev) => (prev + 1) % banners.length);
+  };
+
+  const prevSlide = () => {
+  setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
+  };
 
   // ================= LOAD =================
   useEffect(() => {
@@ -133,8 +138,9 @@ export default function Home() {
   // ================= CAROUSEL =================
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrent((prev) => prev + 1);
+      setCurrent((prev) => (prev + 1) % banners.length);
     }, 3000);
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -159,10 +165,49 @@ export default function Home() {
         <MobileHeader setShowLocationModal={setShowLocationModal} />
         <MobileNav />
 
-        {/* BANNER */}
-        <div className="px-4 mt-4">
-          <img src="/banner1.jpg" className="rounded-xl w-full" />
-        </div>
+        {/* 🔥 PREMIUM MOBILE CAROUSEL */}
+<div className="px-4 mt-4">
+
+  <div
+    className="relative overflow-hidden rounded-xl"
+    onTouchStart={(e) => setTouchStart(e.touches[0].clientX)}
+    onTouchEnd={(e) => {
+      const diff = touchStart - e.changedTouches[0].clientX;
+      if (diff > 50) nextSlide();
+      if (diff < -50) prevSlide();
+    }}
+  >
+
+    {/* SLIDER */}
+    <div
+      className="flex transition-transform duration-500"
+      style={{
+        transform: `translateX(-${current * 100}%)`,
+      }}
+    >
+      {banners.map((b, i) => (
+        <img
+          key={i}
+          src={b}
+          className="w-full h-40 object-cover flex-shrink-0"
+        />
+      ))}
+    </div>
+
+    {/* DOTS */}
+    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+      {banners.map((_, i) => (
+        <div
+          key={i}
+          className={`h-2 w-2 rounded-full ${
+            i === current ? "bg-white" : "bg-white/50"
+          }`}
+        />
+      ))}
+    </div>
+
+  </div>
+</div>
 
         {/* SECTIONS */}
         <MobileSection title="Trending Turfs" turfs={trendingTurfs} router={router} />
