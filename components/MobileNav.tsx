@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 
 const items = [
   { name: "Home", icon: "🏠", path: "/" },
-  { name: "Nearby", icon: "📍", path: "/" },
+  { name: "Nearby", icon: "📍", path: "/nearby" },
   { name: "Sports", icon: "🏏", path: "/sports" },
   { name: "All Turfs", icon: "🏟️", path: "/turfs" },
   { name: "Bookings", icon: "📋", path: "/bookings" },

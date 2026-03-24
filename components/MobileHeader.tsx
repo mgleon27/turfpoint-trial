@@ -4,10 +4,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
-export default function MobileHeader() {
+import { useLocation } from "@/lib/locationContext"; // ✅ ADD
+
+type Props = {
+  setShowLocationModal: (val: boolean) => void; // ✅ ADD
+};
+
+export default function MobileHeader({ setShowLocationModal }: Props) {
   const router = useRouter();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
+
+  const { city } = useLocation(); // ✅ GET CITY
 
   return (
     <div className="bg-white px-2 py-2 shadow-sm sticky top-0 z-50">
@@ -18,8 +26,13 @@ export default function MobileHeader() {
         {/* LOGO + LOCATION */}
         <div className="flex flex-col pl-1">
           <img src="/logo.png" className="h-9" />
-          <span className="text-sm text-gray-600 whitespace-nowrap pl-1 ">
-             Nagercoil ›
+
+          {/* 🔥 CLICKABLE LOCATION */}
+          <span
+            onClick={() => setShowLocationModal(true)}
+            className="text-sm text-gray-700 font-medium pl-1 cursor-pointer flex items-center"
+          >
+            📍 {city} ›
           </span>
         </div>
 

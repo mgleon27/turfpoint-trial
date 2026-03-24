@@ -8,6 +8,10 @@ import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
 import { useUser } from "@/lib/userContext";
 
+// ✅ MOBILE COMPONENTS
+import MobileHeader from "@/components/MobileHeader";
+import MobileNav from "@/components/MobileNav";
+
 const LocationPicker = dynamic(() => import("@/components/LocationPicker"), { ssr: false });
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
 
@@ -46,8 +50,7 @@ export default function NearbyPage() {
   const router = useRouter();
   const { city, location, setLocationData } = useLocation();
   const [search, setSearch] = useState("");
-
-  const { user, loading } = useUser(); // ✅ GLOBAL AUTH
+  const { user, loading } = useUser();
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -57,32 +60,21 @@ export default function NearbyPage() {
   useEffect(() => {
     const load = async () => {
       const { data } = await supabase
-  .from("turfs")
-  .select(`
-    *,
-    reviews ( rating ),
-    turf_sports (
-      sports ( name )
-    )
-  `);
+        .from("turfs")
+        .select(`
+          *,
+          reviews ( rating ),
+          turf_sports (
+            sports ( name )
+          )
+        `);
+
       if (data) setTurfs(data as Turf[]);
     };
     load();
   }, []);
 
-
-
-  // ================= SEARCH =================
-  const filteredTurfs = turfs.filter((t) => {
-    if (!search) return true;
-
-    return (
-      t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.address.toLowerCase().includes(search.toLowerCase())
-    );
-  });
-
-  // ================= SORT BY DISTANCE =================
+  // ================= SORT =================
   const filtered = [...turfs].sort((a, b) => {
     if (!location) return 0;
     const d1 = getDistance(location.lat, location.lng, a.map_lat, a.map_lng);
@@ -91,61 +83,178 @@ export default function NearbyPage() {
   });
 
   if (loading) {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      Loading...
-    </div>
-  );
-}
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen">
 
-      {/* ================= HEADER ================= */}
- <Header
-   search={search}
-   setSearch={setSearch}
-   setShowLocationModal={setShowLocationModal}
- />
-      
+      {/* ================= 📱 MOBILE ================= */}
+      <div className="md:hidden">
 
-      {/* MAIN */}
-      <div className="max-w-[1200px] mx-auto p-6 flex flex-col gap-6">
-
-        {/* TITLE */}
-        <div className="flex justify-between">
-          <p className="text-xl font-semibold">Select Turf by Your Location</p>
+        {/* STICKY HEADER */}
+        <div className="sticky top-0 z-50 bg-white">
+          <MobileHeader setShowLocationModal={setShowLocationModal} />
+          <MobileNav />
         </div>
 
-  {/* 🗺️ MAP ON TOP */}
-  <div className="w-[full] md:w-[1000px] h-[350px] md:h-[400px] rounded-2xl overflow-hidden m-auto">
-    <MapView
-      turfs={filtered}
-      center={location}
-      selectedTurfId={selectedTurfId}
-      onMarkerClick={(id: string) => setSelectedTurfId(id)}
-    />
-  </div>
+        <div className="px-4 mt-4">
 
-  {/* 📋 TURF LIST BELOW */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10">
-    {filtered.map((t) => (
-      <TurfCard
-        key={t.id}
-        turf={t}
-        router={router}
-        location={location}
-        isSelected={selectedTurfId === t.id}
-        setSelectedTurfId={setSelectedTurfId}
-      />
-    ))}
-  </div>
+          {/* TITLE */}
+          <h2 className="text-lg font-semibold mb-3">
+            Select Turf by Your Location
+          </h2>
 
-</div>
+          {/* MAP */}
+          <div className="w-full h-[250px] rounded-xl overflow-hidden">
+            <MapView
+              turfs={filtered}
+              center={location}
+              selectedTurfId={selectedTurfId}
+              onMarkerClick={(id: string) => setSelectedTurfId(id)}
+            />
+          </div>
+
+          {/* TURF LIST */}
+          <div className="mt-5 space-y-4">
+
+            {filtered.map((t) => {
+              const avg =
+                t.reviews?.length
+                  ? t.reviews.reduce((s, r) => s + r.rating, 0) /
+                    t.reviews.length
+                  : 0;
+
+              const sports =
+                t.turf_sports
+                  ?.map((s) => s.sports?.name?.toLowerCase())
+                  .filter(Boolean) || [];
+
+              let distance: number | null = null;
+              if (location) {
+                distance = getDistance(
+                  location.lat,
+                  location.lng,
+                  t.map_lat,
+                  t.map_lng
+                );
+              }
+
+              return (
+                <div
+                  key={t.id}
+                  onClick={() => setSelectedTurfId(t.id)}
+                  className={`bg-white rounded-xl shadow overflow-hidden ${
+                    selectedTurfId === t.id ? "ring-2 ring-green-500" : ""
+                  }`}
+                >
+
+                  {/* IMAGE */}
+                  <div className="relative">
+                    <img
+                      src={t.image_url || "/turf.jpg"}
+                      className="w-full h-36 object-cover"
+                    />
+
+                    {/* DISTANCE */}
+                    {distance && (
+                      <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded-full text-xs shadow">
+                        📍 {distance.toFixed(1)} km
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CONTENT */}
+                  <div className="p-3">
+
+                    <div className="flex justify-between text-sm">
+                      <div>
+                        <span className="bg-yellow-400 px-2 py-1 rounded text-xs">
+                          {avg.toFixed(1)}
+                        </span>
+                        <span className="ml-2 text-gray-500 text-xs">
+                          {t.reviews?.length || 0}
+                        </span>
+                      </div>
+                      <span className="text-xs">📍 {t.locality}</span>
+                    </div>
+
+                    <h2 className="text-sm font-semibold mt-1">{t.name}</h2>
+
+                    <div className="flex gap-2 mt-1 text-sm">
+                      {sports.includes("football") && "⚽"}
+                      {sports.includes("cricket") && "🏏"}
+                      {sports.includes("badminton") && "🏸"}
+                      {sports.includes("volleyball") && "🏐"}
+                    </div>
+
+                    <div className="flex justify-between items-center mt-2">
+                      <p className="text-sm font-semibold">
+                        ₹{t.price}/hr
+                      </p>
+                      <button className="bg-green-500 text-white px-3 py-1 rounded text-xs">
+                        Book
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+              );
+            })}
+
+          </div>
+        </div>
+      </div>
+
+      {/* ================= 💻 DESKTOP (UNCHANGED) ================= */}
+      <div className="hidden md:block">
+
+        <Header
+          search={search}
+          setSearch={setSearch}
+          setShowLocationModal={setShowLocationModal}
+        />
+
+        <div className="max-w-[1200px] mx-auto p-6 flex flex-col gap-6">
+
+          <div className="flex justify-between">
+            <p className="text-xl font-semibold">
+              Select Turf by Your Location
+            </p>
+          </div>
+
+          <div className="w-[full] md:w-[1000px] h-[350px] md:h-[400px] rounded-2xl overflow-hidden m-auto">
+            <MapView
+              turfs={filtered}
+              center={location}
+              selectedTurfId={selectedTurfId}
+              onMarkerClick={(id: string) => setSelectedTurfId(id)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-10">
+            {filtered.map((t) => (
+              <TurfCard
+                key={t.id}
+                turf={t}
+                router={router}
+                location={location}
+                isSelected={selectedTurfId === t.id}
+                setSelectedTurfId={setSelectedTurfId}
+              />
+            ))}
+          </div>
+
+        </div>
+      </div>
 
       {/* LOCATION MODAL */}
       {showLocationModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
           <div className="bg-white p-5 rounded-xl w-[400px]">
 
             <LocationPicker

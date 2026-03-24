@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -22,16 +22,28 @@ export default function MapView({
   selectedTurfId: string | null;
   onMarkerClick?: (id: string) => void;
 }) {
+  const mapRef = useRef<L.Map | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!center) return;
+    if (!center || !containerRef.current) return;
 
-    const map = L.map("map").setView([center.lat, center.lng], 13);
+    // 🔥 REMOVE EXISTING MAP (KEY FIX)
+    if (mapRef.current) {
+      mapRef.current.remove();
+      mapRef.current = null;
+    }
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+    const map = L.map(containerRef.current).setView(
+      [center.lat, center.lng],
+      13
+    );
 
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+      .addTo(map);
+
+    // ✅ ADD MARKERS
     turfs.forEach((turf) => {
-
       const isSelected = turf.id === selectedTurfId;
 
       const marker = L.marker([turf.map_lat, turf.map_lng]).addTo(map);
@@ -51,10 +63,18 @@ export default function MapView({
       });
     });
 
+    mapRef.current = map;
+
     return () => {
       map.remove();
+      mapRef.current = null;
     };
   }, [turfs, center, selectedTurfId]);
 
-  return <div id="map" className="w-full h-full rounded-xl" />;
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-full rounded-xl"
+    />
+  );
 }

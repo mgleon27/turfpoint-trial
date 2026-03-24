@@ -70,14 +70,14 @@ export default function ProfilePage() {
     {/* ================= MOBILE ================= */}
     <div className="md:hidden bg-gray-100 min-h-screen pt-2">
 
-  <MobileHeader />
+  <MobileHeader setShowLocationModal={setShowLocationModal} />
   <MobileNav />
 
   {/* ❌ NOT LOGGED IN */}
   {!user && (
     <div className="flex flex-col items-center justify-center mt-20 px-6 text-center">
 
-      <img src="/profile.png" className="w-24 h-24 mb-4 opacity-80" />
+      <img src="/profile.png" className="w-37 h-37 mb-4" />
 
       <h2 className="text-lg font-semibold mb-2">
         Login to access your profile
@@ -150,6 +150,52 @@ export default function ProfilePage() {
     </div>
   )}
 </div>
+
+{/* LOCATION MODAL (UNCHANGED) */}
+    {showLocationModal && (
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
+        <div className="bg-white p-5 rounded-xl w-[400px]">
+
+          <h2 className="font-semibold mb-3">Select Location</h2>
+
+          <LocationPicker
+            onSelect={(lat, lng) => {
+              setLocationData({ lat, lng }, city);
+            }}
+          />
+
+          <div className="flex justify-between mt-4">
+            <button onClick={() => setShowLocationModal(false)}>
+              Cancel
+            </button>
+
+            <button
+              onClick={async () => {
+                if (!location) return;
+
+                const res = await fetch(
+                  `https://nominatim.openstreetmap.org/reverse?lat=${location.lat}&lon=${location.lng}&format=json`
+                );
+                const data = await res.json();
+
+                const newCity =
+                  data.address.city ||
+                  data.address.town ||
+                  data.address.village ||
+                  "Selected Location";
+
+                setLocationData(location, newCity);
+                setShowLocationModal(false);
+              }}
+              className="bg-green-500 text-white px-3 py-1 rounded"
+            >
+              Confirm
+            </button>
+          </div>
+
+        </div>
+      </div>
+    )}
 
     {/* ================= DESKTOP (UNCHANGED) ================= */}
     <div className="hidden md:block">
@@ -247,7 +293,7 @@ export default function ProfilePage() {
 
     {/* LOCATION MODAL (UNCHANGED) */}
     {showLocationModal && (
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
         <div className="bg-white p-5 rounded-xl w-[400px]">
 
           <h2 className="font-semibold mb-3">Select Location</h2>

@@ -2,7 +2,6 @@
 
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
-// ✅ REUSE SAME TYPE (copy or import if shared)
 type Turf = {
   id: string;
   name: string;
@@ -17,13 +16,25 @@ type Turf = {
   turf_sports?: { sports?: { name?: string } }[];
 };
 
-// ✅ PROPER PROPS TYPE
 type Props = {
   turf: Turf;
   router: AppRouterInstance;
 };
 
 export default function MobileTurfCard({ turf, router }: Props) {
+
+  // ⭐ CALCULATE RATING
+  const avg =
+    turf.reviews?.length
+      ? turf.reviews.reduce((s, r) => s + r.rating, 0) / turf.reviews.length
+      : 0;
+
+  // 🏟️ SPORTS LIST
+  const sports =
+    turf.turf_sports
+      ?.map((s) => s.sports?.name?.toLowerCase())
+      .filter(Boolean) || [];
+
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
@@ -38,18 +49,35 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         <div className="flex justify-between items-center">
           <h2 className="font-semibold">{turf.name}</h2>
+
+          {/* ⭐ DYNAMIC RATING */}
+          <div className="flex justify-between items-center gap-1">
           <span className="bg-yellow-400 px-2 py-1 text-xs rounded">
-            4.0
+            {avg.toFixed(1)}
           </span>
+          <p className="text-xs text-gray-500">
+            {turf.reviews?.length || 0 } reviews
+          </p>
+          </div>
         </div>
 
+        {/* 📍 LOCATION */}
         <p className="text-xs text-gray-500 mt-1">📍 {turf.locality}</p>
-        <p className="text-xs">🕒 {turf.is_24_7 ? "24/7 Available" : "Available"}</p>
 
+        {/* 🕒 TIME */}
+        <p className="text-xs">
+          🕒 {turf.is_24_7 ? "24/7 Available" : "Available"}
+        </p>
+
+        {/* 🏟️ SPORTS ICONS */}
         <div className="flex gap-2 mt-1 text-lg">
-          ⚽ 🏏 🏸
+          {sports.includes("football") && "⚽"}
+          {sports.includes("cricket") && "🏏"}
+          {sports.includes("badminton") && "🏸"}
+          {sports.includes("volleyball") && "🏐"}
         </div>
 
+        {/* 💰 PRICE */}
         <div className="flex justify-between items-center mt-2">
           <p className="font-semibold text-sm">₹{turf.price}/hr</p>
           <button className="bg-green-500 text-white px-3 py-1 rounded text-xs">

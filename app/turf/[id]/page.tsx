@@ -1,183 +1,561 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { useParams } from "next/navigation";
+import Header from "@/components/Header";
+import MobileHeader from "@/components/MobileHeader";
 
-// ✅ Turf type
+// ================= TYPES =================
 type Turf = {
-  id: number;
+  id: string;
   name: string;
-  location: string;
+  locality: string;
+  address: string;
   price: number;
-  image?: string;
+  image_url?: string;
+  map_lat: number;
+  map_lng: number;
+  is_24_7: boolean;
+
+  opening_time?: string;
+  closing_time?: string;
+  area_sqm?: number;
+
+  parking?: boolean;
+  water?: boolean;
+  restroom?: boolean;
+  other_features?: string | null;
+  other_sports?: string | null;
+
+  reviews?: { rating: number }[];
+  turf_sports?: { sports?: { name?: string } }[];
 };
 
-export default function TurfDetails() {
-  const params = useParams<{ id: string }>();
-  const id = params.id;
+type TurfImage = {
+  image_url: string;
+  position: number;
+};
+
+type Amenity = {
+  label: string;
+  icon: string;
+};
+
+type Review = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  image_urls: string[] | null;
+  profiles?: {
+    full_name?: string;
+  };
+};
+
+export default function TurfDetailsPage() {
+  const params = useParams();
+  const id = params?.id as string;
+  const router = useRouter();
 
   const [turf, setTurf] = useState<Turf | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+  const [images, setImages] = useState<TurfImage[]>([]);
+  const [activeImg, setActiveImg] = useState<string>("");
+  const [reviews, setReviews] = useState<Review[]>([]);
 
-  // ✅ Time slots
-  const timeSlots = [
-    "06:00", "07:00", "08:00", "09:00",
-    "10:00", "11:00", "12:00",
-    "16:00", "17:00", "18:00",
-    "19:00", "20:00", "21:00"
-  ];
-
-  // ✅ Fetch turf data
   useEffect(() => {
-    if (!id) return;
-
-    const fetchTurf = async () => {
-      setLoading(true);
-
-      const { data, error } = await supabase
+    const load = async () => {
+      const { data } = await supabase
         .from("turfs")
-        .select("*")
-        .eq("id", Number(id)) // 👉 change to id if UUID
+        .select(`
+          *,
+          reviews ( rating ),
+          turf_sports ( sports ( name ) )
+        `)
+        .eq("id", id)
         .single();
 
-      if (error) {
-        console.log("Fetch Error:", error.message);
-      } else {
-        setTurf(data);
+      if (data) setTurf(data);
+
+      const { data: imgs } = await supabase
+        .from("turf_images")
+        .select("*")
+        .eq("turf_id", id)
+        .order("position", { ascending: true });
+
+      if (imgs && imgs.length > 0) {
+        setImages(imgs);
+        setActiveImg(imgs[0].image_url);
+      } else if (data?.image_url) {
+        setActiveImg(data.image_url);
       }
 
-      setLoading(false);
+      const { data: reviewData } = await supabase
+        .from("reviews")
+        .select(`*, profiles ( full_name )`)
+        .eq("turf_id", id)
+        .limit(7);
+
+      if (reviewData) setReviews(reviewData);
     };
 
-    fetchTurf();
+    load();
   }, [id]);
 
-  // ✅ Fetch booked slots
-  useEffect(() => {
-    if (!date || !id) return;
+  if (!turf) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
-    const fetchBookedSlots = async () => {
-      const { data } = await supabase
-        .from("bookings")
-        .select("time")
-        .eq("turf_id", Number(id))
-        .eq("date", date);
+  const avg =
+    turf.reviews?.length
+      ? turf.reviews.reduce((s, r) => s + r.rating, 0) /
+        turf.reviews.length
+      : 0;
 
-      if (data) {
-        setBookedSlots(data.map((b) => b.time));
-      }
-    };
+  const sports = [
+    ...(turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()) || []),
+    ...(turf.other_sports
+      ? turf.other_sports.toLowerCase().split(",")
+      : []),
+  ];
 
-    fetchBookedSlots();
-  }, [date, id]);
-
-  // ✅ Booking function
-  const bookTurf = async () => {
-    const { data: userData } = await supabase.auth.getUser();
-
-    if (!userData.user) {
-      alert("Please login first");
-      return;
-    }
-
-    if (!date || !time) {
-      alert("Select date & time");
-      return;
-    }
-
-    // 🔴 Prevent double booking
-    const { data: existing } = await supabase
-      .from("bookings")
-      .select("*")
-      .eq("turf_id", turf?.id)
-      .eq("date", date)
-      .eq("time", time);
-
-    if (existing && existing.length > 0) {
-      alert("Slot already booked!");
-      return;
-    }
-
-    // ✅ Insert booking
-    const { error } = await supabase.from("bookings").insert({
-      turf_id: turf?.id,
-      user_id: userData.user.id,
-      date,
-      time,
-    });
-
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("✅ Booking successful!");
-      setTime("");
-    }
-  };
-
-  // ✅ UI states
-  if (loading) return <p className="p-6 text-center">Loading turf...</p>;
-  if (!turf) return <p className="p-6 text-center">Turf not found</p>;
+  const amenities: Amenity[] = [
+    turf.parking && { label: "Parking", icon: "/icons/parking.png" },
+    turf.water && { label: "Water", icon: "/icons/water.png" },
+    turf.restroom && { label: "Restroom", icon: "/icons/restroom.png" },
+    turf.other_features && {
+      label: turf.other_features,
+      icon: "/icons/feature.png",
+    },
+  ].filter(Boolean) as Amenity[];
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      {/* IMAGE */}
-      <img
-        src={turf.image || "/turf.jpg"}
-        className="w-full h-64 object-cover rounded-xl"
+    <div className="bg-white min-h-screen">
+
+      {/* ================= MOBILE ================= */}
+      <div className="md:hidden">
+
+        <MobileHeader setShowLocationModal={() => {}} />
+
+        <div className="px-4 py-4">
+
+          {/* BACK */}
+          <div  className="flex gap-3 mb-4 items-center">
+            <img src="/icons/back.png" className="w-4 h-4"
+            onClick={() => router.back()} />
+            <span className="text-xl">Turf Details</span>
+          </div>
+
+          {/* IMAGE */}
+          <img src={activeImg || "/turf.jpg"} className="w-full h-[200px] rounded-xl object-cover" />
+
+          <div className="flex gap-2 mt-2 overflow-x-auto ">
+            {images.map((img, i) => (
+              <img key={i} src={img.image_url} onClick={() => setActiveImg(img.image_url)}
+                className="w-16 h-14 rounded object-cover" />
+            ))}
+          </div>
+
+          {/* NAME + RATING */}
+          <div className="relative mt-4">
+
+              {/* CENTER NAME */}
+              <h1 className="text-xl font-semibold text-center">
+                 {turf.name}
+              </h1>
+
+              {/* RIGHT SIDE RATING */}
+              <div className="absolute right-0 top-0 text-sm flex items-center gap-2 mr-2">
+                  <span className="bg-yellow-200 rounded-md pl-2 pr-3 py-1">
+                  ⭐ {avg.toFixed(1)}
+                  </span>
+                 <span className="text-lg">({turf.reviews?.length || 0})</span>
+              </div>
+
+</div>
+
+          <div className="flex justify-center mt-3">
+          <p className="text-sm text-gray-700">{turf.address}</p>
+          </div>
+
+          <div className="flex justify-center mt-2">
+          <h2 className="text-lg font-semibold mt-2">₹{turf.price} <span className="font-medium">/60 minutes</span></h2>
+          </div>
+
+          <div className="flex justify-center">
+          <button className="bg-green-600 px-5 py-2 text-lg text-white rounded-full mt-3 mb-1"
+          onClick={() =>
+            alert(
+              "The Slot Checking Feature will be Added Soon.\n\nDownload Application to Check Slot or Book yours Now."
+            )
+          }>
+            Check Slot Availability
+          </button>
+          </div>
+
+          {/* DETAILS */}
+          <div className="mt-4 space-y-2 text-sm">
+
+            <div className="flex justify-between pt-1">
+                 <div className="flex gap-3 text-base font-medium">
+                   <img src="/icons/timing.png" className="w-5 h-5" />
+                   {turf.is_24_7 ? "24/7  Available" : `${turf.opening_time} - ${turf.closing_time}`}
+                 </div>
+
+
+                  <div className="flex gap-2 text-base pr-6">
+                   <img src="/icons/location.png" className="w-5 h-5" />
+                   {turf.locality}
+                 </div>
+            </div>
+
+
+                 {turf.area_sqm && (
+            <div className="flex gap-3 text-base pt-3">
+                <img src="/icons/area.png" className="w-4 h-4" />
+                {turf.area_sqm} sq.m
+            </div>
+            )}
+          </div>
+
+          <hr className="my-4" />
+
+          {/* SPORTS */}
+          <h2 className="font-semibold text-xl pb-6 pt-1">
+            Sports Provided
+          </h2>
+
+          <div className="grid grid-cols-2 gap-5 ml-5">
+            
+            {sports.map((s, i) => (
+              <div key={i} className="flex gap-2 items-center">
+                <img src={`/icons/${s}.png`} className="w-6 h-6" />
+                {s}
+              </div>
+            ))}
+          </div>
+
+          <hr className="my-4 mt-7" />
+
+          {/* AMENITIES */}
+          <h2 className="font-semibold text-xl pb-6 pt-1">
+            Amenities
+          </h2>
+
+          <div className="grid grid-cols-4 gap-4 mb-10">
+            {amenities.map((a, i) => (
+              <div key={i} className="text-center">
+                <img src={a.icon} className="w-8 h-8 mx-auto" />
+                <p className="text-sm pt-2">{a.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* REVIEWS */}
+<div className="flex justify-between items-center mt-6">
+  <h2 className="font-semibold text-xl">Reviews</h2>
+
+  <p className="items-center">
+    <span className="bg-yellow-200 rounded-md pl-2 pr-3 py-1 mr-2">
+      ⭐ {avg.toFixed(1)}
+    </span>
+    <span className="text-lg">
+      ({turf.reviews?.length || 0})</span>
+  </p>
+</div>
+
+{/* HORIZONTAL SCROLL */}
+<div className="flex gap-4 overflow-x-auto mt-4 no-scrollbar">
+
+  {reviews.slice(0, 7).map((r, i) => {
+    const imgs = r.image_urls || [];
+
+    return (
+      <div
+        key={i}
+        className="min-w-[200px] h-[200px] border rounded-xl p-3 flex flex-col justify-between"
+      >
+        {/* NAME */}
+        <p className="text-sm font-semibold">
+          {r.profiles?.full_name || "User"}
+        </p>
+
+        {/* IMAGES */}
+        {imgs.length > 0 && (
+          <div className="flex gap-2 mt-2">
+            {imgs.slice(0, 2).map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                className="w-14 h-14 object-cover rounded"
+              />
+            ))}
+
+            {imgs.length > 2 && (
+              <div className="w-14 h-14 flex items-center justify-center text-xs bg-gray-200 rounded">
+                +{imgs.length - 2}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* COMMENT */}
+        <p className="text-xs text-gray-600 line-clamp-3 mt-2">
+          {r.comment || "No review"}
+        </p>
+
+        {/* VIEW MORE */}
+        <div className="text-right text-xs text-gray-400">
+          View more
+        </div>
+      </div>
+    );
+  })}
+
+  {/* VIEW ALL CARD */}
+  <div className="min-w-[80px] flex items-center justify-center text-xl">
+    →
+  </div>
+
+</div>
+
+          <button className="w-full bg-green-500 text-white py-3 rounded-full mt-5"
+          onClick={() =>
+            alert(
+              "Bookings can Currently be done only through Application.\n\nDownload Application to Book your Slot Now."
+            )
+          }>
+            Book Slot Now
+          </button>
+
+        </div>
+      </div>
+
+      {/* ================= DESKTOP (UNCHANGED) ================= */}
+      <div className="hidden md:block">
+        {/* ✅ YOUR ORIGINAL DESKTOP CODE — NO CHANGES */}
+        <div className="bg-white min-h-screen">
+
+      <Header
+        search=""
+        setSearch={() => {}}
+        setShowLocationModal={() => {}}
       />
 
-      {/* DETAILS */}
-      <h1 className="text-2xl font-bold mt-4">{turf.name}</h1>
-      <p className="text-gray-500">{turf.location}</p>
-      <p className="font-bold mt-2 text-lg">₹{turf.price}/hour</p>
+      <div className="max-w-[1200px] mx-auto px-6 py-6 h-[calc(100vh-140px)]">
 
-      {/* BOOKING */}
-      <div className="mt-6 border-t pt-4">
-        <h2 className="text-xl font-semibold mb-3">Book Slot</h2>
-
-        {/* DATE */}
-        <input
-          type="date"
-          className="border p-2 rounded"
-          onChange={(e) => setDate(e.target.value)}
-        />
-
-        {/* TIME SLOTS */}
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          {timeSlots.map((slot) => {
-            const isBooked = bookedSlots.includes(slot);
-
-            return (
-              <button
-                key={slot}
-                disabled={isBooked}
-                onClick={() => setTime(slot)}
-                className={`p-2 rounded border ${
-                  isBooked
-                    ? "bg-gray-300 cursor-not-allowed"
-                    : time === slot
-                    ? "bg-green-600 text-white"
-                    : "bg-white"
-                }`}
-              >
-                {slot}
-              </button>
-            );
-          })}
+        {/* BACK */}
+        <div
+          className=" mb-6 text-xl font-semibold flex items-center gap-5"
+        >
+        <img src="/icons/back.png" className="w-4 h-4 cursor-pointer" 
+        onClick={() => router.back()}/>Turf Details
         </div>
 
-        {/* BOOK BUTTON */}
-        <button
-          onClick={bookTurf}
-          className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
-        >
-          Confirm Booking
-        </button>
+        <div className="flex gap-10 h-full">
+
+          {/* LEFT IMAGE */}
+          <div className="w-[45%] h-full">
+
+            <img
+              src={activeImg || "/turf.jpg"}
+              className="w-full h-[320px] object-cover rounded-xl"
+            />
+
+            <div className="flex gap-2 mt-3 overflow-x-auto">
+              {images.map((img, i) => (
+                <img
+                  key={i}
+                  src={img.image_url}
+                  onClick={() => setActiveImg(img.image_url)}
+                  className="w-20 h-16 object-cover rounded cursor-pointer border"
+                />
+              ))}
+            </div>
+
+          </div>
+
+          {/* RIGHT CONTENT */}
+          <div className="w-[55%] h-full overflow-y-auto pr-2 space-y-6 pb-20 no-scrollbar">
+
+            {/* NAME */}
+            <div className="flex justify-between items-start">
+
+              <div className="flex justify-between items-center gap-5">
+
+                <h1 className="text-2xl font-semibold">{turf.name}</h1>
+                <p className="text-gray-500">
+                  ⭐ {avg.toFixed(1)} ({turf.reviews?.length || 0})
+                </p>
+              </div>
+
+              <div className="text-sm">📍 {turf.locality}</div>
+            </div>
+
+            {/* ADDRESS */}
+            <div className="text-gray-600">
+              {turf.address}
+            </div>
+
+            {/* TIME */}
+            <div className="flex items-center gap-2 text-sm">
+  <img src="/icons/timing.png" className="w-4 h-4" />
+
+  {turf.is_24_7
+    ? "24/7 Available"
+    : `${turf.opening_time} - ${turf.closing_time}`}
+</div>
+
+            {/* AREA */}
+            {turf.area_sqm && (
+  <div className="flex items-center gap-2 text-sm">
+    <img src="/icons/area.png" className="w-4 h-4" />
+    {turf.area_sqm} sq.m
+  </div>
+)}
+
+            {/* PRICE */}
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">
+                ₹{turf.price} <span className="text-base font-medium text-gray-600">/ 60 minutes</span>
+              </h2>
+
+              <button className="bg-green-500 px-5 py-2 rounded-full text-white border-2 border-green-700"
+              onClick={() =>
+            alert(
+              "The Slot Checking Feature will be Added Soon.\n\nDownload Application to Check Slot or Book yours Now."
+            )
+          }>
+                Check Slot Availability
+              </button>
+            </div>
+
+            {/* SPORTS */}
+            <div>
+              <h1 className="text-xl font-semibold mb-7">
+                Sports
+              </h1>
+
+              <div className="flex gap-15 flex-wrap">
+  {sports.map((s, i) => {
+    const sport = (s || "").toLowerCase(); // ✅ FIX
+
+    const iconMap: Record<string, string> = {
+      football: "/icons/football.png",
+      cricket: "/icons/cricket.png",
+      badminton: "/icons/badminton.png",
+      volleyball: "/icons/volleyball.png",
+    };
+
+    return (
+      <div key={i} className="text-center">
+        <img
+          src={iconMap[sport] || "/icons/sport.png"}
+          className="w-8 h-8 mx-auto"
+        />
+        <p className="text-sm mt-1 capitalize">{sport}</p>
       </div>
+    );
+  })}
+</div>
+            </div>
+
+            {/* AMENITIES */}
+            <div>
+              <h2 className="text-xl font-semibold mb-7">
+                Amenities
+              </h2>
+
+              <div className="flex gap-15 flex-wrap">
+                {amenities.map((a , i) => (
+                  <div key={i} className="text-center">
+                    <img
+                      src={a.icon}
+                      className="w-8 h-8 mx-auto"
+                    />
+                    <p className="text-sm mt-1">{a.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ================= REVIEWS (UPDATED) ================= */}
+            <div>
+              <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold mb-3 ">
+                Reviews  
+              </h2>
+              <p className=" pr-7"><span className="bg-yellow-200 rounded-xl pl-2 pr-3 py-1 mr-1">⭐  {avg.toFixed(1)}</span>  ({turf.reviews?.length || 0})</p>
+              </div>
+
+              <div className="flex gap-4 overflow-x-auto">
+
+                {reviews.map((r, i) => {
+                  const imgs = r.image_urls || [];
+
+                  return (
+                    <div
+                      key={i}
+                      className="min-w-[220px] border rounded-xl p-3 flex flex-col justify-between"
+                    >
+                      {/* NAME */}
+                      <p className="text-sm font-semibold mb-2">
+                        {r.profiles?.full_name || "User"}
+                      </p>
+
+                      {/* RATING */}
+                      <p className="text-xs text-yellow-600 mb-1">
+                        ⭐ {r.rating}
+                      </p>
+
+                      {/* IMAGES */}
+                      {imgs.length > 0 && (
+                        <div className="flex gap-2 mb-2">
+                          {imgs.slice(0, 2).map((img: string, idx: number) => (
+                            <img
+                              key={idx}
+                              src={img}
+                              className="w-14 h-14 object-cover rounded"
+                            />
+                          ))}
+
+                          {imgs.length > 2 && (
+                            <div className="w-14 h-14 flex items-center justify-center text-xs bg-gray-200 rounded">
+                              +{imgs.length - 2}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* COMMENT */}
+                      <p className="text-xs text-gray-600 line-clamp-4">
+                        {r.comment || "No review"}
+                      </p>
+
+                      {/* VIEW MORE */}
+                      <div className="text-right text-xs text-gray-400 mt-2">
+                        View more
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <div className="min-w-[80px] flex items-center justify-center text-xl">
+                  →
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+      </div>
+
     </div>
   );
 }

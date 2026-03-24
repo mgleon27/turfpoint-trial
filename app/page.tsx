@@ -138,10 +138,14 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading || pageLoading) {
+  if (pageLoading) {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      Loading...
+    <div className="md:hidden bg-white min-h-screen">
+      <MobileHeader setShowLocationModal={setShowLocationModal} />
+      <MobileNav />
+      <p className="text-center mt-10 text-gray-400">
+        Loading turfs...
+      </p>
     </div>
   );
 }
@@ -152,7 +156,7 @@ export default function Home() {
       {/* ================= 📱 MOBILE ================= */}
       <div className="md:hidden bg-white min-h-screen">
 
-        <MobileHeader />
+        <MobileHeader setShowLocationModal={setShowLocationModal} />
         <MobileNav />
 
         {/* BANNER */}
@@ -230,8 +234,10 @@ export default function Home() {
       </Section>
 
 
+      
+      </div>
       {showLocationModal && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
     <div className="bg-white p-5 rounded-xl w-[400px]">
 
       <h2 className="font-semibold mb-3">Select Location</h2>
@@ -275,7 +281,6 @@ export default function Home() {
     </div>
   </div>
 )}
-      </div>
     </>
   );
 }
