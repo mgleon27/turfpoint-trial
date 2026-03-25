@@ -114,7 +114,7 @@ if (loading) {
   <div className="bg-white-100 min-h-screen">
 
     {/* ================= MOBILE UI ================= */}
-    <div className="md:hidden">
+    <div className="md:hidden bg-white">
 
       <MobileHeader setShowLocationModal={setShowLocationModal} />
       <MobileNav />
@@ -122,7 +122,7 @@ if (loading) {
       <div className="px-4 mt-2 bg-white">
 
         {/* SPORTS SCROLL */}
-        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+        <div className="flex gap-3 overflow-x-auto pb-5 no-scrollbar">
           {sports.map((s) => (
             <div
               key={s.id}
@@ -153,7 +153,7 @@ if (loading) {
                   : "border-gray-200"
               }`}
             >
-              <div className="relative w-full h-full overflow-hidden rounded-xl">
+              <div className="relative w-full h-full shadow-lg/20 overflow-hidden rounded-xl">
                 <img
                   src={s.image_url || "/sport.jpg"}
                   className="w-full h-full object-cover"

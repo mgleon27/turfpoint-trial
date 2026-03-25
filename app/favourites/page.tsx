@@ -198,7 +198,7 @@ if (loading) {
 
         {/* ❌ NOT LOGGED IN */}
         {!user && (
-          <div className=" flex flex-col items-center text-center justify-center bg-gray-100 rounded-xl p-6 text-center shadow ">
+          <div className=" flex flex-col items-center shadow-lg/20 text-center justify-center bg-gray-100 rounded-xl p-6 text-center shadow ">
             <img src="/favourites.png" className="w-37 h-37 mb-4" />
             <p className="mb-4 text-sm text-gray-700">
               Please Login to View Your Favourites...

@@ -65,17 +65,17 @@ export default function ProfilePage() {
 
   // ================= LOGGED IN UI =================
   return (
-  <div className="bg-gray-100 min-h-screen">
+  <div className="bg-white min-h-screen">
 
     {/* ================= MOBILE ================= */}
-    <div className="md:hidden bg-gray-100 min-h-screen pt-2">
+    <div className="md:hidden bg-white min-h-screen pt-2">
 
   <MobileHeader setShowLocationModal={setShowLocationModal} />
   <MobileNav />
 
   {/* ❌ NOT LOGGED IN */}
   {!user && (
-    <div className="flex flex-col items-center justify-center mt-20 px-6 text-center">
+    <div className="flex flex-col items-center shadow-lg/20 justify-center mt-20 px-6 text-center">
 
       <img src="/profile.png" className="w-37 h-37 mb-4" />
 
@@ -101,7 +101,7 @@ export default function ProfilePage() {
     <div className="px-4 mt-4">
 
       {/* PROFILE CARD */}
-      <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4">
+      <div className="bg-white rounded-xl border-1 border-gray-100 shadow-lg/20 p-5 flex items-center gap-4">
 
         <img
           src={profile?.avatar_url || "/profile.png"}
@@ -367,7 +367,7 @@ function MenuItem({
   return (
     <div
       onClick={onClick}
-      className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center cursor-pointer active:scale-[0.98] transition"
+      className="bg-white p-4 border-1 border-gray-100 rounded-xl shadow-lg/20 flex justify-between items-center cursor-pointer active:scale-[0.98] transition"
     >
       <span className="text-sm font-medium">{title}</span>
       <span className="text-gray-400">›</span>

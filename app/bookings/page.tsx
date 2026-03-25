@@ -106,7 +106,7 @@ if (loading) {
 
           {/* ❌ NOT LOGGED IN */}
           {!user && (
-            <div className="flex flex-col items-center text-center justify-center bg-gray-100 rounded-xl p-6 text-center shadow">
+            <div className="flex flex-col items-center shadow-lg/20 text-center justify-center bg-gray-100 rounded-xl p-6 text-center shadow">
               <img src="/bookings.png" className="w-37 h-37 mb-4" />
               <p className="mb-4 text-gray-700 text-sm">
                 Please Login to View Your Bookings...
@@ -128,10 +128,10 @@ if (loading) {
               <div className="flex gap-3 mb-4">
                 <button
                   onClick={() => setActiveTab("upcoming")}
-                  className={`flex-1 py-2 rounded-full text-sm ${
+                  className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 ${
                     activeTab === "upcoming"
                       ? "bg-green-500 text-white"
-                      : "bg-gray-200"
+                      : "bg-gray-200 text-black"
                   }`}
                 >
                   Upcoming
@@ -139,10 +139,10 @@ if (loading) {
 
                 <button
                   onClick={() => setActiveTab("completed")}
-                  className={`flex-1 py-2 rounded-full text-sm ${
+                  className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 ${
                     activeTab === "completed"
                       ? "bg-green-500 text-white"
-                      : "bg-gray-200"
+                      : "bg-gray-200 text-black"
                   }`}
                 >
                   Completed
@@ -378,12 +378,12 @@ if (loading) {
 
 function MobileBookingCard({ booking }: { booking: Booking }) {
   return (
-    <div className="flex gap-3 bg-white rounded-xl border p-3 shadow-sm">
+    <div className="flex gap-3 bg-white rounded-xl p-3 shadow-lg/20">
 
       {/* IMAGE */}
       <img
         src={booking.turfs?.image_url || "/turf.jpg"}
-        className="w-24 h-24 rounded-lg object-cover"
+        className="w-25 h-25 rounded-lg object-cover"
       />
 
       {/* DETAILS */}
@@ -391,23 +391,23 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
 
         <div>
           <div className="flex justify-between items-center">
-            <h2 className="font-semibold text-sm">
+            <h2 className="font-semibold text-sm text-black">
               {booking.turfs?.name}
             </h2>
 
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-black">
               📍 {booking.turfs?.locality}
             </span>
           </div>
 
-          <p className="text-xs mt-1">📅 {booking.booking_date}</p>
-          <p className="text-xs">
+          <p className="text-xs text-black mt-1">📅 {booking.booking_date}</p>
+          <p className="text-xs text-black">
             ⏰ {booking.start_time} - {booking.end_time}
           </p>
         </div>
 
-        <p className="font-semibold text-sm mt-2">
-          ₹{booking.price}
+        <p className="font-semibold text-sm text-black mt-2">
+          ₹{booking.price} <span className="font-medium text-sm text-gray-700"> /hr</span>
         </p>
 
       </div>

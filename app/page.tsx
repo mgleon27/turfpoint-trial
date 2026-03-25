@@ -358,7 +358,7 @@ function MobileSection({
     <div className="px-4 mt-6 ">
       <h2 className="font-semibold text-black mb-3">{title}</h2>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+      <div className="flex gap-4 overflow-x-auto pb-7 no-scrollbar">
         {turfs.map((t) => (
           <MobileTurfCard key={t.id} turf={t} router={router} />
         ))}

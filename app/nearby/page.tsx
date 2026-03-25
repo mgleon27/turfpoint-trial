@@ -119,7 +119,7 @@ export default function NearbyPage() {
           </div>
 
           {/* TURF LIST */}
-          <div className="mt-5 space-y-4">
+          <div className="mt-5 space-y-4 ">
 
             {filtered.map((t) => {
               const avg =
@@ -147,7 +147,7 @@ export default function NearbyPage() {
                 <div
                   key={t.id}
                   onClick={() => setSelectedTurfId(t.id)}
-                  className={`bg-white rounded-xl shadow overflow-hidden ${
+                  className={`bg-white rounded-xl shadow-lg/30 overflow-hidden ${
                     selectedTurfId === t.id ? "ring-2 ring-green-500" : ""
                   }`}
                 >

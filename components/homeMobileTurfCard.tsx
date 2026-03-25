@@ -38,7 +38,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
-      className="min-w-[220px] bg-white rounded-xl shadow p-3 cursor-pointer"
+      className="min-w-[220px] bg-white rounded-xl border-1 border-gray-100 shadow-lg/20 p-3 cursor-pointer"
     >
       <img
         src={turf.image_url || "/turf.jpg"}
