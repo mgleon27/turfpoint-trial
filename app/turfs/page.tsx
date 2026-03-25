@@ -100,14 +100,14 @@ return (
   <div className="bg-white-100 min-h-screen">
 
     {/* ================= MOBILE UI ================= */}
-    <div className="md:hidden">
+    <div className="md:hidden bg-white">
 
       <MobileHeader setShowLocationModal={setShowLocationModal} />
       <MobileNav />
 
       <div className="px-4 mt-4">
 
-        <h2 className="text-lg font-semibold mb-3">All Turfs</h2>
+        <h2 className="text-lg text-black ml-2 font-semibold mb-3">All Turfs</h2>
 
         {/* ✅ 2 CARDS PER ROW (NO OVERLAP) */}
         <div className="grid grid-cols-2 gap-3">
@@ -124,7 +124,7 @@ return (
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
         <div className="bg-white p-5 rounded-xl w-[400px]">
 
-          <h2 className="font-semibold mb-3">Select Location</h2>
+          <h2 className="font-semibold text-black mb-3">Select Location</h2>
 
           <LocationPicker
             onSelect={(lat, lng) => {
@@ -133,7 +133,7 @@ return (
           />
 
           <div className="flex justify-between mt-4">
-            <button onClick={() => setShowLocationModal(false)}>
+            <button onClick={() => setShowLocationModal(false)} className="text-black">
               Cancel
             </button>
 
@@ -155,7 +155,7 @@ return (
                 setLocationData(location, newCity);
                 setShowLocationModal(false);
               }}
-              className="bg-green-500 text-white px-3 py-1 rounded"
+              className="bg-green-600 text-white px-3 py-1 rounded"
             >
               Confirm
             </button>

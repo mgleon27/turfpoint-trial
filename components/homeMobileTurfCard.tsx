@@ -48,11 +48,11 @@ export default function MobileTurfCard({ turf, router }: Props) {
       <div className="mt-2">
 
         <div className="flex justify-between items-center">
-          <h2 className="font-semibold">{turf.name}</h2>
+          <h2 className="font-semibold text-black">{turf.name}</h2>
 
           {/* ⭐ DYNAMIC RATING */}
           <div className="flex justify-between items-center gap-1">
-          <span className="bg-yellow-400 px-2 py-1 text-xs rounded">
+          <span className="bg-yellow-500 px-2 py-1 text-white text-xs rounded">
             {avg.toFixed(1)}
           </span>
           <p className="text-xs text-gray-500">
@@ -62,15 +62,15 @@ export default function MobileTurfCard({ turf, router }: Props) {
         </div>
 
         {/* 📍 LOCATION */}
-        <p className="text-xs text-gray-500 mt-1">📍 {turf.locality}</p>
+        <p className="text-xs text-gray-700 mt-1">📍 {turf.locality}</p>
 
         {/* 🕒 TIME */}
-        <p className="text-xs">
+        <p className="text-xs text-gray-700">
           🕒 {turf.is_24_7 ? "24/7 Available" : "Available"}
         </p>
 
         {/* 🏟️ SPORTS ICONS */}
-        <div className="flex gap-2 mt-1 text-lg">
+        <div className="flex gap-4 mt-1 text-lg">
           {sports.includes("football") && "⚽"}
           {sports.includes("cricket") && "🏏"}
           {sports.includes("badminton") && "🏸"}
@@ -79,8 +79,10 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* 💰 PRICE */}
         <div className="flex justify-between items-center mt-2">
-          <p className="font-semibold text-sm">₹{turf.price}/hr</p>
-          <button className="bg-green-500 text-white px-3 py-1 rounded text-xs">
+          <p className="font-semibold text-black text-sm">₹{turf.price}
+            <span className="text-gray-700 text-sm font-medium"
+          > / hr</span></p>
+          <button className="bg-green-600 text-white px-3 py-1 rounded text-xs">
             Book
           </button>
         </div>

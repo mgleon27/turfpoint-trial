@@ -37,12 +37,12 @@ export default function MobileTurfCard({ turf, router }: Props) {
       <div className="mt-2">
 
         {/* TITLE + RATING */}
-        <div className="flex justify-between items-center gap-2">
-          <h2 className="font-semibold text-sm truncate">
+        <div className="flex justify-between items-center gap-1">
+          <h2 className="font-semibold text-black text-sm truncate">
             {turf.name}
           </h2>
 
-          <span className="bg-yellow-400 px-2 py-1 text-[10px] rounded shrink-0">
+          <span className="bg-yellow-400 px-2 py-1 mr-1 text-white text-[10px] rounded shrink-0">
             {turf.reviews?.length
               ? (
                   turf.reviews.reduce((s, r) => s + r.rating, 0) /
@@ -50,20 +50,21 @@ export default function MobileTurfCard({ turf, router }: Props) {
                 ).toFixed(1)
               : "0.0"}
           </span>
+
         </div>
 
         {/* LOCATION */}
-        <p className="text-[11px] text-gray-500 mt-1 truncate">
+        <p className="text-[11px] text-gray-700 mt-1 truncate">
           📍 {turf.locality}
         </p>
 
         {/* AVAILABILITY */}
-        <p className="text-[11px]">
+        <p className="text-[11px] text-gray-700 ">
           🕒 {turf.is_24_7 ? "24/7 Available" : "Available"}
         </p>
 
         {/* SPORTS */}
-        <div className="flex gap-1 mt-1 text-sm">
+        <div className="flex gap-4 mt-1 text-sm">
           {turf.turf_sports?.some(s => s.sports?.name?.toLowerCase() === "football") && "⚽"}
           {turf.turf_sports?.some(s => s.sports?.name?.toLowerCase() === "cricket") && "🏏"}
           {turf.turf_sports?.some(s => s.sports?.name?.toLowerCase() === "badminton") && "🏸"}
@@ -72,8 +73,9 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* PRICE + BUTTON */}
         <div className="flex justify-between items-center mt-2">
-          <p className="font-semibold text-xs">
-            ₹{turf.price}/hr
+          <p className="font-semibold text-black text-xs">
+            ₹{turf.price}<span className="text-gray-700 text-sm font-medium"
+          > / hr</span>
           </p>
 
           <button
@@ -81,7 +83,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
               e.stopPropagation();
               router.push(`/turf/${turf.id}`);
             }}
-            className="bg-green-500 text-white px-2 py-1 rounded text-[10px]"
+            className="bg-green-600 text-white px-2 py-1 rounded text-[10px]"
           >
             Book
           </button>

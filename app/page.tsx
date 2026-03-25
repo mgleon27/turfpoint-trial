@@ -285,7 +285,7 @@ export default function Home() {
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
     <div className="bg-white p-5 rounded-xl w-[400px]">
 
-      <h2 className="font-semibold mb-3">Select Location</h2>
+      <h2 className="font-semibold text-black mb-3">Select Location</h2>
 
       <LocationPicker
         onSelect={(lat, lng) => {
@@ -294,7 +294,7 @@ export default function Home() {
       />
 
       <div className="flex justify-between mt-4">
-        <button onClick={() => setShowLocationModal(false)}>
+        <button onClick={() => setShowLocationModal(false)} className="text-black" >
           Cancel
         </button>
 
@@ -318,7 +318,7 @@ export default function Home() {
 
             setShowLocationModal(false);
           }}
-          className="bg-green-500 text-white px-3 py-1 rounded"
+          className="bg-green-600 text-white px-3 py-1 rounded"
         >
           Confirm
         </button>
@@ -356,7 +356,7 @@ function MobileSection({
 }) {
   return (
     <div className="px-4 mt-6 ">
-      <h2 className="font-semibold mb-3">{title}</h2>
+      <h2 className="font-semibold text-black mb-3">{title}</h2>
 
       <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
         {turfs.map((t) => (

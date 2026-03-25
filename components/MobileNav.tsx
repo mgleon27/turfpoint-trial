@@ -55,13 +55,13 @@ export default function MobileNav() {
             ref={active ? activeRef : null}
             onClick={() => router.push(item.path)}
             className={`flex flex-col items-center text-xs min-w-[65px] cursor-pointer snap-center transition-all duration-200 ${
-              active ? "text-green-600 scale-105" : "text-gray-500"
+              active ? "text-green-900 scale-105" : "text-gray-600"
             } active:scale-90`} // 🔥 HAPTIC EFFECT
           >
             {/* ICON */}
             <div
               className={`text-xl transition-all duration-200 ${
-                active ? "bg-green-100 p-2 rounded-full" : ""
+                active ? " rounded-full" : ""
               }`}
             >
               {item.icon}

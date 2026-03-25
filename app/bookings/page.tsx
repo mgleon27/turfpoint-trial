@@ -102,19 +102,19 @@ if (loading) {
 
         <div className="px-4 mt-4">
 
-          <h2 className="text-lg font-semibold mb-4">Your Bookings</h2>
+          <h2 className="text-lg text-black font-semibold mb-4">Your Bookings</h2>
 
           {/* ❌ NOT LOGGED IN */}
           {!user && (
             <div className="flex flex-col items-center text-center justify-center bg-gray-100 rounded-xl p-6 text-center shadow">
               <img src="/bookings.png" className="w-37 h-37 mb-4" />
-              <p className="mb-4 text-sm">
+              <p className="mb-4 text-gray-700 text-sm">
                 Please Login to View Your Bookings...
               </p>
 
               <button
                 onClick={() => router.push("/login")}
-                className="bg-blue-500 text-white px-5 py-2 rounded-lg"
+                className="bg-blue-500 text-white px-5 font-semibold py-2 rounded-lg"
               >
                 Login Now
               </button>

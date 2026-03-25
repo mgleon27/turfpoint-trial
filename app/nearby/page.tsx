@@ -97,15 +97,14 @@ export default function NearbyPage() {
       <div className="md:hidden">
 
         {/* STICKY HEADER */}
-        <div className="sticky top-0 z-50 bg-white">
           <MobileHeader setShowLocationModal={setShowLocationModal} />
           <MobileNav />
-        </div>
 
-        <div className="px-4 mt-4">
+
+          <div className="px-4 mt-4">
 
           {/* TITLE */}
-          <h2 className="text-lg font-semibold mb-3">
+          <h2 className="text-lg text-black font-semibold mb-3">
             Select Turf by Your Location
           </h2>
 
@@ -162,7 +161,7 @@ export default function NearbyPage() {
 
                     {/* DISTANCE */}
                     {distance && (
-                      <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded-full text-xs shadow">
+                      <div className="absolute top-2 left-2 bg-white text-black font-semibold px-2 py-1 rounded-full text-xs shadow">
                         📍 {distance.toFixed(1)} km
                       </div>
                     )}
@@ -171,21 +170,21 @@ export default function NearbyPage() {
                   {/* CONTENT */}
                   <div className="p-3">
 
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between">
                       <div>
-                        <span className="bg-yellow-400 px-2 py-1 rounded text-xs">
+                        <span className="bg-yellow-500 text-white font-semibold px-2 py-1 rounded text-xs">
                           {avg.toFixed(1)}
                         </span>
-                        <span className="ml-2 text-gray-500 text-xs">
+                        <span className="ml-2 text-gray-700 text-base">
                           {t.reviews?.length || 0}
                         </span>
                       </div>
-                      <span className="text-xs">📍 {t.locality}</span>
+                      <span className="text-sm text-black">📍 {t.locality}</span>
                     </div>
 
-                    <h2 className="text-sm font-semibold mt-1">{t.name}</h2>
+                    <h2 className="text-lg text-black font-semibold mt-1">{t.name}</h2>
 
-                    <div className="flex gap-2 mt-1 text-sm">
+                    <div className="flex gap-10 mt-1 text-sm">
                       {sports.includes("football") && "⚽"}
                       {sports.includes("cricket") && "🏏"}
                       {sports.includes("badminton") && "🏸"}
@@ -193,10 +192,10 @@ export default function NearbyPage() {
                     </div>
 
                     <div className="flex justify-between items-center mt-2">
-                      <p className="text-sm font-semibold">
-                        ₹{t.price}/hr
+                      <p className="text-base text-gray-800 font-semibold">
+                        ₹{t.price}<span className="text-gray-700 font-medium"> / hr </span>
                       </p>
-                      <button className="bg-green-500 text-white px-3 py-1 rounded text-xs">
+                      <button className="bg-green-600 font-semibold text-white px-3 py-1 rounded text-xs">
                         Book
                       </button>
                     </div>
@@ -265,7 +264,7 @@ export default function NearbyPage() {
 
             <button
               onClick={() => setShowLocationModal(false)}
-              className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
+              className="mt-4 bg-green-600 text-white px-4 py-2 rounded"
             >
               Confirm
             </button>

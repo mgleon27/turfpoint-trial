@@ -44,9 +44,9 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
           </button>
 
           <Search
-            size={20}
+            size={23}
             onClick={() => setShowSearch(!showSearch)}
-            className="cursor-pointer"
+            className="cursor-pointer stroke-black"
           />
         </div>
       </div>

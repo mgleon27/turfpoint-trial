@@ -119,7 +119,7 @@ if (loading) {
       <MobileHeader setShowLocationModal={setShowLocationModal} />
       <MobileNav />
 
-      <div className="px-4 mt-2">
+      <div className="px-4 mt-2 bg-white">
 
         {/* SPORTS SCROLL */}
         <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
@@ -159,7 +159,7 @@ if (loading) {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-black/30" />
-                <div className="absolute bottom-2 left-2 text-white text-xs font-semibold">
+                <div className="absolute bottom-2 left-2 text-white text-sm font-medium">
                   {s.name}
                 </div>
               </div>
@@ -169,9 +169,9 @@ if (loading) {
 
         {/* SELECTED TEXT */}
         {selectedSport && (
-          <p className="mt-2 text-gray-500 text-sm pl-2">
+          <p className="mt-2 text-gray-600 font-medium text-sm pl-2">
             Showing turfs for{" "}
-            <span className="text-black font-semibold">
+            <span className="text-black pl-1 text-sm font-medium">
               {selectedSport}
             </span>
           </p>
@@ -190,7 +190,7 @@ if (loading) {
     {showLocationModal && (
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
         <div className="bg-white p-5 rounded-xl w-[400px]">
-          <h2 className="font-semibold mb-3">Select Location</h2>
+          <h2 className="font-semibold text-black mb-3">Select Location</h2>
 
           <LocationPicker
             onSelect={(lat, lng) => {
@@ -199,7 +199,7 @@ if (loading) {
           />
 
           <div className="flex justify-between mt-4">
-            <button onClick={() => setShowLocationModal(false)}>
+            <button onClick={() => setShowLocationModal(false)} className="text-black">
               Cancel
             </button>
 
@@ -221,7 +221,7 @@ if (loading) {
                 setLocationData(location, newCity);
                 setShowLocationModal(false);
               }}
-              className="bg-green-500 text-white px-3 py-1 rounded"
+              className="bg-green-600 text-white px-3 py-1 rounded"
             >
               Confirm
             </button>

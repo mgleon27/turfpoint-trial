@@ -79,17 +79,17 @@ export default function ProfilePage() {
 
       <img src="/profile.png" className="w-37 h-37 mb-4" />
 
-      <h2 className="text-lg font-semibold mb-2">
+      <h2 className="text-lg text-black font-semibold mb-2">
         Login to access your profile
       </h2>
 
-      <p className="text-gray-500 text-sm mb-5">
+      <p className="text-gray-600 text-sm mb-5">
         View bookings, favourites and manage your account
       </p>
 
       <button
         onClick={() => router.push("/login")}
-        className="bg-green-500 text-white px-6 py-2 rounded-full"
+        className="bg-green-500 text-white font-semibold px-6 py-2 rounded-full"
       >
         Login
       </button>
