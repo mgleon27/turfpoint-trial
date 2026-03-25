@@ -136,17 +136,17 @@ export default function TurfDetailsPage() {
     <div className="bg-white min-h-screen">
 
       {/* ================= MOBILE ================= */}
-      <div className="md:hidden">
+      <div className="md:hidden bg-white">
 
         <MobileHeader setShowLocationModal={() => {}} />
 
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 bg-white">
 
           {/* BACK */}
           <div  className="flex gap-3 mb-4 items-center">
             <img src="/icons/back.png" className="w-4 h-4"
             onClick={() => router.back()} />
-            <span className="text-xl">Turf Details</span>
+            <span className="text-xl text-black">Turf Details</span>
           </div>
 
           {/* IMAGE */}
@@ -163,30 +163,30 @@ export default function TurfDetailsPage() {
           <div className="relative mt-4">
 
               {/* CENTER NAME */}
-              <h1 className="text-xl font-semibold text-center">
+              <h1 className="text-xl text-black font-semibold text-center">
                  {turf.name}
               </h1>
 
               {/* RIGHT SIDE RATING */}
               <div className="absolute right-0 top-0 text-sm flex items-center gap-2 mr-2">
-                  <span className="bg-yellow-200 rounded-md pl-2 pr-3 py-1">
+                  <span className="bg-yellow-300 text-black rounded-md pl-2 pr-3 py-1">
                   ⭐ {avg.toFixed(1)}
                   </span>
-                 <span className="text-lg">({turf.reviews?.length || 0})</span>
+                 <span className="text-lg text-center text-black">({turf.reviews?.length || 0})</span>
               </div>
 
 </div>
 
           <div className="flex justify-center mt-3">
-          <p className="text-sm text-gray-700">{turf.address}</p>
+          <p className="text-sm text-gray-800">{turf.address}</p>
           </div>
 
           <div className="flex justify-center mt-2">
-          <h2 className="text-lg font-semibold mt-2">₹{turf.price} <span className="font-medium">/60 minutes</span></h2>
+          <h2 className="text-lg text-black font-semibold mt-2">₹{turf.price}<span className=" text-gray-800 font-medium">/ 60 minutes</span></h2>
           </div>
 
           <div className="flex justify-center">
-          <button className="bg-green-600 px-5 py-2 text-lg text-white rounded-full mt-3 mb-1"
+          <button className="bg-green-600 px-5 py-2 text-lg text-white font-medium rounded-full mt-3 mb-1"
           onClick={() =>
             alert(
               "The Slot Checking Feature will be Added Soon.\n\nDownload Application to Check Slot or Book yours Now."
@@ -200,13 +200,13 @@ export default function TurfDetailsPage() {
           <div className="mt-4 space-y-2 text-sm">
 
             <div className="flex justify-between pt-1">
-                 <div className="flex gap-3 text-base font-medium">
+                 <div className="flex gap-3 text-base text-black font-medium ml-2">
                    <img src="/icons/timing.png" className="w-5 h-5" />
                    {turf.is_24_7 ? "24/7  Available" : `${turf.opening_time} - ${turf.closing_time}`}
                  </div>
 
 
-                  <div className="flex gap-2 text-base pr-6">
+                  <div className="flex gap-2 text-base text-black font-medium pr-6">
                    <img src="/icons/location.png" className="w-5 h-5" />
                    {turf.locality}
                  </div>
@@ -214,7 +214,7 @@ export default function TurfDetailsPage() {
 
 
                  {turf.area_sqm && (
-            <div className="flex gap-3 text-base pt-3">
+            <div className="flex gap-3 text-base text-black font-medium items-center mt-4 ml-2">
                 <img src="/icons/area.png" className="w-4 h-4" />
                 {turf.area_sqm} sq.m
             </div>
@@ -224,14 +224,14 @@ export default function TurfDetailsPage() {
           <hr className="my-4" />
 
           {/* SPORTS */}
-          <h2 className="font-semibold text-xl pb-6 pt-1">
+          <h2 className="font-semibold text-black text-xl pb-6 pt-1">
             Sports Provided
           </h2>
 
           <div className="grid grid-cols-2 gap-5 ml-5">
             
             {sports.map((s, i) => (
-              <div key={i} className="flex gap-2 items-center">
+              <div key={i} className="flex gap-2 items-center text-black text-base">
                 <img src={`/icons/${s}.png`} className="w-6 h-6" />
                 {s}
               </div>
@@ -241,28 +241,28 @@ export default function TurfDetailsPage() {
           <hr className="my-4 mt-7" />
 
           {/* AMENITIES */}
-          <h2 className="font-semibold text-xl pb-6 pt-1">
+          <h2 className="font-semibold text-black text-xl pb-6 pt-1">
             Amenities
           </h2>
 
           <div className="grid grid-cols-4 gap-4 mb-10">
             {amenities.map((a, i) => (
-              <div key={i} className="text-center">
+              <div key={i} className="text-center ">
                 <img src={a.icon} className="w-8 h-8 mx-auto" />
-                <p className="text-sm pt-2">{a.label}</p>
+                <p className="text-base text-black pt-2">{a.label}</p>
               </div>
             ))}
           </div>
 
           {/* REVIEWS */}
 <div className="flex justify-between items-center mt-6">
-  <h2 className="font-semibold text-xl">Reviews</h2>
+  <h2 className="font-semibold text-black text-xl">Reviews</h2>
 
   <p className="items-center">
-    <span className="bg-yellow-200 rounded-md pl-2 pr-3 py-1 mr-2">
+    <span className="bg-yellow-300 rounded-md pl-2 pr-3 py-1 mr-2 text-black">
       ⭐ {avg.toFixed(1)}
     </span>
-    <span className="text-lg">
+    <span className="text-lg text-black">
       ({turf.reviews?.length || 0})</span>
   </p>
 </div>
@@ -279,7 +279,7 @@ export default function TurfDetailsPage() {
         className="min-w-[200px] h-[200px] border rounded-xl p-3 flex flex-col justify-between"
       >
         {/* NAME */}
-        <p className="text-sm font-semibold">
+        <p className="text-sm text-black font-semibold">
           {r.profiles?.full_name || "User"}
         </p>
 
@@ -295,7 +295,7 @@ export default function TurfDetailsPage() {
             ))}
 
             {imgs.length > 2 && (
-              <div className="w-14 h-14 flex items-center justify-center text-xs bg-gray-200 rounded">
+              <div className="w-14 h-14 flex items-center justify-center text-black text-xs bg-gray-200 rounded">
                 +{imgs.length - 2}
               </div>
             )}
@@ -303,26 +303,26 @@ export default function TurfDetailsPage() {
         )}
 
         {/* COMMENT */}
-        <p className="text-xs text-gray-600 line-clamp-3 mt-2">
+        <p className="text-xs text-gray-700 line-clamp-3 mt-2">
           {r.comment || "No review"}
         </p>
 
         {/* VIEW MORE */}
         <div className="text-right text-xs text-gray-400">
-          View more
+          
         </div>
       </div>
     );
   })}
 
   {/* VIEW ALL CARD */}
-  <div className="min-w-[80px] flex items-center justify-center text-xl">
+  <div className="min-w-[80px] flex items-center justify-center text-black text-xl">
     →
   </div>
 
 </div>
 
-          <button className="w-full bg-green-500 text-white py-3 rounded-full mt-5"
+          <button className="w-full bg-green-600 text-lg text-white py-3 rounded-full mt-5"
           onClick={() =>
             alert(
               "Bookings can Currently be done only through Application.\n\nDownload Application to Book your Slot Now."
