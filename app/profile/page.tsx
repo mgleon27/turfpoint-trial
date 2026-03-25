@@ -144,7 +144,7 @@ export default function ProfilePage() {
         onClick={logout}
         className="w-full bg-red-500 text-white py-3 rounded-xl mt-8"
       >
-        Logout
+        Logout Now
       </button>
 
     </div>
