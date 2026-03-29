@@ -14,7 +14,7 @@ import dynamic from "next/dynamic";
 // ✅ MOBILE COMPONENTS
 import MobileHeader from "@/components/MobileHeader";
 import MobileNav from "@/components/MobileNav";
-import MobileTurfCard from "@/components/MobileTurfCard";
+import MobileTurfCard from "@/components/MobileTurfCardshadowless";
 
 const LocationPicker = dynamic(
   () => import("@/components/LocationPicker"),
