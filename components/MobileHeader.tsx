@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+
+import useMounted from "@/lib/useMounted";
 
 import { useLocation } from "@/lib/locationContext"; // ✅ ADD
 
@@ -12,6 +14,7 @@ type Props = {
 
 export default function MobileHeader({ setShowLocationModal }: Props) {
   const router = useRouter();
+  const mounted = useMounted();
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -32,7 +35,7 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
             onClick={() => setShowLocationModal(true)}
             className="text-sm text-gray-700 font-medium pl-1 cursor-pointer flex items-center"
           >
-            📍 {city} ›
+            📍 {mounted ? city : "..." } ›
           </span>
         </div>
 

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState } from "react";
 
+// ================= TYPES =================
 type LocationType = {
   lat: number;
   lng: number;
@@ -13,9 +14,10 @@ type LocationContextType = {
   setLocationData: (loc: LocationType, city: string) => void;
 };
 
+// ================= CONTEXT =================
 const LocationContext = createContext<LocationContextType | null>(null);
 
-// ✅ SAFE PARSER (avoids crash if JSON is invalid)
+// ================= SAFE STORAGE PARSER =================
 function getStoredLocation() {
   if (typeof window === "undefined") return null;
 
@@ -25,13 +27,18 @@ function getStoredLocation() {
 
     return JSON.parse(saved);
   } catch (error) {
-    console.error("Error parsing location from localStorage:", error);
+    console.error("Error parsing location:", error);
     return null;
   }
 }
 
-export function LocationProvider({ children }: { children: React.ReactNode }) {
-  // ✅ LOAD ONCE (no hydration issue)
+// ================= PROVIDER =================
+export function LocationProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  // ✅ INITIAL LOAD (NO useEffect → NO ERROR)
   const stored = getStoredLocation();
 
   const [location, setLocation] = useState<LocationType | null>(
@@ -42,7 +49,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     stored?.city || "Nagercoil"
   );
 
-  // ✅ UPDATE FUNCTION
+  // ================= UPDATE FUNCTION =================
   const setLocationData = (loc: LocationType, cityName: string) => {
     setLocation(loc);
     setCity(cityName);
@@ -61,17 +68,21 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <LocationContext.Provider value={{ location, city, setLocationData }}>
+    <LocationContext.Provider
+      value={{ location, city, setLocationData }}
+    >
       {children}
     </LocationContext.Provider>
   );
 }
 
-// ✅ CUSTOM HOOK
+// ================= HOOK =================
 export const useLocation = () => {
   const ctx = useContext(LocationContext);
+
   if (!ctx) {
     throw new Error("useLocation must be used inside LocationProvider");
   }
+
   return ctx;
 };
