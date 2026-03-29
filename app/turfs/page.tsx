@@ -120,50 +120,7 @@ return (
 
       </div>
     </div>
-    {showLocationModal && (
-      <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
-        <div className="bg-white p-5 rounded-xl w-[400px]">
-
-          <h2 className="font-semibold text-black mb-3">Select Location</h2>
-
-          <LocationPicker
-            onSelect={(lat, lng) => {
-              setLocationData({ lat, lng }, city);
-            }}
-          />
-
-          <div className="flex justify-between mt-4">
-            <button onClick={() => setShowLocationModal(false)} className="text-black">
-              Cancel
-            </button>
-
-            <button
-              onClick={async () => {
-                if (!location) return;
-
-                const res = await fetch(
-                  `https://nominatim.openstreetmap.org/reverse?lat=${location.lat}&lon=${location.lng}&format=json`
-                );
-                const data = await res.json();
-
-                const newCity =
-                  data.address.city ||
-                  data.address.town ||
-                  data.address.village ||
-                  "Selected Location";
-
-                setLocationData(location, newCity);
-                setShowLocationModal(false);
-              }}
-              className="bg-green-600 text-white px-3 py-1 rounded"
-            >
-              Confirm
-            </button>
-          </div>
-
-        </div>
-      </div>
-    )}
+    
 
     {/* ================= DESKTOP UI (UNCHANGED) ================= */}
     <div className="hidden md:block">

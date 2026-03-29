@@ -38,39 +38,38 @@ export default function MobileTurfCard({ turf, router }: Props) {
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
-      className="min-w-[220px] bg-white rounded-xl border-1 border-gray-200 shadow-lg/20 p-3 cursor-pointer"
+      className="min-w-[150px] bg-white rounded-xl  p-1 cursor-pointer"
     >
       <img
         src={turf.image_url || "/turf.jpg"}
         className="h-32 w-full object-cover rounded-lg"
       />
 
-      <div className="mt-2">
+      <div >
 
-        <div className="flex justify-between items-center">
-          <h2 className="font-semibold text-black">{turf.name}</h2>
+        
+          
 
           {/* ⭐ DYNAMIC RATING */}
-          <div className="flex justify-between items-center gap-1">
-          <span className="bg-yellow-500 px-2 py-1 text-white text-xs rounded">
-            {avg.toFixed(1)}
+          <div className="flex justify-between items-center gap-11">
+          <span className=" text-black text-[12px] rounded">
+            ⭐{avg.toFixed(1)}
           </span>
           <p className="text-xs text-gray-500">
             {turf.reviews?.length || 0 } reviews
           </p>
           </div>
-        </div>
+        
+
+        {/* Name */}
+        <h2 className="font-semibold text-[15px] text-black mt-1 pl-1">{turf.name}</h2>
 
         {/* 📍 LOCATION */}
-        <p className="text-xs text-gray-700 mt-1">📍 {turf.locality}</p>
+        <p className="text-xs font-extralight text-gray-700">📍 {turf.locality}</p>
 
         {/* 🕒 TIME */}
-        <p className="text-xs text-gray-700">
-          🕒 {turf.is_24_7 ? "24/7 Available" : "Available"}
-        </p>
-
         {/* 🏟️ SPORTS ICONS */}
-        <div className="flex gap-4 mt-1 text-lg">
+        <div className="flex gap-3 text-base pt-1">
           {sports.includes("football") && "⚽"}
           {sports.includes("cricket") && "🏏"}
           {sports.includes("badminton") && "🏸"}
@@ -78,11 +77,12 @@ export default function MobileTurfCard({ turf, router }: Props) {
         </div>
 
         {/* 💰 PRICE */}
-        <div className="flex justify-between items-center mt-2">
+        <div className="flex justify-between items-center mt-1">
           <p className="font-semibold text-black text-sm">₹{turf.price}
             <span className="text-gray-700 text-sm font-medium"
           > / hr</span></p>
-          <button className="bg-green-600 text-white px-3 py-1 rounded text-xs">
+          <button 
+            className="bg-green-600 text-white px-3 py-1 rounded text-xs mr-1">
             Book
           </button>
         </div>

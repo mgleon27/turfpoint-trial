@@ -239,17 +239,41 @@ export default function NearbyPage() {
           <div className="bg-white p-5 rounded-xl w-[400px]">
 
             <LocationPicker
-              onSelect={(lat, lng) => {
-                setLocationData({ lat, lng }, city);
-              }}
-            />
+  onSelect={(lat, lng) => {
+    setLocationData({ lat, lng }, city); // temp set
+  }}
+/>
 
-            <button
-              onClick={() => setShowLocationModal(false)}
-              className="mt-4 bg-green-600 text-white px-4 py-2 rounded"
-            >
-              Confirm
-            </button>
+<div className="flex justify-between mt-4">
+  <button onClick={() => setShowLocationModal(false)}>
+    Cancel
+  </button>
+
+  <button
+    onClick={async () => {
+      if (!location) return;
+
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${location.lat}&lon=${location.lng}&format=json`
+      );
+      const data = await res.json();
+
+      const newCity =
+        data.address.city ||
+        data.address.town ||
+        data.address.village ||
+        "Selected Location";
+
+      // ✅ IMPORTANT
+      setLocationData(location, newCity);
+
+      setShowLocationModal(false);
+    }}
+    className="bg-green-600 text-white px-4 py-2 rounded"
+  >
+    Confirm
+  </button>
+</div>
 
           </div>
         </div>
