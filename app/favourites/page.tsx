@@ -192,7 +192,7 @@ if (loading) {
       <div className="px-4 mt-4">
 
         {/* TITLE */}
-        <h2 className="text-lg text-black font-semibold mb-4">
+        <h2 className="text-base text-black font-medium font-sans mb-4">
           Favourites ❤️
         </h2>
 

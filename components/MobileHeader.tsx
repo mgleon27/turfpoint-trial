@@ -33,16 +33,16 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
           {/* 🔥 CLICKABLE LOCATION */}
           <span
             onClick={() => setShowLocationModal(true)}
-            className="text-sm text-gray-700 font-medium pl-1 cursor-pointer flex items-center"
+            className="text-sm text-gray-700 font-medium cursor-pointer flex pt-0.2 font-sans"
           >
-            📍 {mounted ? city : "..." } ›
+            <img src="/icons/locationtop.png" className="h-4 pr-0.5" /> {mounted ? city : "..." } ›
           </span>
         </div>
 
         {/* RIGHT */}
         <div className="flex items-center gap-5 pr-5">
 
-          <button className="bg-green-500 text-white px-4 py-2 rounded text-xs">
+          <button className="bg-green-500 text-white px-4 py-2 rounded text-xs font-sans">
             Get App
           </button>
 
@@ -60,7 +60,7 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search..."
-          className="mt-3 w-full p-2 rounded bg-gray-100 outline-none"
+          className="mt-3 w-full p-2 rounded bg-gray-100 outline-none font-sans"
         />
       )}
     </div>

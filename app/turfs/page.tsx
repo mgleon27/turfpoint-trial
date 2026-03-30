@@ -14,7 +14,7 @@ import dynamic from "next/dynamic";
 // ✅ MOBILE COMPONENTS
 import MobileHeader from "@/components/MobileHeader";
 import MobileNav from "@/components/MobileNav";
-import MobileTurfCard from "@/components/MobileTurfCardshadowless";
+import MobileTurfCard from "@/components/MobileTurfCard";
 
 const LocationPicker = dynamic(
   () => import("@/components/LocationPicker"),
@@ -107,7 +107,7 @@ return (
 
       <div className="px-4 mt-4">
 
-        <h2 className="text-lg text-black ml-2 font-semibold mb-3">All Turfs</h2>
+        <h2 className="text-lg text-black ml-2 font-medium font-sans mb-3">All Turfs</h2>
 
         {/* ✅ 2 CARDS PER ROW (NO OVERLAP) */}
         <div className="grid grid-cols-2 gap-3">

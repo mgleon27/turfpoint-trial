@@ -111,7 +111,7 @@ if (loading) {
 
 
   return (
-  <div className="bg-white-100 min-h-screen">
+  <div className="bg-white min-h-screen">
 
     {/* ================= MOBILE UI ================= */}
     <div className="md:hidden bg-white">
@@ -120,6 +120,8 @@ if (loading) {
       <MobileNav />
 
       <div className="px-4 mt-2 bg-white">
+
+        <p className="text-black font-medium font-sans text-base mb-3">Select Sports Category</p>
 
         {/* SPORTS SCROLL */}
         <div className="flex gap-3 overflow-x-auto pb-5 no-scrollbar">

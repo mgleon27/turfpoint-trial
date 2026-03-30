@@ -32,7 +32,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
-      className="w-full min-w-0 bg-white rounded-lg p-2  cursor-pointer border-1 border-gray-100 shadow-lg/30"
+      className="w-full min-w-0 bg-white rounded-lg p-2  cursor-pointer border-1 border-gray-100 shadow-lg/10"
     >
       {/* IMAGE */}
       <img
@@ -44,20 +44,20 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* ⭐ DYNAMIC RATING */}
           <div className="flex justify-between items-center gap-11">
-          <span className=" text-black text-[12px] rounded">
+          <span className=" text-black text-[12px] rounded font-sans">
             ⭐{avg.toFixed(1)}
           </span>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 font-sans">
             {turf.reviews?.length || 0 } reviews
           </p>
           </div>
         
 
         {/* Name */}
-        <h2 className="font-semibold text-[15px] text-black mt-1 pl-1">{turf.name}</h2>
+        <h2 className="font-semibold text-[15px] text-black mt-1 pl-1 font-sans">{turf.name}</h2>
 
         {/* 📍 LOCATION */}
-        <p className="text-xs font-extralight text-gray-700">📍 {turf.locality}</p>
+        <p className="text-xs font-extralight text-gray-700 font-sans">📍 {turf.locality}</p>
 
         {/* SPORTS */}
         <div className="flex gap-3 text-base pt-1">
@@ -69,15 +69,15 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* PRICE + BUTTON */}
         <div className="flex justify-between items-center mt-1">
-          <p className="font-semibold text-black text-sm">₹{turf.price}
-            <span className="text-gray-700 text-sm font-medium"
+          <p className="font-semibold text-black text-sm font-sans">₹{turf.price}
+            <span className="text-gray-700 text-sm font-medium font-sans"
           > / hr</span></p>
           <button 
           onClick={(e) => {
               e.stopPropagation();
               router.push(`/turf/${turf.id}`);
             }}
-            className="bg-green-600 text-white px-3 py-1 rounded text-xs mr-1">
+            className="bg-green-600 text-white px-3 py-1 rounded text-xs mr-1 font-sans">
             Book
           </button>
         </div>

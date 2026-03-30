@@ -102,7 +102,7 @@ if (loading) {
 
         <div className="px-4 mt-4">
 
-          <h2 className="text-lg text-black font-semibold mb-4">Your Bookings</h2>
+          <h2 className="text-base text-black font-medium font-sans mb-4">Your Bookings</h2>
 
           {/* ❌ NOT LOGGED IN */}
           {!user && (
@@ -349,23 +349,23 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
 
         <div>
           <div className="flex justify-between items-center">
-            <h2 className="font-semibold text-sm text-black">
+            <h2 className="font-semibold text-sm text-black font-sans">
               {booking.turfs?.name}
             </h2>
 
-            <span className="text-xs text-black">
+            <span className="text-xs text-black font-sans">
               📍 {booking.turfs?.locality}
             </span>
           </div>
 
-          <p className="text-xs text-black mt-1">📅 {booking.booking_date}</p>
-          <p className="text-xs text-black">
+          <p className="text-xs text-black mt-1 font-sans">📅 {booking.booking_date}</p>
+          <p className="text-xs text-black font-sans">
             ⏰ {booking.start_time} - {booking.end_time}
           </p>
         </div>
 
-        <p className="font-semibold text-sm text-black mt-2">
-          ₹{booking.price} <span className="font-medium text-sm text-gray-700"> /hr</span>
+        <p className="font-semibold text-sm text-black mt-2 font-sans">
+          ₹{booking.price} <span className="font-medium text-sm text-gray-700 font-sans"> /hr</span>
         </p>
 
       </div>

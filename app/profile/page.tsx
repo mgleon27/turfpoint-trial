@@ -10,48 +10,49 @@ import { useUser } from "@/lib/userContext";
 import Header from "@/components/Header";
 import dynamic from "next/dynamic";
 
-// ✅ MOBILE COMPONENTS
+// MOBILE
 import MobileHeader from "@/components/MobileHeader";
 import MobileNav from "@/components/MobileNav";
-
 
 const LocationPicker = dynamic(
   () => import("@/components/LocationPicker"),
   { ssr: false }
 );
 
-// ================= TYPES =================
-type Profile = {
-  full_name: string;
-  avatar_url?: string;
-};
-
 export default function ProfilePage() {
   const router = useRouter();
-
-  const { user, profile, loading } = useUser(); // ✅ GLOBAL AUTH
+  const { user, profile, loading } = useUser();
 
   const [search, setSearch] = useState("");
-
-  const [showEditToast, setShowEditToast] = useState(false); //Edit profile
-
-  const [showLogoutToast, setShowLogoutToast] = useState(false); // Logout
+  const [showEditToast, setShowEditToast] = useState(false);
+  const [showLogoutToast, setShowLogoutToast] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const { city, location, setLocationData } = useLocation();
   const [showLocationModal, setShowLocationModal] = useState(false);
 
   // ================= LOGOUT =================
   const logout = async () => {
-  await supabase.auth.signOut();
+    if (loggingOut) return;
 
-  setShowLogoutToast(true);
+    setLoggingOut(true);
 
-  setTimeout(() => {
-    router.refresh();
-  }, 1000);
-};
+    try {
+      await supabase.auth.signOut();
 
-  // ================= LOADING =================
+      setShowLogoutToast(true);
+
+      setTimeout(() => {
+        setShowLogoutToast(false);
+        setLoggingOut(false);
+      }, 1200);
+
+    } catch (err) {
+      console.error("Logout error:", err);
+      setLoggingOut(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -60,100 +61,85 @@ export default function ProfilePage() {
     );
   }
 
-  // ================= NOT LOGGED IN =================
-
-
-  // ================= LOGGED IN UI =================
   return (
-  <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen">
 
-    {/* ================= MOBILE ================= */}
-    <div className="md:hidden bg-white min-h-screen pt-2">
+      {/* ================= MOBILE ================= */}
+      <div className="md:hidden bg-white min-h-screen pt-2">
 
-  <MobileHeader setShowLocationModal={setShowLocationModal} />
-  <MobileNav />
+        <MobileHeader setShowLocationModal={setShowLocationModal} />
+        <MobileNav />
 
-  {/* ❌ NOT LOGGED IN */}
-  {!user && (
-    <div className="flex flex-col items-center shadow-lg/20 justify-center mt-20 px-6 text-center">
+        {/* NOT LOGGED IN */}
+        {!user && (
+          <div className="flex flex-col items-center justify-center mt-20 px-6 text-center">
+            <img src="/profile.png" className="w-37 h-37 mb-4" />
 
-      <img src="/profile.png" className="w-37 h-37 mb-4" />
+            <h2 className="text-lg font-semibold mb-2">
+              Login to access your profile
+            </h2>
 
-      <h2 className="text-lg text-black font-semibold mb-2">
-        Login to access your profile
-      </h2>
+            <p className="text-gray-600 text-sm mb-5">
+              View bookings, favourites and manage your account
+            </p>
 
-      <p className="text-gray-600 text-sm mb-5">
-        View bookings, favourites and manage your account
-      </p>
+            <button
+              onClick={() => router.push("/login")}
+              className="bg-green-500 text-white px-6 py-2 rounded-full"
+            >
+              Login
+            </button>
+          </div>
+        )}
 
-      <button
-        onClick={() => router.push("/login")}
-        className="bg-green-500 text-white font-semibold px-6 py-2 rounded-full"
-      >
-        Login
-      </button>
-    </div>
-  )}
+        {/* LOGGED IN */}
+        {user && (
+          <div className="px-4 mt-4">
 
-  {/* ✅ LOGGED IN */}
-  {user && (
-    <div className="px-4 mt-4">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-lg/20 p-5 flex items-center gap-4">
+              <img
+                src={profile?.avatar_url || "/profile.png"}
+                onError={(e) => (e.currentTarget.src = "/profile.png")}
+                className="w-16 h-16 rounded-full object-cover"
+              />
 
-      {/* PROFILE CARD */}
-      <div className="bg-white rounded-xl border-1 border-gray-100 shadow-lg/20 p-5 flex items-center gap-4">
+              <div>
+                <h2 className="font-semibold text-lg">
+                  {profile?.full_name || "User"}
+                </h2>
 
-        <img
-          src={profile?.avatar_url || "/profile.png"}
-          className="w-16 h-16 rounded-full object-cover"
-        />
+                <p className="text-sm text-gray-500">
+                  {user.email}
+                </p>
+              </div>
+            </div>
 
-        <div>
-          <h2 className="font-semibold text-lg">
-            {profile?.full_name || "User"}
-          </h2>
+            {/* MENU */}
+            <div className="mt-6 flex flex-col gap-3">
+              <MenuItem title="Edit Profile" onClick={() => {
+                setShowEditToast(true);
+                setTimeout(() => setShowEditToast(false), 2000);
+              }} />
+              <MenuItem title="My Bookings" onClick={() => router.push("/bookings")} />
+              <MenuItem title="Favourites" onClick={() => router.push("/favourites")} />
+              <MenuItem title="Contact Help" onClick={() => router.push("/help")} />
+              <MenuItem title="FAQ(s)" onClick={() => router.push("/faq")} />
+            </div>
 
-          <p className="text-sm text-gray-500">
-            {user.email}
-          </p>
-        </div>
+            {/* LOGOUT */}
+            <button
+              onClick={logout}
+              disabled={loggingOut}
+              className="w-full bg-red-500 text-white py-3 rounded-xl mt-8 flex items-center justify-center gap-2"
+            >
+              {loggingOut ? "Logging out..." : "Logout Now"}
+            </button>
+
+          </div>
+        )}
       </div>
 
-      {/* MENU LIST */}
-      <div className="mt-6 flex flex-col gap-3">
-
-        <MenuItem
-  title="Edit Profile"
-  onClick={() => {
-    setShowEditToast(true);
-
-    setTimeout(() => {
-      setShowEditToast(false);
-    }, 2000);
-  }}
-/>
-        <MenuItem title="My Bookings" onClick={() => router.push("/bookings")} />
-        <MenuItem title="Favourites" onClick={() => router.push("/favourites")} />
-        <MenuItem title="Contact Help" onClick={() => router.push("/help")} />
-        <MenuItem title="FAQ(s)" onClick={() => router.push("/faq")} />
-
-      </div>
-
-      {/* LOGOUT */}
-      <button
-        onClick={logout}
-        className="w-full bg-red-500 text-white py-3 rounded-xl mt-8"
-      >
-        Logout Now
-      </button>
-
-    </div>
-  )}
-</div>
-
-
-
-    {/* ================= DESKTOP (UNCHANGED) ================= */}
+      {/* ================= DESKTOP (UNCHANGED) ================= */}
     <div className="hidden md:block">
 
       <Header
@@ -185,6 +171,7 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center">
             <img
               src={profile?.avatar_url || "/profile.png"}
+              onError={(e) => (e.currentTarget.src = "/profile.png")}
               className="w-24 h-24 rounded-full object-cover border"
             />
 
@@ -235,7 +222,10 @@ export default function ProfilePage() {
             </button>
 
             <button
-              onClick={logout}
+  onClick={() => {
+    if (!loggingOut) logout();
+  }}
+  disabled={loggingOut}
               className="bg-red-500 text-white p-3 rounded mt-20"
             >
               Logout
@@ -247,11 +237,10 @@ export default function ProfilePage() {
 
     </div>
 
-    {/* LOCATION MODAL (UNCHANGED) */}
+      {/* LOCATION MODAL (UNCHANGED) */}
     {showLocationModal && (
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
         <div className="bg-white p-5 rounded-xl w-[400px]">
-
           <h2 className="font-semibold mb-3">Select Location</h2>
 
           <LocationPicker
@@ -288,42 +277,32 @@ export default function ProfilePage() {
               Confirm
             </button>
           </div>
-
         </div>
       </div>
     )}
 
-    {showLogoutToast && (
-  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full shadow-lg animate-fadeIn">
-    Logged out successfully ✅
-  </div>
-)}
+      {/* TOASTS */}
+      {showLogoutToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full">
+          Logged out successfully ✅
+        </div>
+      )}
 
+      {showEditToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full">
+          Profile can be edited from the app 📱
+        </div>
+      )}
 
-    {showEditToast && (
-  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full shadow-lg text-sm">
-    Profile can be edited from the application 📱
-  </div>
-)}
-
-  </div>
-
-  
-
-  
-);
+    </div>
+  );
 }
-function MenuItem({
-  title,
-  onClick,
-}: {
-  title: string;
-  onClick: () => void;
-}) {
+
+function MenuItem({ title, onClick }: { title: string; onClick: () => void }) {
   return (
     <div
       onClick={onClick}
-      className="bg-white p-4 border-1 border-gray-100 rounded-xl shadow-lg/20 flex justify-between items-center cursor-pointer active:scale-[0.98] transition"
+      className="bg-white p-4 border border-gray-100 rounded-xl shadow-lg/20 flex justify-between items-center cursor-pointer"
     >
       <span className="text-sm font-medium">{title}</span>
       <span className="text-gray-400">›</span>

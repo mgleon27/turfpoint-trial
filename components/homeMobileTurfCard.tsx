@@ -38,7 +38,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
-      className="min-w-[150px] bg-white rounded-xl  p-1 cursor-pointer"
+      className="min-w-[150px] bg-white rounded-xl  p-1 cursor-pointer  border-1 border-gray-100 shadow-lg/10"
     >
       <img
         src={turf.image_url || "/turf.jpg"}
@@ -52,20 +52,20 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
           {/* ⭐ DYNAMIC RATING */}
           <div className="flex justify-between items-center gap-11">
-          <span className=" text-black text-[12px] rounded">
+          <span className=" text-black text-[12px] rounded font-sans">
             ⭐{avg.toFixed(1)}
           </span>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-500 font-sans">
             {turf.reviews?.length || 0 } reviews
           </p>
           </div>
         
 
         {/* Name */}
-        <h2 className="font-semibold text-[15px] text-black mt-1 pl-1">{turf.name}</h2>
+        <h2 className="font-medium font-sans text-[15px] text-black mt-1 pl-1">{turf.name}</h2>
 
         {/* 📍 LOCATION */}
-        <p className="text-xs font-extralight text-gray-700">📍 {turf.locality}</p>
+        <p className="text-xs font-normal font-sans text-gray-700">📍 {turf.locality}</p>
 
         {/* 🕒 TIME */}
         {/* 🏟️ SPORTS ICONS */}
@@ -78,11 +78,11 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* 💰 PRICE */}
         <div className="flex justify-between items-center mt-1">
-          <p className="font-semibold text-black text-sm">₹{turf.price}
-            <span className="text-gray-700 text-sm font-medium"
+          <p className=" font-sans font-semibold text-black text-sm">₹{turf.price}
+            <span className="text-gray-700 text-sm font-medium font-sans"
           > / hr</span></p>
           <button 
-            className="bg-green-600 text-white px-3 py-1 rounded text-xs mr-1">
+            className="bg-green-600 text-white px-3 py-1 rounded text-xs mr-1 font-sans">
             Book
           </button>
         </div>

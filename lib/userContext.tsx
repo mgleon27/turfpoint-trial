@@ -26,47 +26,70 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<ProfileType | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ================= LOAD USER =================
-  const loadUser = async () => {
-    const { data } = await supabase.auth.getUser();
-
-    if (!data.user) {
-      setUser(null);
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
-
-    setUser({
-      id: data.user.id,
-      email: data.user.email || "",
-    });
-
-    // fetch profile
-    const { data: profileData } = await supabase
+  // ================= FETCH PROFILE =================
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
       .from("profiles")
       .select("full_name, avatar_url")
-      .eq("id", data.user.id)
+      .eq("id", userId)
       .single();
 
-    setProfile(profileData || null);
-    setLoading(false);
+    setProfile(data || null);
   };
 
-  // ================= EFFECT =================
+  // ================= INITIAL LOAD =================
   useEffect(() => {
-    const init = async () => {
-      await loadUser();
+    const loadSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const currentUser = session?.user;
+
+      if (currentUser) {
+        setUser({
+          id: currentUser.id,
+          email: currentUser.email || "",
+        });
+
+        await fetchProfile(currentUser.id);
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
+
+      setLoading(false);
     };
 
-    init();
+    loadSession();
+  }, []);
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async () => {
-      await loadUser();
+  // ================= AUTH LISTENER (FIXED) =================
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+
+      // 🔥 CRITICAL FIX: delay to prevent lock error
+      setTimeout(async () => {
+        const currentUser = session?.user;
+
+        if (currentUser) {
+          setUser({
+            id: currentUser.id,
+            email: currentUser.email || "",
+          });
+
+          await fetchProfile(currentUser.id);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
+      }, 0);
     });
 
     return () => {
-      listener.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 

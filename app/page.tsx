@@ -166,7 +166,7 @@ export default function Home() {
         <MobileNav />
 
         {/* 🔥 PREMIUM MOBILE CAROUSEL */}
-<div className="px-4 mt-4">
+<div className="px-4 mt-3 mb-5">
 
   <div
     className="relative overflow-hidden rounded-xl"
@@ -355,10 +355,10 @@ function MobileSection({
   router: AppRouterInstance;
 }) {
   return (
-    <div className="px-4 mt-6 ">
-      <h2 className="font-semibold text-black mb-3">{title}</h2>
+    <div className="px-4 mt-1 ">
+      <h2 className="font-medium font-sans text-black mb-3">{title}</h2>
 
-      <div className="flex gap-4 overflow-x-auto pb-7 no-scrollbar">
+      <div className="flex gap-4 overflow-x-auto pb-5 no-scrollbar">
         {turfs.map((t) => (
           <MobileTurfCard key={t.id} turf={t} router={router} />
         ))}

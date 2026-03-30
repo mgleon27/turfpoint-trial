@@ -11,6 +11,8 @@ import { useUser } from "@/lib/userContext";
 import MobileHeader from "@/components/MobileHeader";
 import MobileNav from "@/components/MobileNav";
 
+import NearbyMobileCard from "@/components/NearbyMobileCard";
+
 import dynamic from "next/dynamic";
 const LocationPicker = dynamic(() => import("@/components/LocationPicker"), { ssr: false });
 
@@ -99,83 +101,33 @@ export default function NearbyPage() {
 
         <div className="px-4 mt-4">
 
-          <h2 className="text-lg text-black font-semibold mb-3">
+          <h2 className="text-lg text-black font-medium font-sans mb-3">
             Nearby Turfs
           </h2>
 
           <div className="space-y-4">
 
             {sortedTurfs.map((t) => {
-              const avg =
-                t.reviews?.length
-                  ? t.reviews.reduce((s, r) => s + r.rating, 0) /
-                    t.reviews.length
-                  : 0;
+  let distance: number | null = null;
 
-              let distance: number | null = null;
+  if (location) {
+    distance = getDistance(
+      location.lat,
+      location.lng,
+      t.map_lat,
+      t.map_lng
+    );
+  }
 
-              if (location) {
-                distance = getDistance(
-                  location.lat,
-                  location.lng,
-                  t.map_lat,
-                  t.map_lng
-                );
-              }
-
-              return (
-                <div
-                  key={t.id}
-                  className="bg-white rounded-xl shadow-lg/30 overflow-hidden"
-                >
-
-                  {/* IMAGE */}
-                  <div className="relative">
-                    <img
-                      src={t.image_url || "/turf.jpg"}
-                      className="w-full h-36 object-cover"
-                    />
-
-                    {/* DISTANCE BADGE */}
-                    {distance && (
-                      <div className="absolute top-2 left-2 bg-white text-black font-semibold px-2 py-1 rounded-full text-xs shadow">
-                        📍 {distance.toFixed(1)} km
-                      </div>
-                    )}
-                  </div>
-
-                  {/* CONTENT */}
-                  <div className="p-3">
-
-                    <div className="flex justify-between">
-                      <div>
-                        <span className="bg-yellow-500 text-white px-2 py-1 rounded text-xs">
-                          {avg.toFixed(1)}
-                        </span>
-                        <span className="ml-2 text-gray-700 text-base">
-                          {t.reviews?.length || 0}
-                        </span>
-                      </div>
-                      <span className="text-sm text-black">📍 {t.locality}</span>
-                    </div>
-
-                    <h2 className="text-lg text-black font-semibold mt-1">
-                      {t.name}
-                    </h2>
-
-                    <div className="flex justify-between items-center mt-2">
-                      <p className="text-base text-gray-800 font-semibold">
-                        ₹{t.price} / hr
-                      </p>
-                      <button className="bg-green-600 text-white px-3 py-1 rounded text-xs">
-                        Book
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
-              );
-            })}
+  return (
+    <NearbyMobileCard
+      key={t.id}
+      turf={t}
+      router={router}
+      distance={distance}
+    />
+  );
+})}
 
           </div>
         </div>
