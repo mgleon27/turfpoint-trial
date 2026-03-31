@@ -5,7 +5,8 @@ import { supabase } from "@/lib/supabase";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
-import { useUser } from "@/lib/userContext";
+
+import UserOnly from "@/components/UserOnly";
 
 import { useLocation } from "@/lib/locationContext";
 
@@ -44,7 +45,6 @@ export default function TurfsPage() {
   const [turfs, setTurfs] = useState<Turf[]>([]);
   const [search, setSearch] = useState("");
 
-    const { user, loading } = useUser(); // ✅ GLOBAL AUTH
 
   const { city, location, setLocationData } = useLocation();
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -86,17 +86,10 @@ export default function TurfsPage() {
   load();
 }, []);
 
-if (loading) {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      Loading...
-    </div>
-  );
-}
-
 
 
 return (
+  <UserOnly>
   <div className="bg-white-100 min-h-screen">
 
     {/* ================= MOBILE UI ================= */}
@@ -111,7 +104,7 @@ return (
 
         {/* ✅ 2 CARDS PER ROW (NO OVERLAP) */}
         <div className="grid grid-cols-2 gap-3">
-          {turfs.map((t) => (
+          {filteredTurfs.map((t) => (
             <div key={t.id} className="w-full">
               <MobileTurfCard turf={t} router={router} />
             </div>
@@ -142,7 +135,7 @@ return (
 
           {/* DESKTOP GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {turfs.map((t) => (
+            {filteredTurfs.map((t) => (
               <TurfCard key={t.id} turf={t} router={router} />
             ))}
           </div>
@@ -198,6 +191,7 @@ return (
     )}
 
   </div>
+  </UserOnly>
 );
 }
 

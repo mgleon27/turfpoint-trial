@@ -21,7 +21,7 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
   const { city } = useLocation(); // ✅ GET CITY
 
   return (
-    <div className="bg-white px-2 py-2 shadow-sm sticky top-0 z-50">
+    <div className="bg-white px-2 py-2 sticky top-0 z-50  border-b-1 border-gray-300  ">
 
       {/* TOP ROW */}
       <div className="flex items-center justify-between">

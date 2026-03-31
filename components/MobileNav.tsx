@@ -42,7 +42,7 @@ export default function MobileNav() {
   return (
     <div
       ref={containerRef}
-      className="flex overflow-x-auto no-scrollbar gap-3 px-4 pb-2 pt-3 bg-white snap-x snap-mandatory"
+      className="flex overflow-x-auto no-scrollbar gap-3 px-4 pb-2 pt-4 bg-white snap-x snap-mandatory"
     >
       {items.map((item) => {
         const active =

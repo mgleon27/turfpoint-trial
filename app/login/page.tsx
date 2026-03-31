@@ -15,17 +15,39 @@ export default function AuthPage() {
 
   // ================= LOGIN =================
   const handleLogin = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
-    if (error) alert(error.message);
-    else {
-      alert("Login successful!");
-      router.push("/");
-    }
-  };
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  const user = data.user;
+
+  if (!user) return;
+
+  // 🔥 FETCH PROFILE
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role, owner_approved")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile) {
+    router.push("/");
+    return;
+  }
+
+  // 🔥 ROLE BASED REDIRECT
+  if (profile.role === "owner" && profile.owner_approved) {
+    router.push("/owner"); // ✅ OWNER PANEL
+  } else {
+    router.push("/"); // ✅ USER HOME
+  }
+};
 
   // ================= SIGNUP =================
   const handleSignup = async () => {

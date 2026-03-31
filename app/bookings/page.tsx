@@ -8,6 +8,8 @@ import Header from "@/components/Header";
 import dynamic from "next/dynamic";
 import { useUser } from "@/lib/userContext";
 
+import UserOnly from "@/components/UserOnly";
+
 // ✅ MOBILE COMPONENTS
 import MobileHeader from "@/components/MobileHeader";
 import MobileNav from "@/components/MobileNav";
@@ -93,6 +95,7 @@ if (loading) {
   const dataToShow = activeTab === "upcoming" ? upcoming : completed;
 
   return (
+    <UserOnly>
     <div className="bg-white min-h-screen">
 
       {/* ================= MOBILE ================= */}
@@ -327,6 +330,7 @@ if (loading) {
         </div>
       )}
     </div>
+    </UserOnly>
   );
 }
 

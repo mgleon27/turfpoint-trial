@@ -11,6 +11,8 @@ type UserType = {
 type ProfileType = {
   full_name?: string;
   avatar_url?: string;
+  role?: string;
+  owner_approved?: boolean;
 };
 
 type UserContextType = {
@@ -30,7 +32,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
-      .select("full_name, avatar_url")
+      .select("full_name, avatar_url, role, owner_approved")
       .eq("id", userId)
       .single();
 

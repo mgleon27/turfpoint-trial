@@ -15,6 +15,7 @@ import MobileHeader from "@/components/MobileHeader";
 import MobileNav from "@/components/MobileNav";
 import MobileTurfCard from "@/components/homeMobileTurfCard";
 
+
 const LocationPicker = dynamic(
   () => import("@/components/LocationPicker"),
   { ssr: false }
@@ -59,7 +60,7 @@ export default function Home() {
   const [bookingCounts, setBookingCounts] = useState<Record<string, number>>({});
   const [pageLoading, setPageLoading] = useState(true);
 
-  const { user, loading } = useUser();
+  const { user, profile, loading } = useUser();
   const [search, setSearch] = useState("");
   const [current, setCurrent] = useState(0);
 
@@ -108,6 +109,15 @@ export default function Home() {
     loadData();
   }, []);
 
+useEffect(() => {
+  if (loading) return;
+  if (!profile) return;
+
+  if (profile.role === "owner" && profile.owner_approved) {
+    router.replace("/owner"); // 🔥 BLOCK ACCESS
+  }
+}, [profile, loading, router]);
+
   // ================= FILTER =================
   const filteredTurfs = useMemo(() => {
     return turfs.filter((t) =>
@@ -143,6 +153,11 @@ export default function Home() {
     
     return () => clearInterval(interval);
   }, []);
+
+  if (!loading && profile?.role === "owner" && profile?.owner_approved) {
+  return null; // ⛔ stop rendering completely
+  }
+  
 
   if (pageLoading) {
   return (

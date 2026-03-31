@@ -10,6 +10,8 @@ import Header from "@/components/Header";
 
 import { useUser } from "@/lib/userContext";
 
+import UserOnly from "@/components/UserOnly";
+
 import dynamic from "next/dynamic";
 
 // ✅ MOBILE COMPONENTS
@@ -72,6 +74,8 @@ export default function FavouritesPage() {
   // ================= LOAD =================
 
   useEffect(() => {
+  if (loading) return;
+
   const load = async () => {
     if (!user) {
       setTurfs([]);
@@ -104,7 +108,7 @@ export default function FavouritesPage() {
     setTurfs((turfData as Turf[]) || []);
   };
 
-  if (!loading) load(); // ✅ IMPORTANT FIX
+  load();
 }, [user, loading]);
   
 if (loading) {
@@ -182,6 +186,7 @@ if (loading) {
 };
 
   return (
+    <UserOnly>
   <div className="bg-white min-h-screen">
 
     {/* ================= MOBILE ================= */}
@@ -216,7 +221,12 @@ if (loading) {
         {/* ✅ LOGGED IN */}
         {user && (
           <div className="grid grid-cols-2 gap-3">
-            {sortedTurfs.map((t) => (
+            {sortedTurfs
+  .filter((t) =>
+    t.name.toLowerCase().includes(search.toLowerCase()) ||
+    t.address.toLowerCase().includes(search.toLowerCase())
+  )
+  .map((t) => (
               <MobileFavCard
                 key={t.id}
                 turf={t}
@@ -295,7 +305,12 @@ if (loading) {
 
           {/* GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {sortedTurfs.map((t) => (
+            {sortedTurfs
+  .filter((t) =>
+    t.name.toLowerCase().includes(search.toLowerCase()) ||
+    t.address.toLowerCase().includes(search.toLowerCase())
+  )
+  .map((t) => (
               <TurfCard
                 key={t.id}
                 turf={t}
@@ -317,7 +332,9 @@ if (loading) {
         </div>
       )}
 
-      {/* LOCATION MODAL (unchanged) */}
+    </div>
+    </div>
+    {/* LOCATION MODAL (unchanged) */}
       {showLocationModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
           <div className="bg-white p-5 rounded-xl w-[400px]">
@@ -360,9 +377,7 @@ if (loading) {
           </div>
         </div>
       )}
-
-    </div>
-    </div>
+    </UserOnly>
   );
 }
 

@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { useRouter } from "next/navigation";
 import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
-import { useUser } from "@/lib/userContext";
+
+import UserOnly from "@/components/UserOnly";
 
 import dynamic from "next/dynamic";
 
@@ -50,10 +51,8 @@ export default function SportsPage() {
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
-  const [filtered, setFiltered] = useState<Turf[]>([]);
   const [search, setSearch] = useState("");
 
-  const { user, loading } = useUser(); // ✅ GLOBAL AUTH
 
   const { city, location, setLocationData } = useLocation();
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -63,14 +62,23 @@ export default function SportsPage() {
 
 
   // ================= SEARCH =================
-  const filteredTurfs = turfs.filter((t) => {
-    if (!search) return true;
+  const filteredTurfs = useMemo(() => {
+  if (!selectedSport && !search) return turfs;
 
-    return (
+  return turfs.filter((t) => {
+    const matchesSearch =
       t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.address.toLowerCase().includes(search.toLowerCase())
-    );
+      t.address.toLowerCase().includes(search.toLowerCase());
+
+    const matchesSport =
+      !selectedSport ||
+      t.turf_sports?.some(
+        (sp) => sp.sports?.name?.toLowerCase() === selectedSport
+      );
+
+    return matchesSearch && matchesSport;
   });
+}, [turfs, selectedSport, search]);
 
 
 
@@ -94,23 +102,15 @@ export default function SportsPage() {
 
     if (turfData) {
       setTurfs(turfData);
-      setFiltered(turfData);
     }
   };
 
   load();
 }, []);
 
-if (loading) {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      Loading...
-    </div>
-  );
-}
-
 
   return (
+    <UserOnly>
   <div className="bg-white min-h-screen">
 
     {/* ================= MOBILE UI ================= */}
@@ -136,18 +136,7 @@ if (loading) {
 
                 setSelectedSport(newSport);
 
-                if (!newSport) {
-                  setFiltered(turfs);
-                  return;
-                }
-
-                const data = turfs.filter((t) =>
-                  t.turf_sports?.some(
-                    (sp) => sp.sports?.name?.toLowerCase() === newSport
-                  )
-                );
-
-                setFiltered(data);
+                
               }}
               className={`min-w-[110px] h-38 rounded-2xl border-2 ${
                 selectedSport === s.name.toLowerCase()
@@ -181,7 +170,7 @@ if (loading) {
 
         {/* TURF GRID (3 PER ROW) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-1">
-          {filtered.map((t) => (
+          {filteredTurfs.map((t) => (
             <MobileTurfCard key={t.id} turf={t} router={router} />
           ))}
         </div>
@@ -220,18 +209,6 @@ if (loading) {
 
                   setSelectedSport(newSport);
 
-                  if (!newSport) {
-                    setFiltered(turfs);
-                    return;
-                  }
-
-                  const data = turfs.filter((t) =>
-                    t.turf_sports?.some(
-                      (sp) => sp.sports?.name?.toLowerCase() === newSport
-                    )
-                  );
-
-                  setFiltered(data);
                 }}
                 className={`w-30 h-40 rounded-xl border-2 ${
                   selectedSport === s.name.toLowerCase()
@@ -264,7 +241,7 @@ if (loading) {
 
           {/* DESKTOP GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {filtered.map((t) => (
+            {filteredTurfs.map((t) => (
               <TurfCard key={t.id} turf={t} router={router} />
             ))}
           </div>
@@ -317,6 +294,7 @@ if (loading) {
       </div>
     )}
   </div>
+  </UserOnly>
 );
 }
 

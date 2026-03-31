@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef,useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
 import { useUser } from "@/lib/userContext";
+
+import UserOnly from "@/components/UserOnly";
 
 // MOBILE
 import MobileHeader from "@/components/MobileHeader";
@@ -49,7 +51,6 @@ function getDistance(lat1:number, lon1:number, lat2:number, lon2:number) {
 export default function NearbyPage() {
   const router = useRouter();
   const { city, location, setLocationData } = useLocation();
-  const { user, loading } = useUser();
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -73,24 +74,19 @@ export default function NearbyPage() {
   }, []);
 
   // ================= SORT BY DISTANCE =================
-  const sortedTurfs = [...turfs].sort((a, b) => {
-    if (!location) return 0;
+  const sortedTurfs = useMemo(() => {
+  if (!location) return turfs;
 
+  return [...turfs].sort((a, b) => {
     const d1 = getDistance(location.lat, location.lng, a.map_lat, a.map_lng);
     const d2 = getDistance(location.lat, location.lng, b.map_lat, b.map_lng);
-
     return d1 - d2;
   });
+}, [turfs, location]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
 
   return (
+    <UserOnly>
     <div className="bg-white min-h-screen">
 
       {/* ================= 📱 MOBILE ================= */}
@@ -231,5 +227,6 @@ export default function NearbyPage() {
         </div>
       )}
     </div>
+    </UserOnly>
   );
 }
