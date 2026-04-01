@@ -138,8 +138,7 @@ export default function TurfDetailsPage() {
       {/* ================= MOBILE ================= */}
       <div className="md:hidden bg-white">
 
-        <MobileHeader setShowLocationModal={() => {}} />
-
+        
         <div className="px-4 py-4 bg-white">
 
           {/* BACK */}

@@ -21,13 +21,13 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
   const { city } = useLocation(); // ✅ GET CITY
 
   return (
-    <div className="bg-white px-2 py-2 sticky top-0 z-50  border-b-1 border-gray-300  ">
+    <div className="bg-white px-2 py-1 sticky top-0 z-50  border-b-1 border-gray-300  ">
 
       {/* TOP ROW */}
       <div className="flex items-center justify-between">
 
         {/* LOGO + LOCATION */}
-        <div className="flex flex-col pl-1">
+        <div className="flex flex-col pl-1 gap-0.5">
           <img src="/logo.png" className="h-9" />
 
           {/* 🔥 CLICKABLE LOCATION */}
