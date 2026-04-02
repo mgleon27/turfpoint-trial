@@ -89,7 +89,20 @@ export default function ProfilePage() {
             >
               Login
             </button>
+
+
+
+            <div className="mt-6 flex flex-col gap-3 mb-10">
+              <p className="text-lg font-semibold text-left font-sans text-black ">Our Policies</p>
+
+              <PolicyMenuItem title="Terms & Conditions" onClick={() => router.push("/terms")} />
+              <PolicyMenuItem title="Refund and Payment" onClick={() => router.push("/refund")} />
+              <PolicyMenuItem title="Contact us" onClick={() => router.push("/contact")} />
+            </div>
+
           </div>
+
+          
         )}
 
         {/* LOGGED IN */}
@@ -122,8 +135,9 @@ export default function ProfilePage() {
               }} />
               <MenuItem title="My Bookings" onClick={() => router.push("/bookings")} />
               <MenuItem title="Favourites" onClick={() => router.push("/favourites")} />
-              <MenuItem title="Contact Help" onClick={() => router.push("/help")} />
-              <MenuItem title="FAQ(s)" onClick={() => router.push("/faq")} />
+              <MenuItem title="Refund Policy" onClick={() => router.push("/refund")} />
+              <MenuItem title="Terms & Conditions" onClick={() => router.push("/terms")} />
+              <MenuItem title="Contact us" onClick={() => router.push("/contact")} />
             </div>
 
             {/* LOGOUT */}
@@ -161,7 +175,36 @@ export default function ProfilePage() {
           >
             Login
           </button>
+
+          <div className="mt-10 flex flex-col gap-3">
+            <p className="text-left font-semibold text-lg text-black">Our Policies</p>
+
+            <button
+              onClick={() => router.push("/terms")}
+              className="bg-gray-100 p-3 rounded border border-gray-400 shadow-lg/20 shadow-gray-500"
+            >
+              Terms & Conditions
+            </button>
+
+            <button
+              onClick={() => router.push("/refund")}
+              className="bg-gray-100 p-3 rounded border border-gray-400 shadow-lg/20 shadow-gray-500"
+            >
+              Refund and Payment
+            </button>
+
+            <button
+              onClick={() => router.push("/contact")}
+              className="bg-gray-100 p-3 rounded border border-gray-400 shadow-lg/20 shadow-gray-500"
+            >
+              Contact us
+            </button>
+
+          </div>
+
+
         </div>
+        
       )}
 
       {/* ✅ LOGGED IN UI */}
@@ -306,6 +349,17 @@ function MenuItem({ title, onClick }: { title: string; onClick: () => void }) {
     >
       <span className="text-sm font-medium">{title}</span>
       <span className="text-gray-400">›</span>
+    </div>
+  );
+}
+
+function PolicyMenuItem({ title, onClick }: { title: string; onClick: () => void }) {
+  return (
+    <div
+      onClick={onClick}
+      className="bg-white p-3 px-20 border border-gray-400 rounded-xl shadow-lg/20 items-center cursor-pointer "
+    >
+      <span className="text-base font-medium text-center ">{title}</span>
     </div>
   );
 }
