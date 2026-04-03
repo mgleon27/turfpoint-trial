@@ -79,12 +79,6 @@ export default function Page() {
 
   const { user } = useUser();
 
-useEffect(() => {
-  if (!user) {
-    router.push("/login");
-  }
-}, [user]);
-
   const [turf, setTurf] = useState<Turf | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -214,10 +208,6 @@ useEffect(() => {
     };
   }, [id, date]);
 
-   if (!user) {
-  router.push("/login");
-  return null;
-}
 
    if (!turf || loading) return <div className="p-5">Loading...</div>;
 
