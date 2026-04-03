@@ -187,9 +187,7 @@ export default function TurfDetailsPage() {
           <div className="flex justify-center">
           <button className="bg-green-600 px-5 py-2 text-lg text-white font-medium rounded-full mt-3 mb-1"
           onClick={() =>
-            alert(
-              "The Slot Checking Feature will be Added Soon.\n\nDownload Application to Check Slot or Book yours Now."
-            )
+            router.push(`/turf/${turf.id}/book`)
           }>
             Check Slot Availability
           </button>
@@ -323,9 +321,7 @@ export default function TurfDetailsPage() {
 
           <button className="w-full bg-green-600 text-lg text-white py-3 rounded-full mt-5"
           onClick={() =>
-            alert(
-              "Bookings can Currently be done only through Application.\n\nDownload Application to Book your Slot Now."
-            )
+            router.push(`/turf/${turf.id}/book`)
           }>
             Book Slot Now
           </button>
@@ -424,9 +420,7 @@ export default function TurfDetailsPage() {
 
               <button className="bg-green-500 px-5 py-2 rounded-full text-white border-2 border-green-700"
               onClick={() =>
-            alert(
-              "The Slot Checking Feature will be Added Soon.\n\nDownload Application to Check Slot or Book yours Now."
-            )
+            router.push(`/turf/${turf.id}/book`)
           }>
                 Check Slot Availability
               </button>

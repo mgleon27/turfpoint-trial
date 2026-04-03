@@ -6,6 +6,10 @@ import { supabase } from "@/lib/supabase";
 type UserType = {
   id: string;
   email?: string;
+  user_metadata?:{
+    full_name?: string;
+    name?: string;
+  };
 };
 
 type ProfileType = {
