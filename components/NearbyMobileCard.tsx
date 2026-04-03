@@ -64,7 +64,7 @@ export default function NearbyMobileCard({ turf, router, distance }: Props) {
           </div>
 
           {/* NAME */}
-          <h2 className="font-semibold text-black text-base font-sans ">
+          <h2 className="font-semibold text-black text-base font-sans -mt-1">
             {turf.name}
           </h2>
 
@@ -82,7 +82,7 @@ export default function NearbyMobileCard({ turf, router, distance }: Props) {
             <span className="text-gray-600 text-sm font-sans"> / hr</span>
           </p>
 
-          <button className="bg-green-600 font-sans text-white px-2 py-0.5 rounded-full text-xs mb-2">
+          <button className="bg-green-600 font-sans text-white px-2 py-0.5 rounded-full text-sm mb-1">
             View Details
           </button>
         </div>
