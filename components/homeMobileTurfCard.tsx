@@ -38,14 +38,14 @@ export default function MobileTurfCard({ turf, router }: Props) {
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
-      className="min-w-[150px] bg-white rounded-xl  p-1 cursor-pointer  border-1 border-gray-100 shadow-lg/10"
+      className="min-w-[165px] bg-white rounded-xl  p-1 cursor-pointer  border-1 border-gray-100 shadow-lg/10"
     >
       <img
         src={turf.image_url || "/turf.jpg"}
-        className="h-32 w-full object-cover rounded-lg"
+        className="h-30 w-full object-cover rounded-lg"
       />
 
-      <div >
+      <div className="p-0.5" >
 
         
           
@@ -65,24 +65,16 @@ export default function MobileTurfCard({ turf, router }: Props) {
         <h2 className="font-medium font-sans text-[15px] text-black mt-1 pl-1">{turf.name}</h2>
 
         {/* 📍 LOCATION */}
-        <p className="text-xs font-normal font-sans text-gray-700">📍 {turf.locality}</p>
+        <p className="text-xs font-normal font-sans text-gray-700">📍{turf.locality}</p>
 
-        {/* 🕒 TIME */}
-        {/* 🏟️ SPORTS ICONS */}
-        <div className="flex gap-3 text-base pt-1">
-          {sports.includes("football") && "⚽"}
-          {sports.includes("cricket") && "🏏"}
-          {sports.includes("badminton") && "🏸"}
-          {sports.includes("volleyball") && "🏐"}
-        </div>
 
         {/* 💰 PRICE */}
-        <div className="flex justify-between items-center mt-1">
-          <p className=" font-sans font-semibold text-black text-sm">₹{turf.price}
+        <div className="flex justify-between items-center mt-4">
+          <p className=" font-sans font-semibold text-black text-sm pl-1">₹{turf.price}
             <span className="text-gray-700 text-sm font-medium font-sans"
           > / hr</span></p>
           <button 
-            className="bg-green-600 text-white px-3 py-1 rounded text-xs mr-1 font-sans">
+            className="bg-green-600 text-white px-2 py-1 rounded text-xs mr-1 font-sans">
             Book
           </button>
         </div>
