@@ -76,7 +76,14 @@ const getToday = () => {
 export default function Page() {
   const { id } = useParams();
   const router = useRouter();
+
   const { user } = useUser();
+
+useEffect(() => {
+  if (!user) {
+    router.push("/login");
+  }
+}, [user]);
 
   const [turf, setTurf] = useState<Turf | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -207,7 +214,13 @@ useEffect(() => {
     };
   }, [id, date]);
 
-  if (!turf || loading) return <div className="p-5">Loading...</div>;
+   if (!user) {
+  router.push("/login");
+  return null;
+}
+
+   if (!turf || loading) return <div className="p-5">Loading...</div>;
+
 
   const slots = buildSlots(turf);
 
@@ -550,12 +563,21 @@ if (error) {
 
 
 
-        <button
+<div
           onClick={book}
-          className="mt-4 w-full border py-3 rounded-full"
+          className="mt-4 w-full border py-2 px-4 rounded-lg bg-green-900 text-xl text-white font-normal font-sans"
         >
-          Pay ₹{amount}
-        </button>
+    <div className="flex flex-row justify-between items-center">
+        <div>
+          <p className="text-white text-sm font-sans font-medium">₹{amount}.00</p>
+          <p className="text-gray-200 text-sm font-sans font-light">Total</p>
+        </div>
+        <div>
+            <p className="text-white text-base font-sans font-normal">Proceed To Pay</p>
+        </div>
+    </div>
+
+</div>
       </div>
 
       {/* DESKTOP */}
