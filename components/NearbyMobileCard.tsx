@@ -52,14 +52,18 @@ export default function NearbyMobileCard({ turf, router, distance }: Props) {
         <div>
           <div className="flex justify-between items-center text-xs text-gray-600">
             <div className="flex items-center gap-1">
-              ⭐ <span className="font-normal text-black font-sans">{avg.toFixed(1)}</span>
+              <div className="flex flex-row">
+              <img src="/icons/star.png" className="h-3.5 pr-0.5" /> 
+              <p className="font-normal text-black font-sans">{avg.toFixed(1)}</p>
+              </div>
               <span className="font-normal text-black ml-1 font-sans">({turf.reviews?.length || 0})</span>
             </div>
 
             {distance && (
-              <span className="border border-black px-2 py-0.5 rounded-full text-xs mt-1 font-sans font-medium text-black">
-                📍 {distance.toFixed(1)} km
-              </span>
+               
+              <p className="border border-black px-2 py-0.5 rounded-full text-xs mt-1 font-sans font-medium text-black flex flex-row items-center">
+                <img src="/icons/direction.png" className="h-3 pr-0.5" /><span className="pl-1.5"> {distance.toFixed(1)} km</span>
+              </p>
             )}
           </div>
 
