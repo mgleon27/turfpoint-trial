@@ -114,6 +114,17 @@ export default function TurfDetailsPage() {
     );
   }
 
+  const openMap = () => {
+  const url = `https://www.google.com/maps/search/?api=1&query=${turf.map_lat},${turf.map_lng}`;
+  window.open(url, "_blank");
+};
+
+const getDirections = () => {
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${turf.map_lat},${turf.map_lng}`;
+  window.open(url, "_blank");
+};
+
+
   const avg =
     turf.reviews?.length
       ? turf.reviews.reduce((s, r) => s + r.rating, 0) /
@@ -189,18 +200,26 @@ export default function TurfDetailsPage() {
           <h2 className="text-lg text-black font-semibold mt-2">₹{turf.price}<span className=" text-gray-800 font-medium">/ 60 minutes</span></h2>
           </div>
 
-          <div className="flex justify-center">
-          <button className="bg-green-600 px-5 py-2 text-lg text-white font-medium rounded-full mt-3 mb-1"
-          onClick={() => {
-  if (!user) {
-    setShowLoginPopup(true);
-  } else {
-    router.push(`/turf/${turf.id}/book`);
-  }
-}}>
-            Check Slot Availability
+
+
+
+          <div className="flex justify-center gap-4">
+
+          <button onClick={openMap}
+           className="bg-white border-2 border-green-700 px-5 py-1 text-lg text-green-900 font-medium font-sans rounded-full mt-3 mb-1">
+            Locate on Map
           </button>
+
+
+          <button onClick={getDirections} 
+          className="bg-green-600 px-7 py-1 text-lg text-white font-medium rounded-full mt-3 mb-1">
+            Get Direction
+          </button>
+
           </div>
+
+
+
 
           {/* DETAILS */}
           <div className="mt-4 space-y-2 text-sm">

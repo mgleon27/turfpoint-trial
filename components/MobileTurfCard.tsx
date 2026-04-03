@@ -57,10 +57,10 @@ export default function MobileTurfCard({ turf, router }: Props) {
         
 
         {/* Name */}
-        <h2 className="font-semibold text-[15px] text-black pl-1 font-sans">{turf.name}</h2>
+        <h2 className="font-semibold text-[15px] text-black pl-1 font-sans mb-1">{turf.name}</h2>
 
         {/* 📍 LOCATION */}
-        <div className="flex flex-row">
+        <div className="flex flex-row mb-1">
         <img src="/icons/locationtop.png" className="h-4 pr-0.5" />
         <p className="text-xs font-normal font-sans text-gray-700">{turf.locality}</p>
         </div>  

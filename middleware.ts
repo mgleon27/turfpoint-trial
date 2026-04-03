@@ -2,15 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const accessToken = request.cookies.get("sb-access-token")?.value;
-
   const pathname = request.nextUrl.pathname;
 
-  // Protect: /turf/[id]/book
+  // Only protect booking page
   const isProtectedRoute = pathname.includes("/book");
 
-  if (!accessToken && isProtectedRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (isProtectedRoute) {
+    // Allow request, frontend will handle auth
+    return NextResponse.next();
   }
 
   return NextResponse.next();

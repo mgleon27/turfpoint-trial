@@ -77,7 +77,16 @@ export default function Page() {
   const { id } = useParams();
   const router = useRouter();
 
-  const { user } = useUser();
+  const { user, loadingUser } = useUser();
+
+if (loadingUser) {
+  return <div className="p-5">Loading...</div>;
+}
+
+if (!user) {
+  router.push("/login");
+  return null;
+}
 
   const [turf, setTurf] = useState<Turf | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -272,7 +281,15 @@ useEffect(() => {
   return;
 }
     
-    if (!user) return router.push("/login");
+    if (loadingUser) {
+  alert("Please wait...");
+  return;
+}
+
+if (!user) {
+  router.push("/login");
+  return;
+}
 
     const keys = Array.from(selected);
 
@@ -429,16 +446,16 @@ if (error) {
               setDate(d.value);
               setShowDatePicker(false); // ✅ close after select
             }}
-            className={`min-w-[80px] px-3 py-2 rounded-lg text-center cursor-pointer border
+            className={`min-w-[75px] p-1 rounded-lg text-center cursor-pointer border
             
             ${date === d.value
               ? "bg-green-600 text-white border-green-600"
-              : "bg-white"
+              : "bg-white text-black"
             }
             `}
           >
-            <div className="text-xs font-semibold">{d.label}</div>
-            <div className="text-[10px] mt-1">
+            <div className="text-xs font-medium font-sans">{d.label}</div>
+            <div className="text-[10px] mt-1 font-sans font-medium">
               {d.value.split("-").slice(1).join("/")}
             </div>
           </div>
@@ -555,7 +572,7 @@ if (error) {
 
 <div
           onClick={book}
-          className="mt-4 w-full border py-2 px-4 rounded-lg bg-green-900 text-xl text-white font-normal font-sans"
+          className="mt-4 w-full border py-2 px-4 rounded-lg bg-green-700 text-xl text-white font-normal font-sans"
         >
     <div className="flex flex-row justify-between items-center">
         <div>
