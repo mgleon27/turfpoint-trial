@@ -77,11 +77,7 @@ export default function Page() {
   const { id } = useParams();
   const router = useRouter();
 
-  const { user, loadingUser } = useUser();
-
-if (loadingUser) {
-  return <div className="p-5">Loading...</div>;
-}
+  const { user} = useUser();
 
 if (!user) {
   router.push("/login");
@@ -281,10 +277,6 @@ useEffect(() => {
   return;
 }
     
-    if (loadingUser) {
-  alert("Please wait...");
-  return;
-}
 
 if (!user) {
   router.push("/login");
