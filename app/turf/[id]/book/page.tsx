@@ -3,7 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { useUser } from "@/lib/userContext";
+import {useUser} from "@/lib/userContext";
+
+import AuthGuard from "@/components/AuthGuard";
+
 
 // ================= TYPES =================
 type Turf = {
@@ -77,12 +80,7 @@ export default function Page() {
   const { id } = useParams();
   const router = useRouter();
 
-  const { user} = useUser();
-
-if (!user) {
-  router.push("/login");
-  return null;
-}
+  const { user } = useUser();
 
   const [turf, setTurf] = useState<Turf | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -101,6 +99,8 @@ const setDate = (newDate: string) => {
 
 
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  
 
   useEffect(() => {
   const interval = setInterval(() => {
@@ -276,12 +276,8 @@ useEffect(() => {
   alert("Please select atleast one slot to continue");
   return;
 }
-    
 
-if (!user) {
-  router.push("/login");
-  return;
-}
+  
 
     const keys = Array.from(selected);
 
@@ -372,11 +368,14 @@ if (error) {
   return { value, label };
 });
 
+
+
   return (
+    <AuthGuard>
     <div className="min-h-screen bg-white">
 
       {/* MOBILE */}
-      <div className="md:hidden p-4">
+      <div className="md:hidden p-4 pb-28">
 
         <div className="flex items-center gap-3 mb-4">
           <img src="/icons/back.png" className="w-4 h-4"
@@ -495,7 +494,22 @@ if (error) {
           })}
         </div>
 
-        <p className="mt-6 font-sans text-black text-base font-medium">Selected: {selected.size} hrs </p>
+        <p className="mt-6 font-sans text-black text-base font-medium">
+  Selected:
+  <span className="ml-2">
+    {Array.from(selected).map((k) => {
+      const s = slots.find((x) => x.key === k);
+      return (
+        <span
+          key={k}
+          className="inline-block mr-2 mt-1 px-3 py-1 bg-gray-200 rounded-full text-sm"
+        >
+          {s?.label}
+        </span>
+      );
+    })}
+  </span>
+</p>
 
 
 
@@ -562,21 +576,38 @@ if (error) {
 
 
 
-<div
-          onClick={book}
-          className="mt-4 w-full border py-2 px-4 rounded-lg bg-green-700 text-xl text-white font-normal font-sans"
-        >
-    <div className="flex flex-row justify-between items-center">
-        <div>
-          <p className="text-white text-sm font-sans font-medium">₹{amount}.00</p>
-          <p className="text-gray-200 text-sm font-sans font-light">Total</p>
-        </div>
-        <div>
-            <p className="text-white text-base font-sans font-normal">Proceed To Pay</p>
-        </div>
+{/* STICKY FOOTER BUTTON */}
+<div className="fixed bottom-0 left-0 w-full bg-white border-t p-3 md:hidden">
+
+  <div
+    onClick={selected.size > 0 ? book : undefined}
+    className={`w-full py-3 px-4 rounded-xl flex justify-between items-center
+    ${selected.size > 0 
+      ? "bg-green-700 text-white cursor-pointer" 
+      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }
+    `}
+  >
+    <div>
+      <p className="text-sm font-medium">
+        ₹{amount}.00
+      </p>
+      <p className="text-xs">
+        Total
+      </p>
     </div>
 
+    <div>
+      <p className="text-base font-medium">
+        Proceed To Pay
+      </p>
+    </div>
+
+  </div>
 </div>
+
+
+
       </div>
 
       {/* DESKTOP */}
@@ -736,5 +767,6 @@ if (error) {
   </div>
 </div>
     </div>
+    </AuthGuard>
   );
 }

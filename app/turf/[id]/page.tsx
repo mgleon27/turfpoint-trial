@@ -6,6 +6,8 @@ import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
 import MobileHeader from "@/components/MobileHeader";
 
+import UserOnly from"@/components/UserOnly";
+
 import {useUser} from "@/lib/userContext";
 
 // ================= TYPES =================
@@ -64,6 +66,12 @@ export default function TurfDetailsPage() {
   const [activeImg, setActiveImg] = useState<string>("");
   const [reviews, setReviews] = useState<Review[]>([]);
 
+
+  const [isFav, setIsFav] = useState<boolean | null>(null);
+  const [favLoading, setFavLoading] = useState(false);
+
+
+
   const { user } = useUser();
   const [showLoginPopup, setShowLoginPopup] = useState(false);
 
@@ -105,6 +113,36 @@ export default function TurfDetailsPage() {
 
     load();
   }, [id]);
+
+
+
+
+  useEffect(() => {
+  if (!user || !turf) return;
+
+  const checkFav = async () => {
+    const { data, error } = await supabase
+      .from("favorites")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("turf_id", turf.id)
+      .maybeSingle(); // ✅ IMPORTANT
+
+
+    if (error) {
+      console.log(error);
+      setIsFav(false);
+      return;
+    }
+
+    setIsFav(!!data); // ✅ true if exists
+  };
+
+  checkFav();
+}, [user, turf]);
+
+
+
 
   if (!turf) {
     return (
@@ -148,6 +186,43 @@ const getDirections = () => {
     },
   ].filter(Boolean) as Amenity[];
 
+
+const toggleFavourite = async () => {
+  if (!user) {
+    setShowLoginPopup(true);
+    return;
+  }
+
+  if (favLoading || !turf) return;
+
+  setFavLoading(true);
+
+  try {
+    if (isFav) {
+      await supabase
+        .from("favorites")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("turf_id", turf.id);
+
+      setIsFav(false);
+    } else {
+      await supabase.from("favorites").insert({
+        user_id: user.id,
+        turf_id: turf.id,
+      });
+
+      setIsFav(true);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+
+  setFavLoading(false);
+};
+
+
+
   return (
     <div className="bg-white min-h-screen">
 
@@ -161,11 +236,11 @@ const getDirections = () => {
           <div  className="flex gap-3 mb-4 items-center">
             <img src="/icons/back.png" className="w-4 h-4"
             onClick={() => router.back()} />
-            <span className="text-xl text-black">Turf Details</span>
+            <span className="text-xl text-black font-sans">Turf Details</span>
           </div>
 
           {/* IMAGE */}
-          <img src={activeImg || "/turf.jpg"} className="w-full h-[200px] rounded-xl object-cover" />
+          <img src={activeImg || "/turf.jpg"} className="w-full h-[220px] rounded-xl object-cover" />
 
           <div className="flex gap-2 mt-2 overflow-x-auto ">
             {images.map((img, i) => (
@@ -178,26 +253,26 @@ const getDirections = () => {
           <div className="relative mt-4">
 
               {/* CENTER NAME */}
-              <h1 className="text-xl text-black font-semibold text-center">
+              <h1 className="text-2xl text-black font-semibold text-center font-sans">
                  {turf.name}
               </h1>
 
               {/* RIGHT SIDE RATING */}
               <div className="absolute right-0 top-0 text-sm flex items-center gap-2 mr-2">
-                  <span className="bg-yellow-300 text-black rounded-md pl-2 pr-3 py-1">
-                  ⭐ {avg.toFixed(1)}
-                  </span>
-                 <span className="text-lg text-center text-black">({turf.reviews?.length || 0})</span>
+                  <div className="bg-yellow-500 text-white rounded-md pl-2 pr-3 py-0 flex flex-row items-center text-center font-sans">
+                  <img src="/icons/star-white.png" className="w-4 h-4" /><p className="mt-0 pl-1"> {avg.toFixed(1)}</p>
+                  </div>
+                 <span className="text-lg text-center text-black font-sans">({turf.reviews?.length || 0})</span>
               </div>
 
 </div>
 
           <div className="flex justify-center mt-3">
-          <p className="text-sm text-gray-800">{turf.address}</p>
+          <p className="text-[16px] text-gray-800 font-sans">{turf.address}</p>
           </div>
 
           <div className="flex justify-center mt-2">
-          <h2 className="text-lg text-black font-semibold mt-2">₹{turf.price}<span className=" text-gray-800 font-medium">/ 60 minutes</span></h2>
+          <h2 className="text-lg text-black font-semibold mt-2 font-sans">₹{turf.price}<span className=" text-gray-800 font-medium font-sans">/ 60 minutes</span></h2>
           </div>
 
 
@@ -206,15 +281,38 @@ const getDirections = () => {
           <div className="flex justify-center gap-4">
 
           <button onClick={openMap}
-           className="bg-white border-2 border-green-700 px-5 py-1 text-lg text-green-900 font-medium font-sans rounded-full mt-3 mb-1">
+           className="bg-white border-2 border-green-700 px-4 py-1 text-base text-green-900 font-medium font-sans rounded-full mt-3 mb-1 flex flex-row items-center gap-2">
+            <img src="/icons/direction.png" className="w-5 h-5" />
             Locate on Map
           </button>
 
 
-          <button onClick={getDirections} 
-          className="bg-green-600 px-7 py-1 text-lg text-white font-medium rounded-full mt-3 mb-1">
-            Get Direction
-          </button>
+<UserOnly>
+          <button
+  onClick={toggleFavourite}
+  disabled={isFav === null || favLoading}
+  className={`px-4 py-1 font-sans text-base font-medium rounded-full mt-3 mb-1 flex flex-row items-center gap-2
+  ${
+    isFav === null
+      ? "bg-gray-300 text-gray-500"
+      : isFav
+      ? "bg-red-500 text-white"
+      : "bg-green-600 text-white"
+  }`}
+>
+  {isFav === null ? (
+    "Loading..."
+  ) : (
+    <>
+      <img src="/icons/heart.png" className="w-5 h-5" />
+      {isFav ? "Favorites" : "Add to Favourite"}
+    </>
+  )}
+</button>  
+</UserOnly>
+
+
+
 
           </div>
 
@@ -225,13 +323,13 @@ const getDirections = () => {
           <div className="mt-4 space-y-2 text-sm">
 
             <div className="flex justify-between pt-1">
-                 <div className="flex gap-3 text-base text-black font-medium ml-2">
+                 <div className="flex gap-3 text-base font-sans text-black font-medium ml-2">
                    <img src="/icons/timing.png" className="w-5 h-5" />
                    {turf.is_24_7 ? "24/7  Available" : `${turf.opening_time} - ${turf.closing_time}`}
                  </div>
 
 
-                  <div className="flex gap-2 text-base text-black font-medium pr-6">
+                  <div className="flex gap-2 text-base font-sans text-black font-medium pr-6">
                    <img src="/icons/location.png" className="w-5 h-5" />
                    {turf.locality}
                  </div>
@@ -239,7 +337,7 @@ const getDirections = () => {
 
 
                  {turf.area_sqm && (
-            <div className="flex gap-3 text-base text-black font-medium items-center mt-4 ml-2">
+            <div className="flex gap-3 text-base font-sans text-black font-medium items-center mt-4 ml-2">
                 <img src="/icons/area.png" className="w-4 h-4" />
                 {turf.area_sqm} sq.m
             </div>
@@ -249,14 +347,14 @@ const getDirections = () => {
           <hr className="my-4" />
 
           {/* SPORTS */}
-          <h2 className="font-semibold text-black text-xl pb-6 pt-1">
+          <h2 className="font-semibold font-sans text-black text-xl pb-6 pt-1">
             Sports Provided
           </h2>
 
           <div className="grid grid-cols-2 gap-5 ml-5">
             
             {sports.map((s, i) => (
-              <div key={i} className="flex gap-2 items-center text-black text-base">
+              <div key={i} className="flex font-sans gap-2 items-center text-black text-base">
                 <img src={`/icons/${s}.png`} className="w-6 h-6" />
                 {s}
               </div>
@@ -266,28 +364,28 @@ const getDirections = () => {
           <hr className="my-4 mt-7" />
 
           {/* AMENITIES */}
-          <h2 className="font-semibold text-black text-xl pb-6 pt-1">
+          <h2 className="font-semibold font-sans text-black text-xl pb-6 pt-1">
             Amenities
           </h2>
 
-          <div className="grid grid-cols-4 gap-4 mb-10">
+          <div className="grid grid-cols-4 gap-4 font-sans mb-10">
             {amenities.map((a, i) => (
               <div key={i} className="text-center ">
                 <img src={a.icon} className="w-8 h-8 mx-auto" />
-                <p className="text-base text-black pt-2">{a.label}</p>
+                <p className="text-base text-black font-sans pt-2">{a.label}</p>
               </div>
             ))}
           </div>
 
           {/* REVIEWS */}
 <div className="flex justify-between items-center mt-6">
-  <h2 className="font-semibold text-black text-xl">Reviews</h2>
+  <h2 className="font-semibold font-sans text-black text-xl">Reviews</h2>
 
   <p className="items-center">
-    <span className="bg-yellow-300 rounded-md pl-2 pr-3 py-1 mr-2 text-black">
+    <span className="bg-yellow-300 rounded-md font-sans pl-2 pr-3 py-1 mr-2 text-black">
       ⭐ {avg.toFixed(1)}
     </span>
-    <span className="text-lg text-black">
+    <span className="text-lg text-black font-sans">
       ({turf.reviews?.length || 0})</span>
   </p>
 </div>
@@ -304,13 +402,13 @@ const getDirections = () => {
         className="min-w-[200px] h-[200px] border rounded-xl p-3 flex flex-col justify-between"
       >
         {/* NAME */}
-        <p className="text-sm text-black font-semibold">
+        <p className="text-sm text-black font-semibold font-sans">
           {r.profiles?.full_name || "User"}
         </p>
 
         {/* IMAGES */}
         {imgs.length > 0 && (
-          <div className="flex gap-2 mt-2">
+          <div className="flex gap-2 mt-2 font-sans">
             {imgs.slice(0, 2).map((img, idx) => (
               <img
                 key={idx}
@@ -320,7 +418,7 @@ const getDirections = () => {
             ))}
 
             {imgs.length > 2 && (
-              <div className="w-14 h-14 flex items-center justify-center text-black text-xs bg-gray-200 rounded">
+              <div className="w-14 h-14 font-sans flex items-center justify-center text-black text-xs bg-gray-200 rounded">
                 +{imgs.length - 2}
               </div>
             )}
@@ -328,12 +426,12 @@ const getDirections = () => {
         )}
 
         {/* COMMENT */}
-        <p className="text-xs text-gray-700 line-clamp-3 mt-2">
+        <p className="text-xs font-sans text-gray-700 line-clamp-3 mt-2">
           {r.comment || "No review"}
         </p>
 
         {/* VIEW MORE */}
-        <div className="text-right text-xs text-gray-400">
+        <div className="text-right text-xs text-gray-400 font-sans">
           
         </div>
       </div>
@@ -341,13 +439,13 @@ const getDirections = () => {
   })}
 
   {/* VIEW ALL CARD */}
-  <div className="min-w-[80px] flex items-center justify-center text-black text-xl">
+  <div className="min-w-[80px] flex items-center font-sans justify-center text-black text-xl">
     →
   </div>
 
 </div>
 
-          <button className="w-full bg-green-600 text-lg text-white py-3 rounded-full mt-5"
+          <button className="w-full bg-green-600 text-lg font-sans text-white py-3 rounded-full mt-5"
           onClick={() => {
   if (!user) {
     setShowLoginPopup(true);

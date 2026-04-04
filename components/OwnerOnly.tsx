@@ -11,24 +11,40 @@ export default function OwnerOnly({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
 
+    // ❌ Not logged in
     if (!user) {
       router.replace("/login");
       return;
     }
 
-    if (profile?.role !== "owner" || !profile?.owner_approved) {
+    // ❌ Not owner
+    if (profile?.role !== "owner") {
       router.replace("/");
+      return;
     }
+
+    // ⏳ Owner but not approved
+    if (!profile?.owner_approved) {
+      router.replace("/owner-pending"); // 🔥 NEW
+      return;
+    }
+
   }, [user, profile, loading, router]);
 
-  if (
-    loading ||
-    !user ||
-    profile?.role !== "owner" ||
-    !profile?.owner_approved
-  ) {
+  // 🔥 Better loading UX
+  if (loading || !user || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  // ❌ Block render until valid
+  if (profile.role !== "owner" || !profile.owner_approved) {
     return null;
   }
 
+  // ✅ Allowed
   return <>{children}</>;
 }
