@@ -11,13 +11,16 @@ export default function UserOnly({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (loading) return;
 
-    if (profile?.role === "owner" && profile?.owner_approved) {
-      router.replace("/owner");
+    if (profile?.role === "owner") {
+      if (profile.owner_approved) {
+        router.replace("/owner");
+      } else {
+        router.replace("/owner-pending");
+      }
     }
   }, [profile, loading, router]);
 
-  // 🔒 block UI
-  if (!loading && profile?.role === "owner" && profile?.owner_approved) {
+  if (!loading && profile?.role === "owner") {
     return null;
   }
 

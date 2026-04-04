@@ -10,7 +10,7 @@ import Header from "@/components/Header";
 
 import { useUser } from "@/lib/userContext";
 
-import ApprovedUserOnly from "@/components/ApprovedUserOnly";
+import UserOnly from "@/components/UserOnly";
 
 // ✅ MOBILE COMPONENTS
 import MobileHeader from "@/components/MobileHeader";
@@ -175,7 +175,7 @@ useEffect(() => {
 
   // ================= UI =================
   return (
-    <ApprovedUserOnly>
+    <UserOnly>
     <>
       {/* ================= 📱 MOBILE ================= */}
       <div className="md:hidden bg-white min-h-screen">
@@ -345,7 +345,7 @@ useEffect(() => {
   </div>
 )}
     </>
-    </ApprovedUserOnly>
+    </UserOnly>
   );
 }
 

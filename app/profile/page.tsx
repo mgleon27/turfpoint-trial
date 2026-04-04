@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import { useLocation } from "@/lib/locationContext";
 import { useUser } from "@/lib/userContext";
 
+import UserOnly from "@/components/UserOnly";
+
+
 import Header from "@/components/Header";
 import dynamic from "next/dynamic";
 
@@ -62,6 +65,8 @@ export default function ProfilePage() {
   }
 
   return (
+    <UserOnly>
+
     <div className="bg-white min-h-screen">
 
       {/* ================= MOBILE ================= */}
@@ -338,6 +343,7 @@ export default function ProfilePage() {
       )}
 
     </div>
+    </UserOnly>
   );
 }
 
