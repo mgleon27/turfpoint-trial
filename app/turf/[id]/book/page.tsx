@@ -272,14 +272,19 @@ useEffect(() => {
 
   // ================= BOOK =================
   const book = async () => {
-    if (selected.size === 0) {
-  alert("Please select atleast one slot to continue");
-  return;
-}
+  // ✅ ADD THIS
+  if (!user) {
+    alert("Please login to continue");
+    router.push("/login");
+    return;
+  }
 
-  
+  if (selected.size === 0) {
+    alert("Please select atleast one slot to continue");
+    return;
+  }
 
-    const keys = Array.from(selected);
+  const keys = Array.from(selected);
 
     const { data: latest } = await supabase
       .from("bookings")
