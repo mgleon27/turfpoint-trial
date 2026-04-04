@@ -815,9 +815,9 @@ if (error) {
             </div>
 
             {/* STATUS */}
-            <div className="text-sm font-sans mt-1" 
+            <div 
 
-            className={`
+            className={`text-sm font-sans mt-1
             ${s.status === "booked" && "text-white"}
             ${s.status === "available" && "text-green-700 "}
             ${isSelected && "text-white"}`}>
