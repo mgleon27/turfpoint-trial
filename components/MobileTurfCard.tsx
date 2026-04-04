@@ -37,7 +37,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
       {/* IMAGE */}
       <img
         src={turf.image_url || "/turf.jpg"}
-        className="h-32 w-full object-cover rounded-lg"
+        className="h-30 w-full object-cover rounded-lg"
       />
 
       <div>
@@ -76,17 +76,15 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* PRICE + BUTTON */}
         <div className="flex justify-between items-center mt-1">
-          <p className="font-semibold text-black text-sm font-sans">₹{turf.price}
+          <p className="font-semibold text-black text-base font-sans">₹{turf.price}
             <span className="text-gray-700 text-sm font-medium font-sans"
           > / hr</span></p>
-          <button 
+          <img
           onClick={(e) => {
               e.stopPropagation();
               router.push(`/turf/${turf.id}`);
-            }}
-            className="bg-green-600 text-white px-3 py-1 rounded text-xs mr-1 font-sans mb-1">
-            Book
-          </button>
+            }} src="/icons/open.png"
+            className="h-8 pr-1 pb-1" />
         </div>
 
       </div>

@@ -353,24 +353,30 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
 
         <div>
           <div className="flex justify-between items-center">
-            <h2 className="font-semibold text-sm text-black font-sans">
+            <h2 className="font-semibold text-base text-black font-sans">
               {booking.turfs?.name}
             </h2>
 
-            <span className="text-xs text-black font-sans">
-              📍 {booking.turfs?.locality}
+            <span className="text-sm text-black font-sans flex flex-row">
+              <img src="/icons/locationtop.png" className="h-4 pr-0.5" />{booking.turfs?.locality}
             </span>
           </div>
 
-          <p className="text-xs text-black mt-1 font-sans">📅 {booking.booking_date}</p>
-          <p className="text-xs text-black font-sans">
-            ⏰ {booking.start_time} - {booking.end_time}
+          <p className="text-sm text-black mt-1 font-sans font-medium flex flex-row items-center text-center">
+            <img src="/icons/calendar.png" className="h-4 pr-0.5" />
+           {booking.booking_date}</p>
+          <p className="text-sm text-black font-sans font-medium flex flex-row items-center text-center">
+            <img src="/icons/clock.png" className="h-4 pr-0.5" />
+             {booking.start_time} - {booking.end_time}
           </p>
         </div>
 
-        <p className="font-semibold text-sm text-black mt-2 font-sans">
+<div className="flex flex-rows justify-between items-center">
+        <p className="font-semibold text-base text-black mt-1 font-sans ">
           ₹{booking.price} <span className="font-medium text-sm text-gray-700 font-sans"> /hr</span>
         </p>
+        <img src="/icons/ticket.png" className="h-11 -mb-2" />
+</div>        
 
       </div>
     </div>

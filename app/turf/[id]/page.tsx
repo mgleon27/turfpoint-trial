@@ -259,7 +259,7 @@ const toggleFavourite = async () => {
 
               {/* RIGHT SIDE RATING */}
               <div className="absolute right-0 top-0 text-sm flex items-center gap-2 mr-2">
-                  <div className="bg-yellow-500 text-white rounded-md pl-2 pr-3 py-0 flex flex-row items-center text-center font-sans">
+                  <div className="bg-yellow-500 text-white rounded-md pl-2 pr-3 py-0.5 flex flex-row items-center text-center font-sans">
                   <img src="/icons/star-white.png" className="w-4 h-4" /><p className="mt-0 pl-1"> {avg.toFixed(1)}</p>
                   </div>
                  <span className="text-lg text-center text-black font-sans">({turf.reviews?.length || 0})</span>
@@ -381,13 +381,13 @@ const toggleFavourite = async () => {
 <div className="flex justify-between items-center mt-6">
   <h2 className="font-semibold font-sans text-black text-xl">Reviews</h2>
 
-  <p className="items-center">
-    <span className="bg-yellow-300 rounded-md font-sans pl-2 pr-3 py-1 mr-2 text-black">
-      ⭐ {avg.toFixed(1)}
+  <div className="items-center flex flex-row">
+    <span className="bg-yellow-500 rounded-md font-sans pl-2 pr-3 py-0.5 mr-2 text-white flex flex-row items-center text-center font-sans">
+      <img src="/icons/star-white.png" className="h-5 pr-1" />{avg.toFixed(1)}
     </span>
     <span className="text-lg text-black font-sans">
-      ({turf.reviews?.length || 0})</span>
-  </p>
+      ( {turf.reviews?.length || 0} )</span>
+  </div>
 </div>
 
 {/* HORIZONTAL SCROLL */}

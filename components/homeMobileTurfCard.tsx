@@ -77,13 +77,11 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* 💰 PRICE */}
         <div className="flex justify-between items-center mt-4">
-          <p className=" font-sans font-semibold text-black text-sm pl-1">₹{turf.price}
+          <p className=" font-sans font-semibold text-black text-base pl-1">₹{turf.price}
             <span className="text-gray-700 text-sm font-medium font-sans"
           > / hr</span></p>
-          <button 
-            className="bg-green-600 text-white px-2 py-1 rounded text-xs mr-1 font-sans">
-            Book
-          </button>
+          <img src="/icons/open.png" 
+            className="h-8 pr-1 pb-1" />
         </div>
 
       </div>

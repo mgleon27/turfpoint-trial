@@ -123,6 +123,33 @@ export default function AuthPage() {
         )}
 
 
+        <input
+          type="email"
+          placeholder="Email ID"
+          className="border-b p-2 mb-4 outline-none"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="border-b p-2 mb-4 outline-none"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {!isLogin && (
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            className="border-b p-2 mb-4 outline-none"
+          />
+        )}
+
+
+
+
         {!isLogin && (
   <div className="flex mb-4 gap-2">
 
@@ -155,30 +182,6 @@ export default function AuthPage() {
 
 
 
-
-        <input
-          type="email"
-          placeholder="Email ID"
-          className="border-b p-2 mb-4 outline-none"
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-
-
-        <input
-          type="password"
-          placeholder="Password"
-          className="border-b p-2 mb-4 outline-none"
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
-        {!isLogin && (
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            className="border-b p-2 mb-4 outline-none"
-          />
-        )}
 
         {isLogin && (
           <div className="flex justify-between text-sm mb-4">
@@ -253,36 +256,6 @@ export default function AuthPage() {
       )}
 
 
-      {!isLogin && (
-  <div className="flex mb-4 gap-2">
-
-    <button
-      type="button"
-      onClick={() => setRole("user")}
-      className={`flex-1 py-2 rounded-lg border 
-      ${role === "user" 
-        ? "bg-green-500 text-white border-green-500" 
-        : "bg-white text-black"}
-      `}
-    >
-      User
-    </button>
-
-    <button
-      type="button"
-      onClick={() => setRole("owner")}
-      className={`flex-1 py-2 rounded-lg border 
-      ${role === "owner" 
-        ? "bg-green-500 text-white border-green-500" 
-        : "bg-white text-black"}
-      `}
-    >
-      Owner
-    </button>
-
-  </div>
-)}
-
       <input
         type="email"
         placeholder="Email ID"
@@ -304,6 +277,37 @@ export default function AuthPage() {
           className="border-b p-2 mb-4 outline-none"
         />
       )}
+
+      {!isLogin && (
+  <div className="flex mb-4 gap-2">
+
+    <button
+      type="button"
+      onClick={() => setRole("user")}
+      className={`flex-1 py-1.5 rounded-lg border 
+      ${role === "user" 
+        ? "bg-green-500 text-white border-green-500 shadow-lg/20 font-semibold font-sans " 
+        : "bg-white border-gray-400 text-black font-sans"}
+      `}
+    >
+      User
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setRole("owner")}
+      className={`flex-1 py-1.5 rounded-lg border 
+      ${role === "owner" 
+        ? "bg-green-500 text-white border-green-500 shadow-lg/20 font-semibold font-sans" 
+        : "bg-white border-gray-400 text-black font-sans"}
+      `}
+    >
+      Owner
+    </button>
+
+  </div>
+)}
+
 
       {isLogin && (
         <div className="flex justify-between text-sm mb-4">
