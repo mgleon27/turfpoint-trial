@@ -625,43 +625,131 @@ if (error) {
     <div>
       {/* HEADER */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => router.back()}>←</button>
+        <img src="/icons/back.png" onClick={() => router.back()}
+        className="h-5" />
         <h1 className="text-lg font-medium">Book Slot</h1>
       </div>
 
       {/* TURF DETAILS */}
-      <h2 className="text-xl font-semibold">{turf.name}</h2>
+      <div className="border border-gray-400 rounded-2xl px-4 py-1">
+      <div className="flex flex-row items-center text-center justify-between">
+      <h2 className="text-xl font-semibold font-sans">{turf.name}</h2>
 
-      <div className="mt-2 text-gray-600 text-sm leading-5">
+      <h1 className="mt-1 text-gray-600 text-sm font-sans leading-5 flex flex-row">
+        <img src="/icons/locationtop.png" className="h-5 mr-1 -mt-0.5" />
         {turf.locality}
+      </h1>
       </div>
 
-      <p className="mt-4 text-lg font-semibold">
+      <div className="mt-1 text-gray-600 text-sm font-sans leading-5">
+        {turf.address.split(",").map((line, i) => (
+            <div key={i}>{line.trim()}</div>
+))}
+      </div>
+
+      <p className="mt-2 text-lg font-semibold font-sans">
         ₹{turf.price} <span className="text-gray-500 text-base">/ hr</span>
       </p>
     </div>
+    </div>
+
+
+
+
+
+    <div className="mt-2 border border-gray-300 rounded-2xl px-4 py-2 ">
+
+  {/* NAME */}
+  <div className="flex flex-col">
+    <p className="text-sm text-gray-500 font-medium">Name</p>
+    <p className="text-sm text-black font-medium">
+      {profile?.full_name}
+    </p>
+
+
+    <p className="text-sm text-gray-500 font-medium mt-3">Mobile</p>
+    <p className="text-sm text-black font-medium">
+      +91 xxxxxxxxxx
+    </p>
+  
+
+  {/* EMAIL */}
+  
+    <p className="text-sm text-gray-500 font-medium mt-3">Email</p>
+    <p className="text-sm text-black font-medium">
+      {user?.email}
+    </p>
+
+    
+
+
+    <p className="text-sm text-gray-600 font-normal mt-5">
+      The Booking details will be send to the users email.
+    </p>
+  </div>
+
+</div>
+
+
 
     {/* PAYMENT SECTION */}
     <div>
-      <h3 className="font-medium mb-4 text-lg">
-        Select Payment Method
+      <h3 className="font-medium text-black font-sans mb-2 text-lg mt-3">
+        Payment Summary
       </h3>
 
-      <div className="space-y-3 text-sm">
-        {["UPI Payment", "Debit / Credit Card", "Net Banking", "Turfia Wallet"].map((p) => (
-          <label key={p} className="flex items-center gap-3">
-            <input type="radio" name="payment" />
-            {p}
-          </label>
-        ))}
-      </div>
+<div className="mt-0 border border-gray-500 rounded-2xl p-3">
 
-      <button
-        onClick={book}
-        className="mt-8 w-full border rounded-full py-3 text-lg"
-      >
-        Continue &gt;&gt;
-      </button>
+     <div className="flex flex-row justify-between">
+         <p className="font-sans text-gray-700 text-sm font-normal">Booking amount:</p>
+         <p className="font-sans text-gray-700 text-sm font-normal">₹{total}</p>
+     </div>
+
+     <div className="flex flex-row justify-between mt-3">
+        <p className="font-sans text-gray-600 text-sm font-normal">Taxes & fees</p>
+        <p className="font-sans text-gray-700 text-sm font-normal">₹{selected.size * 10}.00</p>
+     </div>
+<hr className="my-4 border-gray-400 mt-4"/>
+
+     <div className="flex flex-row justify-between mt-2">
+        <p className="font-sans text-black text-base font-medium">To be paid</p>
+        <p className="font-sans text-black text-sm font-medium">₹{amount}.00</p>
+     </div>
+    
+</div>  
+
+
+
+
+      <div className=" mt-2">
+
+  <div
+    onClick={selected.size > 0 ? book : undefined}
+    className={`w-full py-3 px-4 rounded-xl flex justify-between items-center
+    ${selected.size > 0 
+      ? "bg-green-700 text-white cursor-pointer" 
+      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+    }
+    `}
+  >
+    <div>
+      <p className="text-sm font-medium">
+        ₹{amount}.00
+      </p>
+      <p className="text-xs">
+        Total
+      </p>
+    </div>
+
+    <div>
+      <p className="text-base font-medium">
+        Proceed To Pay
+      </p>
+    </div>
+
+  </div>
+</div>
+
     </div>
   </div>
 
@@ -715,9 +803,10 @@ if (error) {
             onClick={() => toggle(s.key)}
             className={`relative border rounded-full px-4 py-2 text-center cursor-pointer
               
-              ${s.status === "timeout" && "bg-gray-100 text-gray-400"}
-              ${s.status === "booked" && "text-red-500"}
-              ${isSelected && "bg-green-200 border-green-500"}
+             ${s.status === "timeout" && "bg-gray-300 text-white"}
+                ${s.status === "booked" && "bg-gray-300 text-white"}
+                ${s.status === "available" && "text-black text-base font-sans font-medium border-2 border-green-800"}
+                ${isSelected && "bg-green-500 text-white border border-gray-200"}
             `}
           >
             {/* TIME */}
@@ -726,7 +815,14 @@ if (error) {
             </div>
 
             {/* STATUS */}
-            <div className="text-xs mt-1">
+            <div className="text-sm font-sans mt-1" 
+
+            className={`
+            ${s.status === "booked" && "text-white"}
+            ${s.status === "available" && "text-green-700 "}
+            ${isSelected && "text-white"}`}>
+
+
               {s.status === "available" && "Available"}
               {s.status === "booked" && "Booked"}
               {s.status === "timeout" && "Timeout"}
@@ -734,9 +830,13 @@ if (error) {
 
             {/* ICON */}
             {s.status === "available" && (
-              <div className="absolute -top-2 -right-2 text-green-600 text-lg">
-                {isSelected ? "✔" : "+"}
-              </div>
+              <div className="absolute -top-2 right-0">
+                    {isSelected ? 
+                    <img src="/icons/tick.png" className="h-5.5 "/> 
+                    : 
+                    <img src="/icons/plus.png" className="h-5.5 "/>
+                    }
+                  </div>
             )}
           </div>
         );
@@ -744,9 +844,9 @@ if (error) {
     </div>
 
     {/* SELECTED + PRICE */}
-    <div className="mt-8">
+    <div className="mt-11">
 
-      <p className="text-lg">
+      <p className="text-lg font-sans font-medium text-black">
         Selected :
         <span className="ml-2">
           {Array.from(selected).map((k) => {
@@ -763,9 +863,7 @@ if (error) {
         </span>
       </p>
 
-      <p className="mt-3 text-lg font-medium">
-        Price : ₹{total}
-      </p>
+
 
     </div>
 

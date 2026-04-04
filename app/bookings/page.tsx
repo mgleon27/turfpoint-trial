@@ -205,10 +205,10 @@ if (loading) {
           
           <button
             onClick={() => setActiveTab("upcoming")}
-            className={`px-12 py-2 rounded-full border ${
+            className={`px-12 py-2 rounded-full border border-gray-300 shadow-lg/30 ${
               activeTab === "upcoming"
-                ? "bg-green-600 text-white"
-                : "bg-white"
+                ? "bg-green-600 text-white font-sans"
+                : "bg-white text-black font-sans"
             }`}
           >
             Upcoming
@@ -216,10 +216,10 @@ if (loading) {
 
           <button
             onClick={() => setActiveTab("completed")}
-            className={`px-12 py-2 rounded-full border ${
+            className={`px-12 py-2 rounded-full border border-gray-300 shadow-lg/30 ${
               activeTab === "completed"
-                ? "bg-green-600 text-white"
-                : "bg-white"
+                ? "bg-green-600 text-white font-sans"
+                : "bg-white text-black font-sans"
             }`}
           >
             Completed
@@ -238,7 +238,7 @@ if (loading) {
           {dataToShow.map((b) => (
             <div
               key={b.id}
-              className="bg-white rounded-xl shadow flex overflow-hidden"
+              className="bg-white rounded-xl shadow-lg/20 flex overflow-hidden border border-gray-300"
             >
 
               {/* IMAGE */}
@@ -254,27 +254,31 @@ if (loading) {
 
                 <div>
                   <div className="flex justify-between items-center">
-                    <h2 className="text-lg font-semibold">
+                    <h2 className="text-lg font-semibold font-sans text-black">
                       {b.turfs?.name}
                     </h2>
 
-                    <span className="text-sm text-gray-500">
-                      📍 {b.turfs?.locality}
+                    <span className="text-sm text-gray-700 flex flex-row font-sans">
+                      <img src="/icons/locationtop.png" className="h-4 mr-1 " /> {b.turfs?.locality}
                     </span>
                   </div>
 
-                  <p className="text-sm mt-2">📅 {b.booking_date}</p>
-                  <p className="text-sm">
-                    ⏰ {b.start_time} - {b.end_time}
-                  </p>
+                  <div className="flex flex-row items-center mt-1">
+                    <img src="/icons/calendar.png" className="h-4 mr-1 " /><p className="text-sm font-sans text-black"> {b.booking_date}</p>
+                  </div> 
+
+
+                  <div className="flex flex-row items-center mt-1">
+                    <img src="/icons/clock.png" className="h-4 mr-1 " /><p className="text-sm font-sans text-black"> {b.start_time} - {b.end_time}</p>
+                  </div>
                 </div>
 
                 <div className="flex justify-between items-center mt-2 mb-2">
-                  <p className="font-semibold">₹{b.price}</p>
+                  <p className="font-semibold font-sans text-black text-base">₹{b.price} 
+                    <span className="font-medium font-sans text-gray-600 text-base"> / hr</span>
+                  </p>
 
-                  <span className="text-white bg-green-500 px-3 py-1 rounded-full text-sm">
-                    {b.status} ✔
-                  </span>
+                  <img src="/icons/ticket.png" className="h-15 mr-1 -mb-7 pb-2 " />
                 </div>
 
               </div>

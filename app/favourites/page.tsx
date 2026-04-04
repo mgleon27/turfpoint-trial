@@ -198,7 +198,7 @@ if (loading) {
 
         {/* TITLE */}
         <h2 className="text-base text-black font-medium font-sans mb-4">
-          Favourites ❤️
+          Favourites 
         </h2>
 
         {/* ❌ NOT LOGGED IN */}
@@ -402,9 +402,9 @@ function MobileFavCard({
           e.stopPropagation();
           onRemove();
         }}
-        className="absolute top-2 right-2 bg-white rounded-full p-1 shadow"
+        className="absolute top-3 right-3 bg-white px-1 rounded-full p-1 shadow"
       >
-        ❤️
+        <img src="/icons/heart-filled.png" className="h-4.5" />
       </button>
 
     </div>
@@ -437,64 +437,67 @@ function TurfCard({
 
       
   return (
-    <div className="bg-white rounded-xl shadow overflow-hidden hover:shadow-lg transition">
+    <div 
+     onClick={() => router.push(`/turf/${turf.id}`)}
+     className="bg-white rounded-xl overflow-hidden shadow-xl/20 transition">
 
       {/* IMAGE */}
       <div className="relative">
         <img
-          src={turf.image_url || "/turf.jpg"}
-          className="h-40 w-full object-cover cursor-pointer"
-          onClick={() => router.push(`/turf/${turf.id}`)}
-        />
+        src={turf.image_url || "/turf.jpg"}
+        className="h-47 w-full object-cover"
+      />
 
         {/* ❤️ ANIMATED BUTTON */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setLiked(false);
-            onRemove();
-          }}
-          className={`absolute top-2 right-2 text-xl transition-transform ${
-            liked ? "scale-100" : "scale-75"
-          }`}
-        >
-          {liked ? "❤️" : "🤍"}
-        </button>
+        onClick={(e) => {
+          e.stopPropagation();
+          onRemove();
+        }}
+        className="absolute top-2 right-2 bg-white px-2 rounded-full p-2 shadow"
+      >
+        <img src="/icons/heart-filled.png" className="h-5" />
+      </button>
       </div>
 
       {/* CONTENT */}
-      <div className="p-3 cursor-pointer" onClick={() => router.push(`/turf/${turf.id}`)}>
+      <div className="p-3">
 
-        <div className="flex justify-between text-sm">
+        <div className="flex justify-between text-sm font-sans">
           <div>
-            <span className="bg-yellow-400 px-3 py-2 rounded text-xs">{avg.toFixed(1)}</span>
-            <span className="ml-2 text-gray-500">{turf.reviews?.length || 0} reviews</span>
+            <span className="bg-yellow-500 px-3 py-2 rounded text-white text-xs font-sans">{avg.toFixed(1)}</span>
+            <span className="ml-2 font-sans text-gray-600">{turf.reviews?.length || 0} reviews</span>
           </div>
-          <span>📍 {turf.locality}</span>
+          <span className="flex flex-row items-center gap-0.5 font-sans text-black text-sm">
+            <img src="/icons/locationtop.png" className="h-4" /> 
+          {turf.locality}
+          </span>
         </div>
 
-        <h2 className="text-lg font-semibold mt-2">{turf.name}</h2>
+        <h2 className="text-lg text-black font-semibold mt-2 font-sans">{turf.name}</h2>
 
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 font-sans">
           {turf.address.split(",").map((l, i) => (
             <div key={i}>{l.trim()}</div>
           ))}
         </div>
 
-        {turf.is_24_7 && <p className="text-sm mt-1">🕒 24/7 Available</p>}
 
-        <div className="flex gap-2 mt-2">
-          {sports.includes("football") && "⚽"}
-          {sports.includes("cricket") && "🏏"}
-          {sports.includes("badminton") && "🏸"}
-          {sports.includes("volleyball") && "🏐"}
+        <div className="flex gap-2 mt-4">
+          {sports.includes("football") && <img src="/icons/football.png" className="h-5 ml-2" /> }
+          {sports.includes("cricket") && <img src="/icons/cricket.png" className="h-5 ml-2" /> }
+          {sports.includes("badminton") && <img src="/icons/badminton.png" className="h-5 ml-2" /> }
+          {sports.includes("volleyball") && <img src="/icons/volleyball.png" className="h-5 ml-2" /> }
         </div>
  
         <div className="flex justify-between items-center mt-3">
-          <p className="text-black font-semibold" >₹{turf.price}/hr</p>
-          <button className="bg-green-500 text-white px-4 py-1 rounded-full">Book Now</button>
+          <p className="text-black font-semibold text-lg font-sans" >₹{turf.price}
+            <span className="text-gray-600 font-medium text-base font-sans"> /hr</span>
+            </p>
+          <img src="/icons/open.png" className="h-7" />
         </div>
-        </div>
+        
+      </div>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export default function Header({
               </button>
             )}
 
-            <button>☰</button>
+            
           </div>
 
         </div>
@@ -82,7 +82,7 @@ export default function Header({
 
           <NavItem label="Home" path="/" pathname={pathname} router={router} />
           <NavItem label="Nearby You" path="/nearby" pathname={pathname} router={router} />
-          <NavItem label="Sports" path="/sports" pathname={pathname} router={router} />
+          <NavItem label="Venues" path="/sports" pathname={pathname} router={router} />
           <NavItem label="All Turfs" path="/turfs" pathname={pathname} router={router} />
           <NavItem label="Bookings" path="/bookings" pathname={pathname} router={router} />
           <NavItem label="Favourites" path="/favourites" pathname={pathname} router={router} />

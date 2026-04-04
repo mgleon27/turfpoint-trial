@@ -158,21 +158,57 @@ export default function NearbyPage() {
                 );
               }
 
+              const avg =
+    t.reviews?.length
+      ? t.reviews.reduce((s, r) => s + r.rating, 0) / t.reviews.length
+      : 0;
+
+              
+
               return (
-                <div key={t.id} className="bg-white rounded-xl shadow p-3">
+                <div key={t.id}
+                onClick={() => router.push(`/turf/${t.id}`)}
+                 className="bg-white rounded-xl shadow-xl/30 cursor-pointer overflow-hidden p-2">
+
+                  
 
                   <img
                     src={t.image_url || "/turf.jpg"}
-                    className="w-full h-40 object-cover rounded"
+                    className="h-47 w-full object-cover rounded-xl"
                   />
 
-                  <h2 className="mt-2 font-semibold">{t.name}</h2>
+                  <div className="p-3">
 
-                  {distance && (
-                    <p className="text-sm text-gray-500">
-                      📍 {distance.toFixed(1)} km away
-                    </p>
+        <div className="flex justify-between text-sm font-sans">
+          <div>
+            <span className="bg-yellow-500 px-3 py-1 rounded text-white text-xs font-sans">{avg.toFixed(1)}</span>
+            <span className="ml-2 font-sans text-gray-600">{t.reviews?.length || 0} reviews</span>
+          </div>
+          {distance && (
+                    <div className="text-sm text-black font-sans flex items-center gap-2 border-2 border-gray-600 rounded-4xl px-2 py-0.5 ">
+                      <img src="/icons/direction.png" className="h-3" /> 
+                      {distance.toFixed(1)} km
+                    </div>
                   )}
+        </div>
+
+        <h2 className="text-lg text-black font-semibold mt-1 font-sans">{t.name}</h2>
+
+        <div className="text-sm text-gray-600 font-sans">
+          {t.address.split(",").map((l, i) => (
+            <div key={i}>{l.trim()}</div>
+          ))}
+        </div>
+
+ 
+        <div className="flex justify-between items-center mt-3">
+          <p className="text-black font-semibold text-lg font-sans" >₹{t.price}
+            <span className="text-gray-600 font-medium text-base font-sans"> /hr</span>
+            </p>
+          <img src="/icons/open.png" className="h-7" />
+        </div>
+        
+      </div>
 
                 </div>
               );

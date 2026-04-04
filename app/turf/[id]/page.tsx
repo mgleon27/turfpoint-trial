@@ -512,22 +512,33 @@ const toggleFavourite = async () => {
               <div className="flex justify-between items-center gap-5">
 
                 <h1 className="text-2xl font-semibold">{turf.name}</h1>
-                <p className="text-gray-500">
-                  ⭐ {avg.toFixed(1)} ({turf.reviews?.length || 0})
-                </p>
+
+                <div className="flex px-3 py-0.5 rounded-lg items-center bg-yellow-500 gap-1" >
+                  <img src="/icons/star-white.png" className="h-5" /> 
+                  <p className="text-white font-sans text-base">
+                  {avg.toFixed(1)} 
+                  </p>
+
+                </div>
+                <p className="text-gray-600 font-sans text-base -ml-2">({turf.reviews?.length || 0 }) Reviews</p>
+
               </div>
 
-              <div className="text-sm">📍 {turf.locality}</div>
+              <div className="text-base text-black font-sans flex flex-row items-center text-center gap-1">
+                <img src={"/icons/locationtop.png"} className="h-4.5" /> 
+                {turf.locality}
+                </div>
             </div>
 
             {/* ADDRESS */}
-            <div className="text-gray-600">
-              {turf.address}
-            </div>
-
+            <div className="text-gray-600 font-sans font-normal text-base -mt-1">
+            {turf.address.split(",").map((line, i) => (
+            <div key={i}>{line.trim()}</div>
+))}
+    </div>
             {/* TIME */}
-            <div className="flex items-center gap-2 text-sm">
-  <img src="/icons/timing.png" className="w-4 h-4" />
+            <div className="flex items-center gap-2 text-sm text-black font-sans">
+  <img src="/icons/clock.png" className="w-6 h-6" />
 
   {turf.is_24_7
     ? "24/7 Available"
@@ -536,19 +547,19 @@ const toggleFavourite = async () => {
 
             {/* AREA */}
             {turf.area_sqm && (
-  <div className="flex items-center gap-2 text-sm">
+  <div className="flex items-center gap-2 text-sm text-black font-sans ml-1">
     <img src="/icons/area.png" className="w-4 h-4" />
     {turf.area_sqm} sq.m
   </div>
 )}
 
             {/* PRICE */}
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">
-                ₹{turf.price} <span className="text-base font-medium text-gray-600">/ 60 minutes</span>
+            <div className="flex justify-between items-center font-sans">
+              <h2 className="text-xl font-semibold font-sans">
+                ₹{turf.price} <span className="text-base font-medium text-gray-600 font-sans">/ 60 minutes</span>
               </h2>
 
-              <button className="bg-green-500 px-5 py-2 rounded-full text-white border-2 border-green-700"
+              <button className="bg-green-600 px-5 py-2 rounded-full text-white font-medium font-sans border-2 border-green-700"
               onClick={() => {
   if (!user) {
     setShowLoginPopup(true);
@@ -560,9 +571,50 @@ const toggleFavourite = async () => {
               </button>
             </div>
 
+
+
+
+            <div className="flex gap-7">
+
+          <button onClick={openMap}
+           className="bg-white border-2 border-green-700 px-4 py-0.5 text-base text-green-900 font-medium font-sans rounded-full mt-3 mb-1 flex flex-row items-center gap-2">
+            <img src="/icons/direction.png" className="w-5 h-5" />
+            Locate on Map
+          </button>
+
+
+<UserOnly>
+          <button
+  onClick={toggleFavourite}
+  disabled={isFav === null || favLoading}
+  className={`px-4 py-0.5 font-sans text-base font-medium rounded-full mt-3 mb-1 flex flex-row items-center gap-2
+  ${
+    isFav === null
+      ? "bg-gray-300 text-gray-500"
+      : isFav
+      ? "bg-red-500 text-white"
+      : "bg-green-600 text-white"
+  }`}
+>
+  {isFav === null ? (
+    "Loading..."
+  ) : (
+    <>
+      <img src="/icons/heart.png" className="w-5 h-5" />
+      {isFav ? "Favorites" : "Add to Favourite"}
+    </>
+  )}
+</button>  
+</UserOnly>
+          </div>
+
+
+
+
+
             {/* SPORTS */}
             <div>
-              <h1 className="text-xl font-semibold mb-7">
+              <h1 className="text-xl font-sans text-black font-semibold mb-7">
                 Sports
               </h1>
 
@@ -592,7 +644,7 @@ const toggleFavourite = async () => {
 
             {/* AMENITIES */}
             <div>
-              <h2 className="text-xl font-semibold mb-7">
+              <h2 className="text-xl font-sans text-black font-semibold mb-7">
                 Amenities
               </h2>
 
@@ -609,13 +661,26 @@ const toggleFavourite = async () => {
               </div>
             </div>
 
+
             {/* ================= REVIEWS (UPDATED) ================= */}
             <div>
               <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold mb-3 ">
-                Reviews  
-              </h2>
-              <p className=" pr-7"><span className="bg-yellow-200 rounded-xl pl-2 pr-3 py-1 mr-1">⭐  {avg.toFixed(1)}</span>  ({turf.reviews?.length || 0})</p>
+                 <h2 className="text-xl font-sans text-black font-semibold mb-5 ">
+                  Reviews  
+                 </h2>
+
+
+                  <div className="flex items-center gap-2">
+                    <div className="bg-yellow-500 rounded-lg px-2 py-0.5 flex items-center gap-1" >
+                      <img src="/icons/star-white.png" className="h-5" />
+                      <p className="text-white font-sans text-sm">{avg.toFixed(1)}</p>
+                    </div>
+
+                    <p className="text-gray-800 font-sans text-base">({turf.reviews?.length || 0})</p>
+
+                  </div>
+
+
               </div>
 
               <div className="flex gap-4 overflow-x-auto">
@@ -629,12 +694,12 @@ const toggleFavourite = async () => {
                       className="min-w-[220px] border rounded-xl p-3 flex flex-col justify-between"
                     >
                       {/* NAME */}
-                      <p className="text-sm font-semibold mb-2">
+                      <p className="text-sm font-semibold font-sans mb-2">
                         {r.profiles?.full_name || "User"}
                       </p>
 
                       {/* RATING */}
-                      <p className="text-xs text-yellow-600 mb-1">
+                      <p className="text-xs font-sans text-yellow-600 mb-1">
                         ⭐ {r.rating}
                       </p>
 
@@ -650,7 +715,7 @@ const toggleFavourite = async () => {
                           ))}
 
                           {imgs.length > 2 && (
-                            <div className="w-14 h-14 flex items-center justify-center text-xs bg-gray-200 rounded">
+                            <div className="w-14 h-14 flex items-center justify-center font-sans text-xs bg-gray-200 rounded">
                               +{imgs.length - 2}
                             </div>
                           )}
@@ -658,21 +723,15 @@ const toggleFavourite = async () => {
                       )}
 
                       {/* COMMENT */}
-                      <p className="text-xs text-gray-600 line-clamp-4">
+                      <p className="text-xs text-gray-600 font-sans line-clamp-4">
                         {r.comment || "No review"}
                       </p>
 
                       {/* VIEW MORE */}
-                      <div className="text-right text-xs text-gray-400 mt-2">
-                        View more
-                      </div>
+                    
                     </div>
                   );
                 })}
-
-                <div className="min-w-[80px] flex items-center justify-center text-xl">
-                  →
-                </div>
 
               </div>
             </div>

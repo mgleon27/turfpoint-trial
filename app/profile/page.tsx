@@ -236,37 +236,44 @@ export default function ProfilePage() {
 
             <button
               onClick={() => router.push("/profile")}
-              className="bg-gray-100 p-3 rounded"
+              className="bg-gray-100 p-3 rounded shadow-lg/10 border border-gray-300"
             >
               Edit Profile
             </button>
 
             <button
               onClick={() => router.push("/bookings")}
-              className="bg-gray-100 p-3 rounded"
+              className="bg-gray-100 p-3 rounded shadow-lg/10 border border-gray-300"
             >
               My Bookings
             </button>
 
             <button
               onClick={() => router.push("/favourites")}
-              className="bg-gray-100 p-3 rounded"
+              className="bg-gray-100 p-3 rounded shadow-lg/10 border border-gray-300"
             >
               Favourites
             </button>
 
             <button
-              onClick={() => router.push("/help")}
-              className="bg-gray-100 p-3 rounded"
+              onClick={() => router.push("/contact")}
+              className="bg-gray-100 p-3 rounded shadow-lg/10 border border-gray-300"
             >
               Contact Help
             </button>
 
             <button
-              onClick={() => router.push("/faq")}
-              className="bg-gray-100 p-3 rounded"
+              onClick={() => router.push("/terms")}
+              className="bg-gray-100 p-3 rounded shadow-lg/10 border border-gray-300"
             >
-              FAQ(s)
+              Terms & Conditions
+            </button>
+
+            <button
+              onClick={() => router.push("/refund")}
+              className="bg-gray-100 p-3 rounded shadow-lg/10 border border-gray-300"
+            >
+              Payment and Refund
             </button>
 
             <button
@@ -274,7 +281,7 @@ export default function ProfilePage() {
     if (!loggingOut) logout();
   }}
   disabled={loggingOut}
-              className="bg-red-500 text-white p-3 rounded mt-20"
+              className="bg-red-500 text-white p-3 rounded mt-20 shadow-lg/30"
             >
               Logout
             </button>
