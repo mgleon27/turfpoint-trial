@@ -5,21 +5,19 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/userContext";
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, loadingUser } = useUser();
+  const { user, loading } = useUser(); // ✅ FIXED
   const router = useRouter();
 
   useEffect(() => {
-    if (!loadingUser && !user) {
+    if (!loading && !user) {
       router.replace("/login");
     }
-  }, [user, loadingUser, router]);
+  }, [user, loading, router]);
 
-  // ⏳ wait for auth
-  if (loadingUser) {
+  if (loading) {
     return <div className="p-5">Loading...</div>;
   }
 
-  // 🔒 block UI until redirect
   if (!user) {
     return null;
   }
