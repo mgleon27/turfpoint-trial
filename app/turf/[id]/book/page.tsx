@@ -757,28 +757,28 @@ if (error) {
   <div className="w-[70%] p-6 overflow-y-auto">
 
     {/* HEADER */}
-    <div className="flex justify-between items-center mb-6">
-      <h2 className="text-xl font-medium">Select Slots</h2>
+    <div className="flex justify-between items-center mb-8">
+      <h2 className="text-lg font-medium text-black font-sans mr-7">Select Date</h2>
 
 
 
       <div className="overflow-x-auto no-scrollbar">
-  <div className="flex gap-4 w-max">
+  <div className="flex gap-4 w-max ">
 
     {next10Days.map((d) => (
       <div
         key={d.value}
         onClick={() => setDate(d.value)}
-        className={`min-w-[110px] px-4 py-3 rounded-xl text-center cursor-pointer border
+        className={`min-w-[110px] px-3 py-0 rounded-xl text-center cursor-pointer border font-sans shadow-sm
         
         ${date === d.value
-          ? "bg-green-600 text-white border-green-600"
-          : "bg-white"
+          ? "bg-green-600 text-white border-green-700"
+          : "bg-white text-black border-green-700"
         }
         `}
       >
-        <div className="text-sm font-semibold">{d.label}</div>
-        <div className="text-xs mt-1 opacity-80">
+        <div className="text-sm font-medium font-sans">{d.label}</div>
+        <div className="text-xs pb-0.5 opacity-90 font-sans">
           {d.value.split("-").slice(1).join("/")}
         </div>
       </div>
@@ -792,6 +792,7 @@ if (error) {
     </div>
 
     {/* SLOT GRID */}
+    <p className="text-lg font-sans text-black font-medium mb-4 mt-4"> Select Slots</p>
     <div className="grid grid-cols-6 gap-4">
 
       {computed.map((s) => {
@@ -801,10 +802,10 @@ if (error) {
           <div
             key={s.key}
             onClick={() => toggle(s.key)}
-            className={`relative border rounded-full px-4 py-2 text-center cursor-pointer
+            className={`relative border rounded-full px-3 py-1.5 text-center cursor-pointer shadow-lg/20
               
              ${s.status === "timeout" && "bg-gray-300 text-white"}
-                ${s.status === "booked" && "bg-gray-300 text-white"}
+                ${s.status === "booked" && "bg-gray-300 text-white border-gray-400 border-2"}
                 ${s.status === "available" && "text-black text-base font-sans font-medium border-2 border-green-800"}
                 ${isSelected && "bg-green-500 text-white border border-gray-200"}
             `}

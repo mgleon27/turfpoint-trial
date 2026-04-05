@@ -242,7 +242,7 @@ export default function AuthPage() {
       <img src="/logo.png" className="h-10 mb-8 self-center" />
 
       {/* SAME FORM (COPIED — NOT SEPARATE COMPONENT) */}
-      <h1 className="text-2xl font-bold mb-6 text-center">
+      <h1 className="text-2xl font-bold mb-6 text-center text-black font-sans">
         {isLogin ? "Welcome Back!!!" : "Create Account !!!"}
       </h1>
 
@@ -250,7 +250,7 @@ export default function AuthPage() {
         <input
           type="text"
           placeholder="Your Name"
-          className="border-b p-2 mb-4 outline-none"
+          className="border-b p-2 mb-4 outline-none text-gray-700 font-sans"
           onChange={(e) => setName(e.target.value)}
         />
       )}
@@ -259,14 +259,14 @@ export default function AuthPage() {
       <input
         type="email"
         placeholder="Email ID"
-        className="border-b p-2 mb-4 outline-none"
+        className="border-b p-2 mb-4 outline-none text-gray-700 font-sans"
         onChange={(e) => setEmail(e.target.value)}
       />
 
       <input
         type="password"
         placeholder="Password"
-        className="border-b p-2 mb-4 outline-none"
+        className="border-b p-2 mb-4 outline-none text-gray-700 font-sans"
         onChange={(e) => setPassword(e.target.value)}
       />
 
@@ -274,7 +274,7 @@ export default function AuthPage() {
         <input
           type="password"
           placeholder="Confirm Password"
-          className="border-b p-2 mb-4 outline-none"
+          className="border-b p-2 mb-4 outline-none text-gray-700 font-sans"
         />
       )}
 
@@ -310,11 +310,11 @@ export default function AuthPage() {
 
 
       {isLogin && (
-        <div className="flex justify-between text-sm mb-4">
+        <div className="flex justify-between text-sm mb-4 text-black font-sans">
           <label>
             <input type="checkbox" /> Remember Me
           </label>
-          <span className="cursor-pointer text-gray-500">
+          <span className="cursor-pointer text-gray-500 font-sans">
             Forgot Password?
           </span>
         </div>
@@ -322,12 +322,12 @@ export default function AuthPage() {
 
       <button
         onClick={isLogin ? handleLogin : handleSignup}
-        className="bg-green-500 text-white py-3 rounded-lg mt-2"
+        className="bg-green-500 text-white py-3 rounded-lg mt-2 font-sans"
       >
         {isLogin ? "Sign in Now" : "Sign Up Now"}
       </button>
 
-      <p className="text-sm mt-4 text-center">
+      <p className="text-sm mt-4 text-center text-black font-sans">
         {isLogin ? (
           <>
             Don’t have an Account?{" "}
@@ -343,7 +343,7 @@ export default function AuthPage() {
             Already have an Account?{" "}
             <span
               onClick={() => setIsLogin(true)}
-              className="text-blue-600 cursor-pointer"
+              className="text-blue-600 cursor-pointer font-sans"
             >
               Login
             </span>
@@ -353,7 +353,7 @@ export default function AuthPage() {
 
       <button
         onClick={() => router.push("/")}
-        className="mt-4 text-gray-600 text-sm underline"
+        className="mt-4 text-gray-600 text-sm underline font-sans"
       >
         Skip for now →
       </button>

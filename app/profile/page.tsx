@@ -122,11 +122,11 @@ export default function ProfilePage() {
               />
 
               <div>
-                <h2 className="font-semibold text-lg">
+                <h2 className="font-semibold text-lg text-black font-sans">
                   {profile?.full_name || "User"}
                 </h2>
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 font-sans">
                   {user.email}
                 </p>
               </div>
@@ -149,7 +149,7 @@ export default function ProfilePage() {
             <button
               onClick={logout}
               disabled={loggingOut}
-              className="w-full bg-red-500 text-white py-3 rounded-xl mt-8 flex items-center justify-center gap-2"
+              className="w-full bg-red-500 text-white py-3 rounded-xl mt-8 flex items-center justify-center gap-2 font-sans"
             >
               {loggingOut ? "Logging out..." : "Logout Now"}
             </button>
@@ -338,13 +338,13 @@ export default function ProfilePage() {
 
       {/* TOASTS */}
       {showLogoutToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full font-sans">
           Logged out successfully ✅
         </div>
       )}
 
       {showEditToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-5 py-3 rounded-full font-sans">
           Profile can be edited from the app 📱
         </div>
       )}
@@ -358,10 +358,10 @@ function MenuItem({ title, onClick }: { title: string; onClick: () => void }) {
   return (
     <div
       onClick={onClick}
-      className="bg-white p-4 border border-gray-100 rounded-xl shadow-lg/20 flex justify-between items-center cursor-pointer"
+      className="bg-white p-4 border border-gray-100 rounded-xl shadow-lg/20 flex justify-between items-center cursor-pointer text-black font-sans"
     >
-      <span className="text-sm font-medium">{title}</span>
-      <span className="text-gray-400">›</span>
+      <span className="text-sm font-medium text-black font-sans">{title}</span>
+      <span className="text-gray-400 text-black font-sans">›</span>
     </div>
   );
 }
@@ -372,7 +372,7 @@ function PolicyMenuItem({ title, onClick }: { title: string; onClick: () => void
       onClick={onClick}
       className="bg-white p-3 px-20 border border-gray-400 rounded-xl shadow-lg/20 items-center cursor-pointer "
     >
-      <span className="text-base font-medium text-center ">{title}</span>
+      <span className="text-base font-medium text-center text-black font-sans ">{title}</span>
     </div>
   );
 }
