@@ -82,6 +82,8 @@ export default function Page() {
 
   const { user } = useUser();
 
+  const [pricing, setPricing] = useState<any[]>([]);
+
   const [turf, setTurf] = useState<Turf | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -150,6 +152,18 @@ useEffect(() => {
 
   setTurf(turfRes.data as Turf);
 
+
+  // 🔥 GET PRICING
+const selectedDate = new Date(date);
+const dayOfWeek = selectedDate.getDay(); // 0–6
+
+const { data: pricingData } = await supabase
+  .from("turf_pricing")
+  .select("*")
+  .eq("turf_id", id);
+
+setPricing(pricingData || []);
+
   // BOOKINGS
   const bookingRes = await supabase
     .from("bookings")
@@ -214,6 +228,23 @@ useEffect(() => {
   }, [id, date]);
 
 
+  const priceRange = useMemo(() => {
+  if (!turf) return { min: 0, max: 0 };
+
+  const prices = pricing.map((p) => p.price);
+
+  // include default price also
+  prices.push(turf.price);
+
+  return {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+  };
+}, [pricing, turf]);
+
+
+
+
    if (!turf || loading) return <div className="p-5">Loading...</div>;
 
 
@@ -245,13 +276,27 @@ useEffect(() => {
     isPastDate || 
     (date === today && s.startMin <= currentMin);
 
+  // 🔥 FIND PRICE
+  const hour = s.startMin / 60;
+
+  
+const dayOfWeek = selectedDate.getDay(); // 0–6
+
+const priceRow = pricing.find(
+  (p) =>
+    p.start_hour === hour &&
+    p.day_of_week === dayOfWeek
+);
+
+  const price = priceRow?.price ?? turf.price;
+
   const status = isTimeout
     ? "timeout"
     : isBooked
     ? "booked"
     : "available";
 
-  return { ...s, status };
+  return { ...s, status, price };
 });
 
   // ================= SELECT =================
@@ -266,7 +311,10 @@ useEffect(() => {
     });
   };
 
-  const total = selected.size * turf.price;
+  const total = Array.from(selected).reduce((sum, key) => {
+  const slot = computed.find((s) => s.key === key);
+  return sum + (slot?.price || 0);
+}, 0);
 
   const amount = total + (selected.size * 10) ;
 
@@ -316,7 +364,7 @@ useEffect(() => {
         start_time: minutesToTime(s),
         end_time: minutesToTime(e),
         status: "confirmed",
-        price: turf.price,
+        price: computed.find(s => s.key === k)?.price || turf.price,
         booked_by : "online",
       };
     });
@@ -374,7 +422,6 @@ if (error) {
 });
 
 
-
   return (
     <AuthGuard>
     <div className="min-h-screen bg-white">
@@ -406,9 +453,11 @@ if (error) {
     </div>
 
 
-        <p className="mt-2 font-semibold font-sans text-black text-lg">
-          ₹{turf.price}<span className="text-gray-500 text-base"> / hr </span>
-        </p>
+        <p className="mt-2 font-medium font-sans text-black text-base">
+  ₹{priceRange.min} 
+  {priceRange.min !== priceRange.max && ` - ₹${priceRange.max}`}
+  <span className="text-gray-500 text-base"> / hr </span>
+</p>
 
         <hr className="my-4 border-gray-400 mt-2"/>
 
@@ -476,14 +525,20 @@ if (error) {
               <div
                 key={s.key}
                 onClick={() => toggle(s.key)}
-                className={`relative rounded-full px-3 py-2 text-center text-sm
-                ${s.status === "timeout" && "bg-gray-300 text-white"}
-                ${s.status === "booked" && "bg-gray-200 text-white"}
-                ${s.status === "available" && "text-black text-base font-sans font-medium border-2 border-green-800"}
+                className={`relative rounded-full px-3 py-1 text-center text-sm
+                ${s.status === "timeout" && "bg-gray-300 border border-gray-400 text-white"}
+                ${s.status === "booked" && "bg-gray-200 border border-gray-400 text-white"}
+                ${s.status === "available" && "text-black text-base font-sans font-medium border-2 border-green-700"}
                 ${isSelected && "bg-green-500 text-white border border-gray-200"}
               `}
               >
-                {s.label}
+                <div>{s.label}</div>
+
+                <div className={`text-gray-600 font-sans text-sm/4 font-medium
+                   ${isSelected && "text-white font-sans text-xs"}
+                   `}>
+                    ₹{s.price}
+                    </div>
 
                 {s.status === "available" && (
                   <div className="absolute -top-2 -right-1">
@@ -648,8 +703,10 @@ if (error) {
       </div>
 
       <p className="mt-2 text-lg font-semibold font-sans">
-        ₹{turf.price} <span className="text-gray-500 text-base">/ hr</span>
-      </p>
+  ₹{priceRange.min}
+  {priceRange.min !== priceRange.max && ` - ₹${priceRange.max}`}
+  <span className="text-gray-500 text-base"> / hr</span>
+</p>
     </div>
     </div>
 
@@ -812,8 +869,11 @@ if (error) {
           >
             {/* TIME */}
             <div className="text-sm font-medium">
-              {s.label}
-            </div>
+  {s.label}
+</div>
+<div className="text-xs text-gray-600">
+  ₹{s.price}
+</div>
 
             {/* STATUS */}
             <div 

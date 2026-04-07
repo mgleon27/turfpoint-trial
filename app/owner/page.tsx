@@ -195,34 +195,38 @@ export default function OwnerHome() {
 
   // ================= SLOT GRID =================
   const buildSlots = () => {
-    const arr = [];
+  const arr = [];
 
-    const nowMin =
-      new Date().getHours() * 60 + new Date().getMinutes();
+  const nowMin =
+    new Date().getHours() * 60 + new Date().getMinutes();
 
-    for (let i = 0; i < 24; i++) {
-      const start = i * 60;
+  for (let i = 0; i < 24; i++) {
+    const start = i * 60;
 
-      const isBooked = todayBookings.some(
-        (b) =>
-          timeToMinutes(b.start_time) === start &&
-          b.turf_id === selectedTurf?.id
-      );
+    const isBooked = todayBookings.some(
+      (b) =>
+        timeToMinutes(b.start_time) === start &&
+        b.turf_id === selectedTurf?.id
+    );
 
-      const isTimeout = start <= nowMin;
+    const isTimeout = start <= nowMin;
 
-      arr.push({
-        label: formatLabel(i),
-        status: isTimeout
-          ? "timeout"
-          : isBooked
-          ? "booked"
-          : "available",
-      });
+    let status = "available";
+
+    if (isBooked) {
+      status = "booked"; // ✅ FIRST PRIORITY
+    } else if (isTimeout) {
+      status = "timeout"; // ✅ SECOND
     }
 
-    return arr;
-  };
+    arr.push({
+      label: formatLabel(i),
+      status,
+    });
+  }
+
+  return arr;
+};
 
   const slots = buildSlots();
 
@@ -250,13 +254,13 @@ export default function OwnerHome() {
 
           <div>
             <p className="text-sm font-sans text-gray-500 -mt-1.5">Welcome</p>
-            <p className="font-medium font-sans text-xl/4 ">
+            <p className="font-medium text-black font-sans text-lg/4">
               {profile?.full_name}
             </p>
           </div>
         </div>
-        <div className="border border-green-700 rounded-full p-1">
-          <img src="/icons/bell.png" className="h-6" />
+        <div className="border border-black rounded-full p-1.5">
+          <img src="/icons/bell.png" className="h-4.5" />
         </div>
       </div>
 

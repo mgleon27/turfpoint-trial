@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
@@ -61,6 +61,8 @@ export default function TurfDetailsPage() {
   const id = params?.id as string;
   const router = useRouter();
 
+  const [pricing, setPricing] = useState<any[]>([]);
+
   const [turf, setTurf] = useState<Turf | null>(null);
   const [images, setImages] = useState<TurfImage[]>([]);
   const [activeImg, setActiveImg] = useState<string>("");
@@ -88,6 +90,22 @@ export default function TurfDetailsPage() {
         .single();
 
       if (data) setTurf(data);
+
+
+
+
+      
+    const { data: pricingData } = await supabase
+     .from("turf_pricing")
+     .select("price")
+     .eq("turf_id", id);
+
+    setPricing(pricingData || []);
+
+
+
+
+
 
       const { data: imgs } = await supabase
         .from("turf_images")
@@ -140,6 +158,21 @@ export default function TurfDetailsPage() {
 
   checkFav();
 }, [user, turf]);
+
+
+const priceRange = useMemo(() => {
+  if (!turf) return { min: 0, max: 0 };
+
+  const prices = pricing.map((p) => p.price);
+
+  // include base price also
+  prices.push(turf.price);
+
+  return {
+    min: Math.min(...prices),
+    max: Math.max(...prices),
+  };
+}, [pricing, turf]);
 
 
 
@@ -272,7 +305,14 @@ const toggleFavourite = async () => {
           </div>
 
           <div className="flex justify-center mt-2">
-          <h2 className="text-lg text-black font-semibold mt-2 font-sans">₹{turf.price}<span className=" text-gray-800 font-medium font-sans">/ 60 minutes</span></h2>
+          <h2 className="text-lg text-black font-semibold mt-2 font-sans">
+
+            ₹{priceRange.min}
+{priceRange.min !== priceRange.max && ` - ₹${priceRange.max}`}
+<span className="text-gray-800 font-medium text-base font-sans">
+  / 60 minutes
+</span>
+          </h2>
           </div>
 
 
