@@ -17,6 +17,10 @@ type Turf = {
   locality: string;
   address: string;
   price: number;
+
+  min_price?: number;
+  max_price?: number;
+
   image_url?: string;
   map_lat: number;
   map_lng: number;
@@ -61,8 +65,6 @@ export default function TurfDetailsPage() {
   const id = params?.id as string;
   const router = useRouter();
 
-  const [pricing, setPricing] = useState<any[]>([]);
-
   const [turf, setTurf] = useState<Turf | null>(null);
   const [images, setImages] = useState<TurfImage[]>([]);
   const [activeImg, setActiveImg] = useState<string>("");
@@ -90,22 +92,6 @@ export default function TurfDetailsPage() {
         .single();
 
       if (data) setTurf(data);
-
-
-
-
-      
-    const { data: pricingData } = await supabase
-     .from("turf_pricing")
-     .select("price")
-     .eq("turf_id", id);
-
-    setPricing(pricingData || []);
-
-
-
-
-
 
       const { data: imgs } = await supabase
         .from("turf_images")
@@ -147,7 +133,7 @@ export default function TurfDetailsPage() {
       .maybeSingle(); // ✅ IMPORTANT
 
 
-    if (error) {
+    if (error) { 
       console.log(error);
       setIsFav(false);
       return;
@@ -158,23 +144,6 @@ export default function TurfDetailsPage() {
 
   checkFav();
 }, [user, turf]);
-
-
-const priceRange = useMemo(() => {
-  if (!turf) return { min: 0, max: 0 };
-
-  const prices = pricing.map((p) => p.price);
-
-  // include base price also
-  prices.push(turf.price);
-
-  return {
-    min: Math.min(...prices),
-    max: Math.max(...prices),
-  };
-}, [pricing, turf]);
-
-
 
 
   if (!turf) {
@@ -306,13 +275,12 @@ const toggleFavourite = async () => {
 
           <div className="flex justify-center mt-2">
           <h2 className="text-lg text-black font-semibold mt-2 font-sans">
-
-            ₹{priceRange.min}
-{priceRange.min !== priceRange.max && ` - ₹${priceRange.max}`}
-<span className="text-gray-800 font-medium text-base font-sans">
-  / 60 minutes
-</span>
-          </h2>
+  ₹{turf.min_price ?? turf.price}
+  {(turf.min_price !== turf.max_price) && ` - ₹${turf.max_price}`}
+  <span className="text-gray-800 font-medium text-base font-sans">
+    / 60 minutes
+  </span>
+</h2>
           </div>
 
 
@@ -595,9 +563,14 @@ const toggleFavourite = async () => {
 
             {/* PRICE */}
             <div className="flex justify-between items-center font-sans">
-              <h2 className="text-xl font-semibold font-sans">
-                ₹{turf.price} <span className="text-base font-medium text-gray-600 font-sans">/ 60 minutes</span>
-              </h2>
+              
+              <h2 className="text-lg text-black font-semibold mt-2 font-sans">
+  ₹{turf.min_price ?? turf.price}
+  {(turf.min_price !== turf.max_price) && ` - ₹${turf.max_price}`}
+  <span className="text-gray-800 font-medium text-base font-sans">
+    / 60 minutes
+  </span>
+</h2>
 
               <button className="bg-green-600 px-5 py-2 rounded-full text-white font-medium font-sans border-2 border-green-700"
               onClick={() => {

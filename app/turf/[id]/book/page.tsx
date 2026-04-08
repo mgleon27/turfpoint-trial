@@ -15,6 +15,10 @@ type Turf = {
   address:string;
   locality: string;
   price: number;
+
+  min_price?: number;
+  max_price?: number;
+
   is_24_7: boolean;
   opening_time?: string;
   closing_time?: string;
@@ -79,12 +83,15 @@ const getToday = () => {
 export default function Page() {
   const { id } = useParams();
   const router = useRouter();
+  const [turf, setTurf] = useState<Turf | null>(null);
 
   const { user } = useUser();
 
   const [pricing, setPricing] = useState<any[]>([]);
 
-  const [turf, setTurf] = useState<Turf | null>(null);
+  const minPrice = turf?.min_price ?? turf?.price ?? 0;
+  const maxPrice = turf?.max_price ?? turf?.price ?? 0;
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [date, setDateState] = useState(() => getToday());
@@ -226,23 +233,6 @@ setPricing(pricingData || []);
       supabase.removeChannel(channel);
     };
   }, [id, date]);
-
-
-  const priceRange = useMemo(() => {
-  if (!turf) return { min: 0, max: 0 };
-
-  const prices = pricing.map((p) => p.price);
-
-  // include default price also
-  prices.push(turf.price);
-
-  return {
-    min: Math.min(...prices),
-    max: Math.max(...prices),
-  };
-}, [pricing, turf]);
-
-
 
 
    if (!turf || loading) return <div className="p-5">Loading...</div>;
@@ -454,8 +444,8 @@ if (error) {
 
 
         <p className="mt-2 font-medium font-sans text-black text-base">
-  ₹{priceRange.min} 
-  {priceRange.min !== priceRange.max && ` - ₹${priceRange.max}`}
+  ₹{minPrice}
+{minPrice !== maxPrice && ` - ₹${maxPrice}`}
   <span className="text-gray-500 text-base"> / hr </span>
 </p>
 
@@ -525,10 +515,10 @@ if (error) {
               <div
                 key={s.key}
                 onClick={() => toggle(s.key)}
-                className={`relative rounded-full px-3 py-1 text-center text-sm
+                className={`relative rounded-full px-3 py-1 text-center text-sm shadow-lg
                 ${s.status === "timeout" && "bg-gray-300 border border-gray-400 text-white"}
-                ${s.status === "booked" && "bg-gray-200 border border-gray-400 text-white"}
-                ${s.status === "available" && "text-black text-base font-sans font-medium border-2 border-green-700"}
+                ${s.status === "booked" && "bg-gray-300 border border-gray-400 text-red-400"}
+                ${s.status === "available" && "text-black text-base font-sans font-medium border-1 border-green-300"}
                 ${isSelected && "bg-green-500 text-white border border-gray-200"}
               `}
               >
@@ -703,8 +693,8 @@ if (error) {
       </div>
 
       <p className="mt-2 text-lg font-semibold font-sans">
-  ₹{priceRange.min}
-  {priceRange.min !== priceRange.max && ` - ₹${priceRange.max}`}
+  ₹{minPrice}
+{minPrice !== maxPrice && ` - ₹${maxPrice}`}
   <span className="text-gray-500 text-base"> / hr</span>
 </p>
     </div>
@@ -859,35 +849,28 @@ if (error) {
           <div
             key={s.key}
             onClick={() => toggle(s.key)}
-            className={`relative border rounded-full px-3 py-1.5 text-center cursor-pointer shadow-lg/20
+            className={`relative border rounded-full px-3 py-1.5 text-center cursor-pointer shadow-lg/10
               
-             ${s.status === "timeout" && "bg-gray-300 text-white"}
-                ${s.status === "booked" && "bg-gray-300 text-white border-gray-400 border-2"}
-                ${s.status === "available" && "text-black text-base font-sans font-medium border-2 border-green-800"}
+                ${s.status === "timeout" && "bg-gray-300 text-white border-gray-400 border-1"}
+                ${s.status === "booked" && "bg-gray-300 text-red-400 border-gray-400 border-1"}
+                ${s.status === "available" && "text-black text-base font-sans font-medium border-2 border-green-300"}
                 ${isSelected && "bg-green-500 text-white border border-gray-200"}
             `}
           >
             {/* TIME */}
             <div className="text-sm font-medium">
-  {s.label}
-</div>
-<div className="text-xs text-gray-600">
-  ₹{s.price}
-</div>
+             {s.label}
+            </div>
+
+
+            <div className={`text-gray-600 font-sans text-xs/4 font-medium
+                             ${isSelected && "text-white font-sans text-xs"}
+                           `}>
+                    ₹{s.price}
+            </div>
 
             {/* STATUS */}
-            <div 
 
-            className={`text-sm font-sans mt-1
-            ${s.status === "booked" && "text-white"}
-            ${s.status === "available" && "text-green-700 "}
-            ${isSelected && "text-white"}`}>
-
-
-              {s.status === "available" && "Available"}
-              {s.status === "booked" && "Booked"}
-              {s.status === "timeout" && "Timeout"}
-            </div>
 
             {/* ICON */}
             {s.status === "available" && (

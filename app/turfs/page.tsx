@@ -30,6 +30,10 @@ type Turf = {
   locality: string;
   address: string;
   price: number;
+
+  min_price?: number;
+  max_price?: number;
+
   image_url?: string;
   map_lat: number;
   map_lng: number;
@@ -214,6 +218,10 @@ function TurfCard({
 const sports = turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()).filter(Boolean) || [];
 
 
+const min = turf.min_price ?? turf.price;
+const max = turf.max_price ?? turf.price;
+
+
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
@@ -254,9 +262,15 @@ const sports = turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()).filte
         </div>
  
         <div className="flex justify-between items-center mt-3">
-          <p className="text-black font-semibold text-lg font-sans" >₹{turf.price}
-            <span className="text-gray-600 font-medium text-base font-sans"> /hr</span>
-            </p>
+          
+          <p className="text-black font-semibold text-lg font-sans">
+  ₹{min}
+  {min !== max && ` - ₹${max}`}
+  <span className="text-gray-600 font-medium text-base font-sans">
+    {" "} /hr
+  </span>
+</p>
+
           <img src="/icons/open.png" className="h-7" />
         </div>
         

@@ -8,6 +8,10 @@ type Turf = {
   locality: string;
   address: string;
   price: number;
+
+  min_price?: number;
+  max_price?: number;
+
   image_url?: string;
   map_lat: number;
   map_lng: number;
@@ -77,9 +81,18 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* 💰 PRICE */}
         <div className="flex justify-between items-center mt-4">
-          <p className=" font-sans font-semibold text-black text-base pl-1">₹{turf.price}
-            <span className="text-gray-700 text-sm font-medium font-sans"
-          > / hr</span></p>
+
+
+          <p className="font-sans font-medium text-black text-xs pl-1">
+           ₹{turf.min_price ?? turf.price}
+          {(turf.min_price !== turf.max_price) &&
+            ` - ₹${turf.max_price}`}
+         <span className="text-gray-700 text-sm font-medium font-sans">
+         / hr
+        </span>
+        </p>
+
+
           <img src="/icons/open.png" 
             className="h-8 pr-1 pb-1" />
         </div>

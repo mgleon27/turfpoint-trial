@@ -26,6 +26,10 @@ type Turf = {
   locality: string;
   address: string;
   price: number;
+
+  min_price?: number;
+  max_price?: number;
+
   image_url?: string;
   map_lat: number;
   map_lng: number;
@@ -163,6 +167,9 @@ export default function NearbyPage() {
       ? t.reviews.reduce((s, r) => s + r.rating, 0) / t.reviews.length
       : 0;
 
+      const min = t.min_price ?? t.price;
+      const max = t.max_price ?? t.price;
+
               
 
               return (
@@ -202,9 +209,13 @@ export default function NearbyPage() {
 
  
         <div className="flex justify-between items-center mt-3">
-          <p className="text-black font-semibold text-lg font-sans" >₹{t.price}
-            <span className="text-gray-600 font-medium text-base font-sans"> /hr</span>
-            </p>
+
+          <p className="text-black font-semibold text-lg font-sans">
+  ₹{min}
+  {min !== max && ` - ₹${max}`}
+  <span className="text-gray-600 font-medium text-base font-sans"> /hr</span>
+</p>
+
           <img src="/icons/open.png" className="h-7" />
         </div>
         

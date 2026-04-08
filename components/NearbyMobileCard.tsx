@@ -8,6 +8,10 @@ type Turf = {
   locality: string;
   address: string;
   price: number;
+
+  min_price?: number;
+  max_price?: number;
+
   image_url?: string;
   map_lat: number;
   map_lng: number;
@@ -33,6 +37,10 @@ export default function NearbyMobileCard({ turf, router, distance }: Props) {
     turf.turf_sports
       ?.map((s) => s.sports?.name?.toLowerCase())
       .filter(Boolean) || [];
+
+
+      const min = turf.min_price ?? turf.price;
+      const max = turf.max_price ?? turf.price;
 
   return (
     <div
@@ -82,7 +90,8 @@ export default function NearbyMobileCard({ turf, router, distance }: Props) {
         {/* BOTTOM */}
         <div className="flex justify-between items-center">
           <p className="font-medium text-black text-sm ml-0.5 font-sans">
-            ₹{turf.price}
+           ₹{min}
+{min !== max && ` - ₹${max}`}
             <span className="text-gray-600 text-sm font-sans"> / hr</span>
           </p>
 

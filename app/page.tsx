@@ -30,6 +30,10 @@ type Turf = {
   locality: string;
   address: string;
   price: number;
+
+  min_price?: number;
+  max_price?: number;
+
   image_url?: string;
   map_lat: number;
   map_lng: number;
@@ -96,6 +100,7 @@ export default function Home() {
       if (data) setTurfs(data);
 
       const { data: bookings } = await supabase.from("bookings").select("turf_id");
+      
 
       if (bookings) {
         const counts: Record<string, number> = {};
@@ -464,9 +469,12 @@ const sports = turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()).filte
         </div>
  
         <div className="flex justify-between items-center mt-3">
-          <p className="text-black font-semibold text-lg font-sans" >₹{turf.price}
-            <span className="text-gray-600 font-medium text-base font-sans"> /hr</span>
-            </p>
+          <p className="text-black font-semibold text-lg font-sans">
+  ₹{turf.min_price ?? turf.price}
+  {(turf.min_price !== turf.max_price) &&
+    ` - ₹${turf.max_price}`}
+  <span className="text-gray-600 font-medium text-base font-sans"> /hr</span>
+</p>
           <img src="/icons/open.png" className="h-7" />
         </div>
         

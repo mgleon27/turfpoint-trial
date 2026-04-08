@@ -9,6 +9,10 @@ type Turf = {
   locality: string;
   address: string;
   price: number;
+
+  min_price?: number;
+  max_price?: number;
+
   image_url?: string;
   map_lat: number;
   map_lng: number;
@@ -29,6 +33,11 @@ export default function MobileTurfCard({ turf, router }: Props) {
     turf.reviews?.length
       ? turf.reviews.reduce((s, r) => s + r.rating, 0) / turf.reviews.length
       : 0;
+
+    const min = turf.min_price ?? turf.price;
+    const max = turf.max_price ?? turf.price;
+
+
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
@@ -76,9 +85,15 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* PRICE + BUTTON */}
         <div className="flex justify-between items-center mt-1">
-          <p className="font-semibold text-black text-base font-sans">₹{turf.price}
-            <span className="text-gray-700 text-sm font-medium font-sans"
-          > / hr</span></p>
+
+          <p className="font-semibold text-black text-base font-sans">
+  ₹{min}
+  {min !== max && ` - ₹${max}`}
+  <span className="text-gray-700 text-sm font-medium font-sans">
+    {" "} / hr
+  </span>
+</p>
+
           <img
           onClick={(e) => {
               e.stopPropagation();
