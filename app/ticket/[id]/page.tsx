@@ -98,7 +98,7 @@ export default function TicketPage() {
 
 
   return (
-    <div className="min-h-screen bg-green-100 p-3">
+    <div className="min-h-screen bg-white p-3">
 
       {/* HEADER */}
       <div className="flex items-center gap-3 mb-5">
@@ -111,7 +111,7 @@ export default function TicketPage() {
       </div>
 
       {/* MAIN CARD */}
-      <div className="bg-white rounded-3xl p-4 shadow-md">
+      <div className="bg-green-100 rounded-3xl p-4 shadow-md">
 
         {/* 🎟 TOP TICKET */}
         <div className="flex items-stretch rounded-xl overflow-hidden relative mt-3 mb-2">
@@ -144,16 +144,16 @@ export default function TicketPage() {
 
 
 {/* ✂️ PERFORATION */}
-  <div className="relative flex flex-col justify-between items-center">
+  <div className="relative flex flex-col justify-between items-center bg-white">
 
     {/* TOP CUT DOT */}
-    <div className="w-3 h-3 bg-white rounded-full border border-green-600 -mt-1.5 z-10"></div>
+    <div className="w-3 h-3 bg-green-100 rounded-full border border-green-600 -mt-1.5 z-10"></div>
 
     {/* DASHED LINE */}
     <div className="flex-1 border-l border-dashed border-gray-500"></div>
 
     {/* BOTTOM CUT DOT */}
-    <div className="w-3 h-3 bg-white rounded-full border border-green-600 -mb-1.5 z-10"></div>
+    <div className="w-3 h-3 bg-green-100 rounded-full border border-green-600 -mb-1.5 z-10"></div>
 
   </div>
 
@@ -243,7 +243,7 @@ export default function TicketPage() {
               Get Direction
             </button>
 
-            <button className="px-5 bg-green-100 text-green-700 py-1 rounded-md font-medium font-sans text-base border border-green-300">
+            <button className="px-5 bg-white text-green-700 py-1 rounded-md font-medium font-sans text-base border border-green-300">
               Show QR
             </button>
           </div>
