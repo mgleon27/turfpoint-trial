@@ -115,7 +115,7 @@ export default function TicketPage() {
     <div className="w-3 h-3 bg-white rounded-full border border-green-600 -mt-1.5 z-10"></div>
 
     {/* DASHED LINE */}
-    <div className="flex-1 border-l-1 border-dashed border-gray-500"></div>
+    <div className="flex-1 border-l border-dashed border-gray-500"></div>
 
     {/* BOTTOM CUT DOT */}
     <div className="w-3 h-3 bg-white rounded-full border border-green-600 -mb-1.5 z-10"></div>
@@ -191,10 +191,10 @@ export default function TicketPage() {
 
 
             <div className="font-medium text-base text-black font-sans ml-1">
-              {turf.address.split(",").map((line, i) => (
-            <div key={i}>{line.trim()}</div>
-))}
-            </div>
+  {turf.address.split(",").map((line: string, i: number) => (
+    <div key={i}>{line.trim()}</div>
+  ))}
+</div>
 
 
           </div>
