@@ -182,13 +182,65 @@ setPricing(pricingData || []);
 
   setBookings((bookingRes.data ?? []) as Booking[]);
 };
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await load();
-      setLoading(false);
-    })();
-  }, [id, date]);
+
+
+
+// ✅ LOAD TURF + PRICING (ONLY ONCE)
+const loadStatic = async () => {
+  const turfRes = await supabase
+    .from("turfs")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (!turfRes.error) {
+    setTurf(turfRes.data);
+  }
+
+  const { data: pricingData } = await supabase
+    .from("turf_pricing")
+    .select("*")
+    .eq("turf_id", id);
+
+  setPricing(pricingData || []);
+};
+
+
+
+// ✅ LOAD BOOKINGS (ON DATE CHANGE)
+const loadBookings = async () => {
+  const { data } = await supabase
+    .from("bookings")
+    .select("start_time,end_time")
+    .eq("turf_id", id)
+    .eq("booking_date", date);
+
+  setBookings(data || []);
+};
+
+
+useEffect(() => {
+  if (!id) return;
+
+  (async () => {
+    setLoading(true);
+    await loadStatic();
+    setLoading(false);
+  })();
+}, [id]);
+
+useEffect(() => {
+  if (!id || !date) return;
+
+  loadBookings();
+}, [id, date]);
+
+
+
+
+
+
+
 
  useEffect(() => {
   if (!id) return;
@@ -222,7 +274,7 @@ setPricing(pricingData || []);
           filter: `turf_id=eq.${id}`,
         },
         async () => {
-          await load();
+          await loadBookings();
         }
       )
       .subscribe();

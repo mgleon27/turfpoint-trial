@@ -289,7 +289,8 @@ const toggleFavourite = async () => {
           <div className="flex justify-center gap-4">
 
           <button onClick={openMap}
-           className="bg-white border-2 border-green-700 px-4 py-1 text-base text-green-900 font-medium font-sans rounded-full mt-3 mb-1 flex flex-row items-center gap-2">
+           className="bg-white border-2 border-green-700 px-4 py-1 text-base text-green-900 font-medium font-sans rounded-full mt-3 
+           mb-1 flex items-center gap-2 whitespace-nowrap">
             <img src="/icons/direction.png" className="w-5 h-5" />
             Locate on Map
           </button>
@@ -299,7 +300,7 @@ const toggleFavourite = async () => {
           <button
   onClick={toggleFavourite}
   disabled={isFav === null || favLoading}
-  className={`px-4 py-1 font-sans text-base font-medium rounded-full mt-3 mb-1 flex flex-row items-center gap-2
+  className={`px-4 py-1 font-sans text-base font-medium rounded-full mt-3 mb-1 flex items-center gap-2 whitespace-nowrap
   ${
     isFav === null
       ? "bg-gray-300 text-gray-500"
@@ -590,7 +591,7 @@ const toggleFavourite = async () => {
             <div className="flex gap-7">
 
           <button onClick={openMap}
-           className="bg-white border-2 border-green-700 px-4 py-0.5 text-base text-green-900 font-medium font-sans rounded-full mt-3 mb-1 flex flex-row items-center gap-2">
+           className="bg-white border-2 border-green-700 px-4 py-0.5 text-base text-green-900 font-medium font-sans rounded-full mt-3 mb-1 flex whitespace-nowrap items-center gap-2">
             <img src="/icons/direction.png" className="w-5 h-5" />
             Locate on Map
           </button>
@@ -600,7 +601,7 @@ const toggleFavourite = async () => {
           <button
   onClick={toggleFavourite}
   disabled={isFav === null || favLoading}
-  className={`px-4 py-0.5 font-sans text-base font-medium rounded-full mt-3 mb-1 flex flex-row items-center gap-2
+  className={`px-4 py-0.5 font-sans text-base font-medium rounded-full mt-3 mb-1 flex whitespace-nowrap items-center gap-2
   ${
     isFav === null
       ? "bg-gray-300 text-gray-500"

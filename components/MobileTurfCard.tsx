@@ -86,11 +86,11 @@ export default function MobileTurfCard({ turf, router }: Props) {
         {/* PRICE + BUTTON */}
         <div className="flex justify-between items-center mt-1">
 
-          <p className="font-semibold text-black text-base font-sans">
+          <p className="font-semibold text-black text-sm font-sans whitespace-nowrap">
   ₹{min}
   {min !== max && ` - ₹${max}`}
   <span className="text-gray-700 text-sm font-medium font-sans">
-    {" "} / hr
+    {" "} /hr
   </span>
 </p>
 

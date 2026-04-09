@@ -131,10 +131,10 @@ if (loading) {
               <div className="flex gap-3 mb-4">
                 <button
                   onClick={() => setActiveTab("upcoming")}
-                  className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 ${
+                  className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 border-1 border-green-400 ${
                     activeTab === "upcoming"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-200 text-black"
+                      ? "bg-green-500 text-white font-sans"
+                      : "bg-emerald-50 text-black font-sans"
                   }`}
                 >
                   Upcoming
@@ -142,10 +142,10 @@ if (loading) {
 
                 <button
                   onClick={() => setActiveTab("completed")}
-                  className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 ${
+                  className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 border-1 border-green-400 ${
                     activeTab === "completed"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-200 text-black"
+                      ? "bg-green-500 text-white font-sans"
+                      : "bg-emerald-50 text-black font-sans"
                   }`}
                 >
                   Completed
@@ -238,6 +238,7 @@ if (loading) {
           {dataToShow.map((b) => (
             <div
               key={b.id}
+              onClick={() => router.push(`/ticket/${booking.id}`)}
               className="bg-white rounded-xl shadow-lg/20 flex overflow-hidden border border-gray-300"
             >
 
@@ -278,7 +279,9 @@ if (loading) {
                     <span className="font-medium font-sans text-gray-600 text-base"> / hr</span>
                   </p>
 
-                  <img src="/icons/ticket.png" className="h-15 mr-1 -mb-7 pb-2 " />
+                  <div className=" bg-green-500 px-3 py-0.5 text-white text-base font-sans font-medium rounded-full text-center">
+          View Ticket
+        </div>
                 </div>
 
               </div>
@@ -343,8 +346,12 @@ if (loading) {
 //////////////////////////////////////////////////////////////
 
 function MobileBookingCard({ booking }: { booking: Booking }) {
+
+  const router = useRouter();
+
   return (
-    <div className="flex gap-3 bg-white rounded-xl p-3 shadow-lg/20">
+    <div onClick={() => router.push(`/ticket/${booking.id}`)}
+    className="flex gap-3 bg-white rounded-xl p-3 shadow-lg/20">
 
       {/* IMAGE */}
       <img
@@ -379,7 +386,9 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
         <p className="font-semibold text-base text-black mt-1 font-sans ">
           ₹{booking.price} <span className="font-medium text-sm text-gray-700 font-sans"> /hr</span>
         </p>
-        <img src="/icons/ticket.png" className="h-11 -mb-2" />
+        <div className=" bg-green-500 px-3 py-0.5 text-white text-sm font-sans font-medium rounded-full text-center">
+          View Ticket
+        </div>
 </div>        
 
       </div>
