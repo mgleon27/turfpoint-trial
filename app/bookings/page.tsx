@@ -238,7 +238,7 @@ if (loading) {
           {dataToShow.map((b) => (
             <div
               key={b.id}
-              onClick={() => router.push(`/ticket/${booking.id}`)}
+              onClick={() => router.push(`/ticket/${b.id}`)}
               className="bg-white rounded-xl shadow-lg/20 flex overflow-hidden border border-gray-300"
             >
 
