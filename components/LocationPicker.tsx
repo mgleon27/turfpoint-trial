@@ -1,36 +1,51 @@
 "use client";
 
-import {
-  GoogleMap,
-  Marker,
-  Circle,
-  Autocomplete,
-  useJsApiLoader,
-} from "@react-google-maps/api";
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import mapboxgl from "mapbox-gl";
+
+mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 
 export default function LocationPicker({
   onSelect,
 }: {
   onSelect: (lat: number, lng: number) => void;
 }) {
-  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
-  const [accuracy, setAccuracy] = useState<number>(0);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapContainer = useRef<HTMLDivElement | null>(null);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
+
   const [loadingLocation, setLoadingLocation] = useState(false);
 
-  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const defaultCenter: [number, number] = [77.4119, 8.1833];
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-    libraries: ["places"], // 🔥 REQUIRED
-  });
+  // 🚀 INIT MAP
+  useEffect(() => {
+    if (mapRef.current) return;
 
-  const defaultCenter = {
-    lat: 8.1833,
-    lng: 77.4119,
-  };
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainer.current!,
+      style: "mapbox://styles/mapbox/streets-v11",
+      center: defaultCenter,
+      zoom: 13,
+    });
 
-  // 🔥 CURRENT LOCATION
+    // CLICK SELECT
+    mapRef.current.on("click", (e) => {
+      const { lng, lat } = e.lngLat;
+
+      // remove old marker
+      markerRef.current?.remove();
+
+      // add new marker
+      markerRef.current = new mapboxgl.Marker({ color: "#2563eb" })
+        .setLngLat([lng, lat])
+        .addTo(mapRef.current!);
+
+      onSelect(lat, lng);
+    });
+  }, []);
+
+  // 📍 CURRENT LOCATION
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation not supported");
@@ -44,10 +59,18 @@ export default function LocationPicker({
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
 
-        setPosition({ lat, lng });
-        setAccuracy(pos.coords.accuracy);
-        onSelect(lat, lng);
+        mapRef.current?.flyTo({
+          center: [lng, lat] as [number, number],
+          zoom: 15,
+        });
 
+        markerRef.current?.remove();
+
+        markerRef.current = new mapboxgl.Marker({ color: "#2563eb" })
+          .setLngLat([lng, lat])
+          .addTo(mapRef.current!);
+
+        onSelect(lat, lng);
         setLoadingLocation(false);
       },
       () => {
@@ -57,40 +80,10 @@ export default function LocationPicker({
     );
   };
 
-  // 🔥 PLACE SEARCH SELECT
-  const onPlaceChanged = () => {
-    const place = autocompleteRef.current?.getPlace();
-
-    if (!place?.geometry?.location) return;
-
-    const lat = place.geometry.location.lat();
-    const lng = place.geometry.location.lng();
-
-    setPosition({ lat, lng });
-    setAccuracy(0);
-    onSelect(lat, lng);
-  };
-
-  if (!isLoaded) {
-    return <div className="h-[300px] flex items-center justify-center">Loading...</div>;
-  }
-
   return (
     <div className="space-y-3">
 
-      {/* 🔍 SEARCH BAR */}
-      <Autocomplete
-        onLoad={(ref) => (autocompleteRef.current = ref)}
-        onPlaceChanged={onPlaceChanged}
-      >
-        <input
-          type="text"
-          placeholder="Search location..."
-          className="w-full p-2 border rounded-lg outline-none"
-        />
-      </Autocomplete>
-
-      {/* 📍 CURRENT LOCATION BUTTON */}
+      {/* 📍 CURRENT LOCATION */}
       <button
         onClick={getCurrentLocation}
         className="w-full bg-green-500 text-white py-2 rounded-lg text-sm"
@@ -99,50 +92,10 @@ export default function LocationPicker({
       </button>
 
       {/* 🗺️ MAP */}
-      <GoogleMap
-        center={position || defaultCenter}
-        zoom={13}
-        mapContainerClassName="h-[300px] w-full rounded-lg"
-        onClick={(e) => {
-          const lat = e.latLng?.lat();
-          const lng = e.latLng?.lng();
-          if (!lat || !lng) return;
-
-          setPosition({ lat, lng });
-          setAccuracy(0);
-          onSelect(lat, lng);
-        }}
-      >
-        {position && (
-          <>
-            {/* 🔵 Accuracy Circle */}
-            {accuracy > 0 && (
-              <Circle
-                center={position}
-                radius={accuracy}
-                options={{
-                  fillColor: "#3b82f6",
-                  fillOpacity: 0.2,
-                  strokeOpacity: 0,
-                }}
-              />
-            )}
-
-            {/* 🔵 Blue Dot */}
-            <Marker
-              position={position}
-              icon={{
-                path: window.google.maps.SymbolPath.CIRCLE,
-                scale: 8,
-                fillColor: "#2563eb",
-                fillOpacity: 1,
-                strokeColor: "#fff",
-                strokeWeight: 2,
-              }}
-            />
-          </>
-        )}
-      </GoogleMap>
+      <div
+        ref={mapContainer}
+        className="h-[300px] w-full rounded-lg"
+      />
     </div>
   );
 }

@@ -4,11 +4,34 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+type Turf = {
+  name: string;
+  locality: string;
+  address: string;
+  map_lat: number;
+  map_lng: number;
+};
+
+type Profile = {
+  full_name: string;
+};
+
+type BookingType = {
+  id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  price: number;
+  turfs: Turf;
+  profile: Profile;
+};
+
 export default function TicketPage() {
   const { id } = useParams();
   const router = useRouter();
 
-  const [booking, setBooking] = useState<any>(null);
+  const [booking, setBooking] = useState<BookingType | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,8 +69,11 @@ export default function TicketPage() {
     return <div className="p-5">Loading...</div>;
   }
 
-  const turf = booking.turfs;
-  const user = booking.profile;
+  const turf = Array.isArray(booking.turfs)
+  ? booking.turfs[0]
+  : booking.turfs;
+
+  const user = booking?.profile;
 
   const openMap = () => {
     window.open(
@@ -61,6 +87,15 @@ export default function TicketPage() {
     const hh = h % 12 === 0 ? 12 : h % 12;
     return `${hh}:00 ${am}`;
   };
+
+
+
+  if (loading || !booking || !booking.turfs) {
+  return <div className="p-5">Loading...</div>;
+}
+
+
+
 
   return (
     <div className="min-h-screen bg-green-100 p-3">
