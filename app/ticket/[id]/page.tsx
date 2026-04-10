@@ -111,10 +111,10 @@ export default function TicketPage() {
       </div>
 
       {/* MAIN CARD */}
-      <div className="bg-green-100 rounded-3xl p-4 shadow-md">
+      <div className="bg-emerald-50 rounded-3xl p-4 shadow-md">
 
         {/* 🎟 TOP TICKET */}
-        <div className="flex items-stretch rounded-xl overflow-hidden relative mt-3 mb-2">
+        <div className="flex items-stretch rounded-xl overflow-hidden relative mt-3 mb-2 shadow-sm">
 
           {/* LEFT GREEN */}
           <div className="bg-green-600 text-white p-4 flex-1 rounded-l-xl relative  ">

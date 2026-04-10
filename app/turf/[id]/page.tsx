@@ -761,11 +761,11 @@ const toggleFavourite = async () => {
     
     <div className="bg-white rounded-2xl p-6 w-[85%] max-w-sm text-center">
       
-      <h2 className="text-lg font-semibold text-black">
+      <h2 className="text-lg font-semibold text-black font-sans">
         Login Required
       </h2>
 
-      <p className="text-sm text-gray-600 mt-2">
+      <p className="text-sm text-gray-600 mt-2 font-sans">
         Please login to book your slot
       </p>
 
@@ -774,7 +774,7 @@ const toggleFavourite = async () => {
         {/* CANCEL */}
         <button
           onClick={() => setShowLoginPopup(false)}
-          className="flex-1 border rounded-full py-2"
+          className="flex-1 border border-black rounded-full py-2 font-sans text-black"
         >
           Cancel
         </button>
@@ -782,7 +782,7 @@ const toggleFavourite = async () => {
         {/* LOGIN */}
         <button
           onClick={() => router.push("/login")}
-          className="flex-1 bg-green-600 text-white rounded-full py-2"
+          className="flex-1 bg-green-600 text-white rounded-full py-2 font-sans"
         >
           Login
         </button>
