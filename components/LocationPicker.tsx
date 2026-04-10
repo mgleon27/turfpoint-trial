@@ -18,34 +18,50 @@ export default function LocationPicker({
 
   const defaultCenter: [number, number] = [77.4119, 8.1833];
 
-  // 🚀 INIT MAP
+  // 🚀 INIT MAP (SAFE)
   useEffect(() => {
+    if (!mapContainer.current) return; // ✅ prevent null crash
     if (mapRef.current) return;
 
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainer.current!,
+    const map = new mapboxgl.Map({
+      container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v11",
       center: defaultCenter,
       zoom: 13,
     });
 
-    // CLICK SELECT
-    mapRef.current.on("click", (e) => {
-      const { lng, lat } = e.lngLat;
+    mapRef.current = map;
 
-      // remove old marker
-      markerRef.current?.remove();
+    // ✅ Wait for map to load before attaching events
+    map.on("load", () => {
+      map.on("click", (e) => {
+        try {
+          if (!e?.lngLat) return;
 
-      // add new marker
-      markerRef.current = new mapboxgl.Marker({ color: "#2563eb" })
-        .setLngLat([lng, lat])
-        .addTo(mapRef.current!);
+          const lng = e.lngLat.lng;
+          const lat = e.lngLat.lat;
 
-      onSelect(lat, lng);
+          markerRef.current?.remove();
+
+          markerRef.current = new mapboxgl.Marker({ color: "#2563eb" })
+            .setLngLat([lng, lat])
+            .addTo(map);
+
+          onSelect(lat, lng);
+        } catch (err) {
+          console.error("Map click error:", err);
+        }
+      });
     });
+
+    // ✅ CLEANUP (VERY IMPORTANT)
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
   }, []);
 
-  // 📍 CURRENT LOCATION
+  // 📍 CURRENT LOCATION (SAFE)
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation not supported");
@@ -59,8 +75,10 @@ export default function LocationPicker({
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
 
-        mapRef.current?.flyTo({
-          center: [lng, lat] as [number, number],
+        if (!mapRef.current) return;
+
+        mapRef.current.flyTo({
+          center: [lng, lat],
           zoom: 15,
         });
 
@@ -68,7 +86,7 @@ export default function LocationPicker({
 
         markerRef.current = new mapboxgl.Marker({ color: "#2563eb" })
           .setLngLat([lng, lat])
-          .addTo(mapRef.current!);
+          .addTo(mapRef.current);
 
         onSelect(lat, lng);
         setLoadingLocation(false);
@@ -82,7 +100,6 @@ export default function LocationPicker({
 
   return (
     <div className="space-y-3">
-
       {/* 📍 CURRENT LOCATION */}
       <button
         onClick={getCurrentLocation}
