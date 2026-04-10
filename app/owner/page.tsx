@@ -5,6 +5,11 @@ import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/userContext";
 import { useRouter } from "next/navigation";
 
+
+
+import OwnerMobileNav from "@/components/OwnerMobileNav";
+import OwnerMobileHeader from "@/components/OwnerMobileHeader";
+
 // ================= TYPES =================
 type Turf = {
   id: string;
@@ -240,29 +245,13 @@ export default function OwnerHome() {
 
   // ================= UI =================
   return (
-    <div className="min-h-screen bg-white p-3">
+    <div className="min-h-screen bg-white px-3">
 
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-3 px-2 py-2">
-        <div className="flex gap-3 items-center">
+      
 
-          <img
-                src={profile?.avatar_url || "/profile.png"}
-                onError={(e) => (e.currentTarget.src = "/profile.png")}
-                className="w-13 h-13 rounded-full object-cover border border-gray-400"
-              />
-
-          <div>
-            <p className="text-sm font-sans text-gray-500 -mt-1.5">Welcome</p>
-            <p className="font-medium text-black font-sans text-lg/4">
-              {profile?.full_name}
-            </p>
-          </div>
-        </div>
-        <div className="border border-black rounded-full p-1.5">
-          <img src="/icons/bell.png" className="h-4.5" />
-        </div>
-      </div>
+        <OwnerMobileHeader />
+        <OwnerMobileNav />
+        
 
 
       {/* STATS */}

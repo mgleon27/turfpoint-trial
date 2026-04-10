@@ -15,7 +15,7 @@ import dynamic from "next/dynamic";
 // ✅ MOBILE COMPONENTS
 import MobileHeader from "@/components/MobileHeader";
 import MobileNav from "@/components/MobileNav";
-import MobileTurfCardss from "@/components/MobileTurfCardshadowless";
+import MobileTurfCard from "@/components/MobileTurfCard";
 
 const LocationPicker = dynamic(
   () => import("@/components/LocationPicker"),
@@ -110,7 +110,7 @@ return (
         <div className="grid grid-cols-2 gap-3">
           {filteredTurfs.map((t) => (
             <div key={t.id} className="w-full">
-              <MobileTurfCardss turf={t} router={router} />
+              <MobileTurfCard turf={t} router={router} />
             </div>
           ))}
         </div>
