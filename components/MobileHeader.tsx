@@ -49,8 +49,7 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
         .from("turfs")
         .select("id,price, name, locality, image_url")
         .ilike("name", `%${search}%`)
-        .or(`locality.ilike.%${search}%`)
-        .limit(7);
+        .limit(5);
 
       if (error) console.log(error);
 
