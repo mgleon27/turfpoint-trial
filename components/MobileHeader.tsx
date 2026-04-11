@@ -90,7 +90,8 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
         {/* RIGHT */}
         <div className="flex items-center gap-5 pr-5">
 
-          <button className="bg-green-500 text-white px-4 py-2 rounded text-xs font-sans">
+          <button onClick={() => router.push("/download")}
+          className="bg-green-500 text-white px-4 py-2 rounded text-xs font-sans">
             Get App
           </button>
 
@@ -114,7 +115,7 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search..."
-            className="w-full p-2 rounded bg-gray-100 outline-none font-sans"
+            className="w-full p-2 rounded bg-gray-100 outline-none font-sans font-medium text-gray-800 text-[15px]"
           />
 
           {/* 🔥 DROPDOWN */}
