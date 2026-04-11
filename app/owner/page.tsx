@@ -58,7 +58,6 @@ export default function OwnerHome() {
 
   const [earnings, setEarnings] = useState(0);
   const [bookingsCount, setBookingsCount] = useState(0);
-   const [loggingOut, setLoggingOut] = useState(false);
 
   const [yesterdayEarnings, setYesterdayEarnings] = useState(0);
   const [yesterdayBookings, setYesterdayBookings] = useState(0);
@@ -72,30 +71,6 @@ export default function OwnerHome() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const channelRef = useRef<any>(null);
-
-
-  
-    // ================= LOGOUT =================
-    const logout = async () => {
-      if (loggingOut) return;
-  
-      setLoggingOut(true);
-  
-      try {
-        await supabase.auth.signOut();
-  
-        setShowLogoutToast(true);
-  
-        setTimeout(() => {
-          setShowLogoutToast(false);
-          setLoggingOut(false);
-        }, 1200);
-  
-      } catch (err) {
-        console.error("Logout error:", err);
-        setLoggingOut(false);
-      }
-    };
 
 
   const today = getDate(0);
@@ -319,25 +294,6 @@ export default function OwnerHome() {
         <div className="h-27 w-27 rounded-xl border border-gray-500 bg-rose-400 shadow-lg/20"><img src="/icons/water.png" className=" p-8" /></div>
 
       </div>
-
-
-
-
-
-<button
-              onClick={logout}
-              disabled={loggingOut}
-              className="w-full bg-red-500 text-white py-3 rounded-xl mt-8 flex items-center justify-center gap-2 font-sans"
-            >
-              {loggingOut ? "Logging out..." : "Logout Now"}
-            </button>
-
-
-
-
-
-
-
 
 
 
