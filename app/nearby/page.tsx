@@ -102,9 +102,16 @@ export default function NearbyPage() {
 
         <div className="px-4 mt-4">
 
+          <div className="flex justify-between items-center mb-1">
           <h2 className="text-lg text-black font-medium font-sans mb-3">
             Nearby Turfs
           </h2>
+               <div  onClick={() => setShowLocationModal(true)}
+               className="flex">
+                <img src="/icons/locationtop.png" className="h-4 pr-0.5" />
+                <p className="text-black font-sans font-medium text-sm/5"> {city || "loading..."} ›</p>
+               </div>
+          </div>
 
           <div className="space-y-4">
 

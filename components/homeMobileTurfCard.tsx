@@ -42,11 +42,12 @@ export default function MobileTurfCard({ turf, router }: Props) {
   return (
     <div
       onClick={() => router.push(`/turf/${turf.id}`)}
-      className="min-w-[165px] bg-white rounded-xl  p-1 cursor-pointer  border-1 border-gray-100 shadow-lg/10"
+      className="min-w-[160px] bg-white rounded-xl  p-1 cursor-pointer  border-1 border-gray-100 shadow-lg/10"
     >
       <img
         src={turf.image_url || "/turf.jpg"}
         className="h-30 w-full object-cover rounded-lg"
+        loading="lazy"
       />
 
       <div className="p-0.5" >
@@ -58,7 +59,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
           <div className="flex justify-between items-center gap-11">
 
 <div className="flex flex-row">
-          <img src="/icons/star.png" className="h-3.5 pr-0.5" /> 
+          <img src="/icons/star.png" className="h-3.5 pr-0.5" loading="lazy" /> 
           <p className=" text-black text-[12px] rounded font-sans">{avg.toFixed(1)}</p>
 </div>          
 
@@ -73,9 +74,9 @@ export default function MobileTurfCard({ turf, router }: Props) {
         <h2 className="font-medium font-sans text-[15px] text-black pl-1">{turf.name}</h2>
 
         {/* 📍 LOCATION */}
-        <div className="flex flex-row">
-        <img src="/icons/locationtop.png" className="h-4 pr-0.5" />
-        <p className="text-xs font-normal font-sans text-gray-700">{turf.locality}</p>
+        <div className="flex flex-row mt-0.5">
+        <img src="/icons/locationtop.png" className="h-4 pr-0.5" loading="lazy" />
+        <p className="text-xs/4.5 font-normal font-sans text-gray-700">{turf.locality}</p>
         </div>  
 
 
@@ -94,7 +95,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
 
           <img src="/icons/open.png" 
-            className="h-8 pr-1 pb-1" />
+            className="h-8 pr-1 pb-1" loading="lazy" />
         </div>
 
       </div>

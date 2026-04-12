@@ -13,7 +13,7 @@ type Props = {
 };
 
 // ✅ TYPE (safe)
-type TurfSearch = {
+type TurfSearch = { 
   id: string;
   name: string;
   price: number;
@@ -114,8 +114,8 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
             ref={inputRef}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search..."
-            className="w-full p-2 rounded bg-gray-100 outline-none font-sans font-medium text-gray-800 text-[15px]"
+            placeholder="Search Turfs..."
+            className="w-full p-2 pl-3 rounded bg-gray-100 outline-none font-sans font-medium text-gray-800 text-[15px]"
           />
 
           {/* 🔥 DROPDOWN */}

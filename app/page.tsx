@@ -57,10 +57,12 @@ function getDistance(lat1:number, lon1:number, lat2:number, lon2:number) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-const banners = ["/banner1.jpg", "/banner2.jpg", "/banner3.jpg"];
 
 export default function Home() {
   const router = useRouter();
+  const [banners, setBanners] = useState<
+  { image_url: string; redirect_url?: string | null }[]
+>([]);
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
   const [bookingCounts, setBookingCounts] = useState<Record<string, number>>({});
@@ -76,13 +78,20 @@ export default function Home() {
   const [touchStart, setTouchStart] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
 
-  const nextSlide = () => {
-  setCurrent((prev) => (prev + 1) % banners.length);
-  };
+  const safeBanners =
+  banners.length > 0
+    ? banners
+    : [{ image_url: "/banner1.jpg", redirect_url: null }];
 
-  const prevSlide = () => {
-  setCurrent((prev) => (prev - 1 + banners.length) % banners.length);
-  };
+  const nextSlide = () => {
+  if (safeBanners.length === 0) return;
+  setCurrent((prev) => (prev + 1) % safeBanners.length);
+};
+
+const prevSlide = () => {
+  if (safeBanners.length === 0) return;
+  setCurrent((prev) => (prev - 1 + safeBanners.length) % safeBanners.length);
+};
 
   // ================= LOAD =================
   useEffect(() => {
@@ -100,6 +109,18 @@ export default function Home() {
       if (data) setTurfs(data);
 
       const { data: bookings } = await supabase.from("bookings").select("turf_id");
+
+
+      // 🔥 FETCH BANNERS
+const { data: bannerData } = await supabase
+  .from("banners")
+  .select("image_url, redirect_url")
+  .eq("active", true)
+  .order("display_order", { ascending: true });
+
+if (bannerData) {
+  setBanners(bannerData);
+}
       
 
       if (bookings) {
@@ -154,12 +175,14 @@ useEffect(() => {
 
   // ================= CAROUSEL =================
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % banners.length);
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, []);
+  if (safeBanners.length === 0) return;
+
+const interval = setInterval(() => {
+  setCurrent((prev) => (prev + 1) % safeBanners.length);
+}, 3000);
+
+  return () => clearInterval(interval);
+}, [safeBanners.length]);
 
   if (!loading && profile?.role === "owner" && profile?.owner_approved) {
   return null; // ⛔ stop rendering completely
@@ -177,6 +200,10 @@ useEffect(() => {
     </div>
   );
 }
+
+
+
+
 
   // ================= UI =================
   return (
@@ -208,33 +235,45 @@ useEffect(() => {
         transform: `translateX(-${current * 100}%)`,
       }}
     >
-      {banners.map((b, i) => (
-        <img
-          key={i}
-          src={b}
-          className="w-full h-40 object-cover flex-shrink-0"
-        />
-      ))}
+      {(banners.length > 0
+  ? banners
+  : [{ image_url: "/banner1.jpg" }]
+).map((b, i) => (
+  <img
+    key={i}
+    src={b.image_url}
+    onClick={() => {
+  if (!b.redirect_url) return;
+
+  if (b.redirect_url.startsWith("http")) {
+    window.open(b.redirect_url, "_blank");
+  } else {
+    router.push(b.redirect_url);
+  }
+}}
+    className="w-full h-40 object-cover flex-shrink-0 cursor-pointer"
+  />
+))}
     </div>
 
     {/* DOTS */}
     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
-      {banners.map((_, i) => (
-        <div
-          key={i}
-          className={`h-2 w-2 rounded-full ${
-            i === current ? "bg-white" : "bg-white/50"
-          }`}
-        />
-      ))}
-    </div>
+  {(banners.length > 0 ? banners : [{ image_url: "/banner1.jpg" }]).map((_, i) => (
+  <div
+    key={i}
+    className={`h-2 w-2 rounded-full ${
+      i === current ? "bg-white" : "bg-white/50"
+    }`}
+  />
+))}
+</div>
 
   </div>
 </div>
 
         {/* SECTIONS */}
-        <MobileSection title="Trending Turfs" turfs={trendingTurfs} router={router} />
-        <MobileSection title="Nearby Turfs" turfs={nearbyTurfs} router={router} />
+        <MobileSection title="Todays Trending" turfs={trendingTurfs} router={router} />
+        <MobileSection title="Nearby Me" turfs={nearbyTurfs} router={router} />
         <MobileSection title="All Turfs" turfs={allTurfs} router={router} />
 
       </div>
@@ -261,13 +300,36 @@ useEffect(() => {
               if (diff < -50) prevSlide();
             }}
           >
-            <Slide src={banners[banners.length - 1]} isActive={false} />
+            {safeBanners.length >= 1 && (
+  <>
+    <Slide
+  src={safeBanners[safeBanners.length - 1].image_url}
+  isActive={false}
+/>
 
-            {banners.map((b, i) => (
-              <Slide key={i} src={b} isActive={i === current} />
-            ))}
+    {safeBanners.map((b, i) => (
+      <Slide
+  key={i}
+  src={b.image_url}
+  isActive={i === current}
+  onClick={() => {
+  if (!b.redirect_url) return;
 
-            <Slide src={banners[0]} isActive={false} />
+  if (b.redirect_url.startsWith("http")) {
+    window.open(b.redirect_url, "_blank");
+  } else {
+    router.push(b.redirect_url);
+  }
+}}
+/>
+    ))}
+
+    <Slide
+  src={safeBanners[0].image_url}
+  isActive={false}
+/>
+  </>
+)}
           </div>
 
           <button onClick={prevSlide} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow">
@@ -357,11 +419,29 @@ useEffect(() => {
 
 
 // ================= SLIDE =================
-function Slide({ src, isActive }: { src: string; isActive: boolean }) {
+function Slide({
+  src,
+  isActive,
+  onClick,
+}: {
+  src: string;
+  isActive: boolean;
+  onClick?: () => void;
+}) {
   return (
-    <div className="flex-shrink-0 w-[60%] px-3">
-      <div className={`${isActive ? "scale-100" : "scale-90 opacity-60"} transition-all`}>
-        <img src={src} className="w-full h-[200px] md:h-[350px] object-cover rounded-2xl" />
+    <div
+      onClick={onClick}
+      className="flex-shrink-0 w-[60%] px-3 cursor-pointer"
+    >
+      <div
+        className={`${
+          isActive ? "scale-100" : "scale-90 opacity-60"
+        } transition-all`}
+      >
+        <img
+          src={src}
+          className="w-full h-[200px] md:h-[350px] object-cover rounded-2xl"
+        />
       </div>
     </div>
   );

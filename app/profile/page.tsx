@@ -77,7 +77,10 @@ export default function ProfilePage() {
 
         {/* NOT LOGGED IN */}
         {!user && (
-          <div className="flex flex-col items-center justify-center mt-20 px-6 text-center">
+          <div className="flex flex-col items-center justify-center mt-10 px-6 text-center ">
+
+            <div className=" flex flex-col bg-green-50 p-5 items-center justify-center rounded-xl">
+
             <img src="/profile.png" className="w-37 h-37 mb-4" />
 
             <h2 className="text-lg font-semibold mb-2">
@@ -95,6 +98,8 @@ export default function ProfilePage() {
               Login
             </button>
 
+            </div>  
+
 
 
             <div className="mt-6 flex flex-col gap-3 mb-10">
@@ -104,6 +109,9 @@ export default function ProfilePage() {
               <PolicyMenuItem title="Refund and Payment" onClick={() => router.push("/refund")} />
               <PolicyMenuItem title="Contact us" onClick={() => router.push("/contact")} />
             </div>
+
+
+          
 
           </div>
 

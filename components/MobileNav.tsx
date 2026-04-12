@@ -70,7 +70,7 @@ export default function MobileNav() {
             >
               <img
                 src={active ? item.activeIcon : item.icon}
-                className="h-4.5 w-4.5 transition-all duration-200"
+                className="h-5 w-5 transition-all duration-200"
               />
             </div>
 

@@ -47,6 +47,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
       <img
         src={turf.image_url || "/turf.jpg"}
         className="h-30 w-full object-cover rounded-lg"
+        loading="lazy"
       />
 
       <div>
@@ -55,7 +56,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
           <div className="flex justify-between items-center gap-11">
 
 <div className="flex flex-row">
-          <img src="/icons/star.png" className="h-3.5 pr-0.5" /> 
+          <img src="/icons/star.png" className="h-3.5 pr-0.5"  loading="lazy" /> 
           <p className=" text-black text-[12px] rounded font-sans">{avg.toFixed(1)}</p>
 </div>
 
@@ -70,7 +71,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
 
         {/* 📍 LOCATION */}
         <div className="flex flex-row mb-1">
-        <img src="/icons/locationtop.png" className="h-4 pr-0.5" />
+        <img src="/icons/locationtop.png" className="h-4 pr-0.5" loading="lazy" />
         <p className="text-xs font-normal font-sans text-gray-700">{turf.locality}</p>
         </div>  
 
@@ -99,7 +100,7 @@ export default function MobileTurfCard({ turf, router }: Props) {
               e.stopPropagation();
               router.push(`/turf/${turf.id}`);
             }} src="/icons/open.png"
-            className="h-8 pr-1 pb-1" />
+            className="h-8 pr-1 pb-1" loading="lazy" />
         </div>
 
       </div>

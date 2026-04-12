@@ -27,7 +27,7 @@ export default function LocationPicker({
       container: mapContainer.current,
       style: "mapbox://styles/mapbox/streets-v11",
       center: defaultCenter,
-      zoom: 13,
+      zoom: 13, 
     });
 
     mapRef.current = map;
