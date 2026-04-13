@@ -29,6 +29,17 @@ type Booking = {
   end_time: string;
 };
 
+
+type Pricing = {
+  start_hour: number;
+  day_of_week: number;
+  price: number;
+};
+
+
+
+
+
 // ================= TIME HELPERS =================
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
@@ -81,13 +92,16 @@ const getToday = () => {
 
 // ================= PAGE =================
 export default function Page() {
-  const { id } = useParams();
+  const params = useParams();
+  const id = params?.id as string;
+
   const router = useRouter();
   const [turf, setTurf] = useState<Turf | null>(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
 
   const { user } = useUser();
 
-  const [pricing, setPricing] = useState<any[]>([]);
+  const [pricing, setPricing] = useState<Pricing[]>([]);
 
   const minPrice = turf?.min_price ?? turf?.price ?? 0;
   const maxPrice = turf?.max_price ?? turf?.price ?? 0;
@@ -208,14 +222,21 @@ const loadStatic = async () => {
 
 
 // ✅ LOAD BOOKINGS (ON DATE CHANGE)
-const loadBookings = async () => {
-  const { data } = await supabase
-    .from("bookings")
-    .select("start_time,end_time")
-    .eq("turf_id", id)
-    .eq("booking_date", date);
+const loadBookings = async () : Promise<void> => {
+  if (!id) return;
 
-  setBookings(data || []);
+  const { data, error } = await supabase
+  .from("bookings")
+  .select("start_time,end_time")
+  .eq("turf_id", id)
+  .eq("booking_date", date);
+
+if (error) {
+  console.error(error);
+  return;
+}
+
+setBookings(data ?? []);
 };
 
 
@@ -232,7 +253,11 @@ useEffect(() => {
 useEffect(() => {
   if (!id || !date) return;
 
-  loadBookings();
+  const fetchBookings = async () => {
+    await loadBookings();
+  };
+
+  fetchBookings();
 }, [id, date]);
 
 
@@ -253,6 +278,15 @@ useEffect(() => {
   }, 0);
 
 }, [id]);
+
+
+useEffect(() => {
+  const close = () => setShowDatePicker(false);
+  window.addEventListener("click", close);
+  return () => window.removeEventListener("click", close);
+}, []);
+
+
   
 
   // ================= REALTIME =================
@@ -271,7 +305,7 @@ useEffect(() => {
           event: "*",
           schema: "public",
           table: "bookings",
-          filter: `turf_id=eq.${id}`,
+          filter: `turf_id=eq.${id} AND booking_date=eq.${date}`,
         },
         async () => {
           await loadBookings();
@@ -287,8 +321,27 @@ useEffect(() => {
   }, [id, date]);
 
 
-   if (!turf || loading) return <div className="p-5">Loading...</div>;
+   if (!turf || loading) {
+  return (
+    <div className="min-h-screen bg-white animate-pulse p-4">
 
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-5 h-5 bg-gray-300 rounded"></div>
+        <div className="h-5 w-32 bg-gray-300 rounded"></div>
+      </div>
+
+      <div className="h-6 w-48 bg-gray-300 rounded mb-2"></div>
+      <div className="h-4 w-32 bg-gray-300 rounded mb-4"></div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {[...Array(9)].map((_, i) => (
+          <div key={i} className="h-12 bg-gray-300 rounded-full"></div>
+        ))}
+      </div>
+
+    </div>
+  );
+}
 
   const slots = buildSlots(turf);
 
@@ -304,6 +357,13 @@ useEffect(() => {
   const currentMin = now.getHours() * 60 + now.getMinutes();
 
   const computed = slots.map((s) => {
+
+    const isNowSlot =
+  date === today &&
+  s.startMin <= currentMin &&
+  currentMin < s.startMin + 60;
+
+
   const isBooked = bookedSet.has(s.key);
 
   const selectedDate = new Date(date);
@@ -319,7 +379,7 @@ useEffect(() => {
     (date === today && s.startMin <= currentMin);
 
   // 🔥 FIND PRICE
-  const hour = s.startMin / 60;
+  const hour = Math.floor(s.startMin / 60);
 
   
 const dayOfWeek = selectedDate.getDay(); // 0–6
@@ -338,7 +398,7 @@ const priceRow = pricing.find(
     ? "booked"
     : "available";
 
-  return { ...s, status, price };
+  return { ...s, status, price, isNowSlot };
 });
 
   // ================= SELECT =================
@@ -362,17 +422,23 @@ const priceRow = pricing.find(
 
   // ================= BOOK =================
   const book = async () => {
+
+    if (bookingLoading) return;
+setBookingLoading(true);
+
   // ✅ ADD THIS
   if (!user) {
-    alert("Please login to continue");
-    router.push("/login");
-    return;
-  }
+  alert("Please login to continue");
+  router.push("/login");
+  setBookingLoading(false); // ✅ add
+  return;
+}
 
-  if (selected.size === 0) {
-    alert("Please select atleast one slot to continue");
-    return;
-  }
+if (selected.size === 0) {
+  alert("Please select atleast one slot to continue");
+  setBookingLoading(false); // ✅ add
+  return;
+}
 
   const keys = Array.from(selected);
 
@@ -394,6 +460,7 @@ const priceRow = pricing.find(
     if (conflict.length) {
       alert("Some slots already booked!");
       setSelected(new Set());
+      setBookingLoading(false); // ✅ add
       return;
     }
 
@@ -436,11 +503,13 @@ if (error) {
   }
 
   alert("Booking failed: " + error.message);
+  setBookingLoading(false); // ✅ add
   return;
 }
 
     alert("Booked ✅");
     router.push("/bookings");
+    setBookingLoading(false);
   };
 
   const next10Days = Array.from({ length: 10 }).map((_, i) => {
@@ -462,6 +531,8 @@ if (error) {
 
   return { value, label };
 });
+
+
 
 
   return (
@@ -514,7 +585,10 @@ if (error) {
 
   {/* SMALL DATE BUTTON */}
   <div
-    onClick={() => setShowDatePicker(!showDatePicker)}
+    onClick={(e) => {
+  e.stopPropagation(); // 🔥 important
+  setShowDatePicker(!showDatePicker);
+}}
     className="px-3 py-1 border rounded-lg text-sm cursor-pointer bg-gray-100"
   >
     {next10Days.find(d => d.value === date)?.label || "Select Date"}
@@ -522,7 +596,9 @@ if (error) {
 
   {/* DROPDOWN DATE SCROLL */}
   {showDatePicker && (
-    <div className="absolute right-0 mt-2 bg-white shadow-lg border rounded-xl p-3 z-50 w-[260px]">
+    <div 
+    onClick={(e) => e.stopPropagation()} // 🔥 prevents closing
+    className="absolute right-0 mt-2 bg-white shadow-lg border rounded-xl p-3 z-50 w-[260px]">
 
       <div className="flex gap-3 overflow-x-auto no-scrollbar">
 
@@ -568,9 +644,10 @@ if (error) {
                 key={s.key}
                 onClick={() => toggle(s.key)}
                 className={`relative rounded-full px-3 py-1 text-center text-sm shadow-lg
+                ${s.isNowSlot && "ring-2 ring-yellow-400"}
                 ${s.status === "timeout" && "bg-gray-300 border border-gray-400 text-white"}
                 ${s.status === "booked" && "bg-gray-300 border border-gray-400 text-red-400"}
-                ${s.status === "available" && "text-black text-base font-sans font-medium border-1 border-green-300"}
+                ${s.status === "available" && "text-black text-base font-sans font-medium border-1 border-green-300 "}
                 ${isSelected && "bg-green-500 text-white border border-gray-200"}
               `}
               >
@@ -684,6 +761,9 @@ if (error) {
   <div
     onClick={selected.size > 0 ? book : undefined}
     className={`w-full py-3 px-4 rounded-xl flex justify-between items-center
+
+      ${bookingLoading ? "opacity-50 pointer-events-none" : ""}
+
     ${selected.size > 0 
       ? "bg-green-700 text-white cursor-pointer" 
       : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -701,8 +781,8 @@ if (error) {
 
     <div>
       <p className="text-base font-medium">
-        Proceed To Pay
-      </p>
+  {bookingLoading ? "Processing..." : "Proceed To Pay"}
+</p>
     </div>
 
   </div>
@@ -825,6 +905,9 @@ if (error) {
   <div
     onClick={selected.size > 0 ? book : undefined}
     className={`w-full py-3 px-4 rounded-xl flex justify-between items-center
+
+      ${bookingLoading ? "opacity-50 pointer-events-none" : ""}
+
     ${selected.size > 0 
       ? "bg-green-700 text-white cursor-pointer" 
       : "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -842,8 +925,8 @@ if (error) {
 
     <div>
       <p className="text-base font-medium">
-        Proceed To Pay
-      </p>
+  {bookingLoading ? "Processing..." : "Proceed To Pay"}
+</p>
     </div>
 
   </div>
