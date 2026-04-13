@@ -7,7 +7,6 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import dynamic from "next/dynamic";
 import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
-import Image from "next/image";
 
 import { useUser } from "@/lib/userContext";
 
@@ -580,15 +579,12 @@ const sports = turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()).filte
       onClick={() => router.push(`/turf/${turf.id}`)}
       className="bg-white rounded-xl shadow-xl/30 cursor-pointer overflow-hidden p-2"
     >
-      <Image
+      <img
   src={turf.image_url || "/turf.jpg"}
   alt={`${turf.name} turf in ${turf.locality}`}
-  width={400}
-  height={250}
-  sizes="(max-width: 768px) 100vw, 400px"
-  className="object-cover rounded-xl"
-  placeholder="blur"
-  blurDataURL="/blur.jpg"
+  loading="lazy"
+  onLoad={(e) => e.currentTarget.classList.remove("opacity-0")}
+  className="w-full h-[180px] object-cover rounded-xl opacity-0 transition-opacity duration-500"
 />
 
       <div className="p-3">

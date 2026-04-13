@@ -55,6 +55,7 @@ function getDistance(lat1:number, lon1:number, lat2:number, lon2:number) {
 
 export default function NearbyPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const { city, location, setLocationData } = useLocation();
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
@@ -63,18 +64,24 @@ export default function NearbyPage() {
   // ================= FETCH =================
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
-        .from("turfs")
-        .select(`
-          *,
-          reviews ( rating ),
-          turf_sports (
-            sports ( name )
-          )
-        `);
+  setLoading(true);
 
-      if (data) setTurfs(data as Turf[]);
-    };
+  const { data, error } = await supabase
+  .from("turfs")
+  .select(`
+    *,
+    reviews ( rating ),
+    turf_sports ( sports ( name ) )
+  `);
+
+if (error) {
+  console.error(error);
+} else if (data) {
+  setTurfs(data as Turf[]);
+}
+
+  setLoading(false);
+};
     load();
   }, []);
 
@@ -115,29 +122,63 @@ export default function NearbyPage() {
 
           <div className="space-y-4">
 
-            {sortedTurfs.map((t) => {
-  let distance: number | null = null;
+  {/* 🔥 NO LOCATION */}
+  {!location && !loading && (
+    <div
+      onClick={() => setShowLocationModal(true)}
+      className="text-center py-4 cursor-pointer"
+    >
+      <p className="text-gray-400 text-sm">
+        Tap to select location 📍
+      </p>
+    </div>
+  )}
 
-  if (location) {
-    distance = getDistance(
-      location.lat,
-      location.lng,
-      t.map_lat,
-      t.map_lng
-    );
-  }
+  {/* 🔥 LOADING */}
+  {loading ? (
+    <div className="space-y-4">
+  {[1, 2, 3].map((i) => (
+    <NearbyCardSkeleton key={i} />
+  ))}
+</div>
+    
+  ) : !location ? null : sortedTurfs.length === 0 ? (
 
-  return (
-    <NearbyMobileCard
-      key={t.id}
-      turf={t}
-      router={router}
-      distance={distance}
-    />
-  );
-})}
+    /* 🔥 EMPTY STATE */
+    <div className="text-center py-6">
+      <img src="/empty.png" className="w-24 mx-auto mb-2 opacity-70" />
+      <p className="text-gray-400 text-sm">No turfs found nearby 
+        (Try changing Your Location)
+      </p>
+    </div>
 
-          </div>
+  ) : (
+
+    /* 🔥 DATA */
+    sortedTurfs.map((t) => {
+      let distance: number | null = null;
+
+      if (location) {
+        distance = getDistance(
+          location.lat,
+          location.lng,
+          t.map_lat,
+          t.map_lng
+        );
+      }
+
+      return (
+        <NearbyMobileCard
+          key={t.id}
+          turf={t}
+          router={router}
+          distance={distance}
+        />
+      );
+    })
+
+  )}
+</div>
         </div>
       </div>
 
@@ -157,81 +198,120 @@ export default function NearbyPage() {
           </h2>
 
           <div className="grid grid-cols-4 gap-6">
-            {sortedTurfs.map((t) => {
-              let distance: number | null = null;
 
-              if (location) {
-                distance = getDistance(
-                  location.lat,
-                  location.lng,
-                  t.map_lat,
-                  t.map_lng
-                );
-              }
+  {loading ? (
 
-              const avg =
-    t.reviews?.length
-      ? t.reviews.reduce((s, r) => s + r.rating, 0) / t.reviews.length
-      : 0;
+    /* 🔥 LOADING */
+    [...Array(8)].map((_, i) => (
+  <NearbyCardSkeleton key={i} />
+))
+
+  ) : !location ? (
+  <div className="col-span-full text-center py-10 cursor-pointer"
+       onClick={() => setShowLocationModal(true)}>
+    <p className="text-gray-400">Select location to see nearby turfs 📍</p>
+  </div>
+) : sortedTurfs.length === 0 ? (
+
+    /* 🔥 EMPTY */
+    <div className="col-span-full text-center py-10">
+      <img src="/empty.png" className="w-28 mx-auto mb-3 opacity-70" />
+      <p className="text-gray-400">No turfs found Nearby 
+        (Try changing Your Location)</p>
+    </div>
+
+  ) : (
+
+    /* 🔥 DATA */
+    sortedTurfs.map((t) => {
+      let distance: number | null = null;
+
+      if (location) {
+        distance = getDistance(
+          location.lat,
+          location.lng,
+          t.map_lat,
+          t.map_lng
+        );
+      }
+
+      const avg =
+        t.reviews?.length
+          ? t.reviews.reduce((s, r) => s + r.rating, 0) / t.reviews.length
+          : 0;
 
       const min = t.min_price ?? t.price;
       const max = t.max_price ?? t.price;
 
-              
+      return (
+        <div
+          key={t.id}
+          onClick={() => router.push(`/turf/${t.id}`)}
+          className="bg-white rounded-xl shadow-xl/30 cursor-pointer overflow-hidden p-2 
+transition duration-200 hover:scale-[1.02] active:scale-95"
+        >
+          <img
+            src={t.image_url || "/turf.jpg"}
+            loading="lazy"
+            className="h-[190px] w-full object-cover rounded-xl"
+          />
 
-              return (
-                <div key={t.id}
-                onClick={() => router.push(`/turf/${t.id}`)}
-                 className="bg-white rounded-xl shadow-xl/30 cursor-pointer overflow-hidden p-2">
+          <div className="p-3">
 
-                  
+            <div className="flex justify-between text-sm font-sans">
+              <div>
+                <span className="bg-yellow-500 px-3 py-1 rounded text-white text-xs">
+                  {avg.toFixed(1)}
+                </span>
+                <span className="ml-2 text-gray-600">
+                  {t.reviews?.length || 0} reviews
+                </span>
+              </div>
 
-                  <img
-                    src={t.image_url || "/turf.jpg"}
-                    className="h-47 w-full object-cover rounded-xl"
-                  />
+              {/* ✅ FIXED DISTANCE BUG */}
+              {distance !== null && (
+  <div
+    className={`text-sm flex items-center gap-2 px-2 py-0.5 rounded-full border ${
+      distance < 3
+        ? "border-green-500 text-green-600"
+        : distance < 8
+        ? "border-yellow-500 text-yellow-600"
+        : "border-gray-400 text-gray-500"
+    }`}
+  >
+    <img src="/icons/direction.png" className="h-3" />
+    {distance.toFixed(1)} km
+  </div>
+)}
+            </div>
 
-                  <div className="p-3">
+            <h2 className="text-lg text-black font-semibold mt-1">
+              {t.name}
+            </h2>
 
-        <div className="flex justify-between text-sm font-sans">
-          <div>
-            <span className="bg-yellow-500 px-3 py-1 rounded text-white text-xs font-sans">{avg.toFixed(1)}</span>
-            <span className="ml-2 font-sans text-gray-600">{t.reviews?.length || 0} reviews</span>
+            <div className="text-sm text-gray-600">
+              {t.address.split(",").map((l, i) => (
+                <div key={i}>{l.trim()}</div>
+              ))}
+            </div>
+
+            <div className="flex justify-between items-center mt-3">
+              <p className="text-black font-semibold text-lg">
+                ₹{min}
+                {min !== max && ` - ₹${max}`}
+                <span className="text-gray-600 text-base"> /hr</span>
+              </p>
+
+              <img src="/icons/open.png" className="h-7" />
+            </div>
+
           </div>
-          {distance && (
-                    <div className="text-sm text-black font-sans flex items-center gap-2 border-2 border-gray-600 rounded-4xl px-2 py-0.5 ">
-                      <img src="/icons/direction.png" className="h-3" /> 
-                      {distance.toFixed(1)} km
-                    </div>
-                  )}
         </div>
+      );
+    })
 
-        <h2 className="text-lg text-black font-semibold mt-1 font-sans">{t.name}</h2>
-
-        <div className="text-sm text-gray-600 font-sans">
-          {t.address.split(",").map((l, i) => (
-            <div key={i}>{l.trim()}</div>
-          ))}
-        </div>
-
- 
-        <div className="flex justify-between items-center mt-3">
-
-          <p className="text-black font-semibold text-lg font-sans">
-  ₹{min}
-  {min !== max && ` - ₹${max}`}
-  <span className="text-gray-600 font-medium text-base font-sans"> /hr</span>
-</p>
-
-          <img src="/icons/open.png" className="h-7" />
-        </div>
-        
-      </div>
-
-                </div>
-              );
-            })}
-          </div>
+  )}
+</div>
 
         </div>
       </div>
@@ -283,5 +363,27 @@ export default function NearbyPage() {
       )}
     </div>
     </UserOnly>
+  );
+}
+
+
+function NearbyCardSkeleton() {
+  return (
+    <div className="bg-white rounded-xl p-2 animate-pulse shadow-sm">
+      
+      <div className="h-[120px] w-full bg-gray-200 rounded-xl mb-2" />
+
+      <div className="space-y-2 px-1">
+        <div className="h-4 w-3/4 bg-gray-200 rounded" />
+        <div className="h-3 w-1/2 bg-gray-200 rounded" />
+        <div className="h-3 w-2/3 bg-gray-200 rounded" />
+      </div>
+
+      <div className="flex justify-between items-center mt-3 px-1">
+        <div className="h-4 w-1/4 bg-gray-200 rounded" />
+        <div className="h-6 w-6 bg-gray-200 rounded-full" />
+      </div>
+
+    </div>
   );
 }

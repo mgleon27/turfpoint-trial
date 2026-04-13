@@ -50,6 +50,7 @@ type Turf = {
 
 export default function SportsPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   const [sports, setSports] = useState<Sport[]>([]);
   const [selectedSport, setSelectedSport] = useState<string | null>(null);
@@ -72,7 +73,7 @@ export default function SportsPage() {
   return turfs.filter((t) => {
     const matchesSearch =
       t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.address.toLowerCase().includes(search.toLowerCase());
+      (t.address || "").toLowerCase().includes(search.toLowerCase());
 
     const matchesSport =
       !selectedSport ||
@@ -90,6 +91,8 @@ export default function SportsPage() {
   // ================= FETCH =================
   useEffect(() => {
   const load = async () => {
+    setLoading(true);
+
     const { data: sportsData } = await supabase.from("sports").select("*");
 
     const { data: turfData } = await supabase
@@ -97,16 +100,13 @@ export default function SportsPage() {
       .select(`
         *,
         reviews ( rating ),
-        turf_sports (
-          sports ( name )
-        )
+        turf_sports ( sports ( name ) )
       `);
 
     if (sportsData) setSports(sportsData);
+    if (turfData) setTurfs(turfData);
 
-    if (turfData) {
-      setTurfs(turfData);
-    }
+    setLoading(false);
   };
 
   load();
@@ -129,7 +129,20 @@ export default function SportsPage() {
 
         {/* SPORTS SCROLL */}
         <div className="flex gap-3 overflow-x-auto pb-5 no-scrollbar">
-          {sports.map((s) => (
+          {loading ? (
+
+  // 🔥 SHIMMER UI
+  [...Array(5)].map((_, i) => (
+    <div
+      key={i}
+      className="min-w-[110px] h-[150px] rounded-2xl bg-gray-200 animate-pulse"
+    />
+  ))
+
+) : (
+
+  // ✅ REAL DATA
+  sports.map((s) => (
             <div
               key={s.id}
               onClick={() => {
@@ -142,7 +155,7 @@ export default function SportsPage() {
 
                 
               }}
-              className={`min-w-[110px] h-38 rounded-2xl border-2 ${
+              className={`min-w-[110px] h-[150px] rounded-2xl border-2 ${
                 selectedSport === s.name.toLowerCase()
                   ? "border-green-500 border-3"
                   : "border-gray-200"
@@ -159,7 +172,7 @@ export default function SportsPage() {
                 </div>
               </div>
             </div>
-          ))}
+          )))}
         </div>
 
         {/* SELECTED TEXT */}
@@ -172,12 +185,36 @@ export default function SportsPage() {
           </p>
         )}
 
+
+        <p className="text-gray-400 text-sm mt-1">
+  {filteredTurfs.length} turfs found
+</p>
+
+
+
         {/* TURF GRID (3 PER ROW) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-1">
-          {filteredTurfs.map((t) => (
-            <MobileTurfCard key={t.id} turf={t} router={router} />
-          ))}
-        </div>
+       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-1">
+
+  {loading ? (
+    [...Array(6)].map((_, i) => (
+      <div key={i} className="animate-pulse">
+        <div className="h-32 bg-gray-200 rounded-xl mb-2" />
+        <div className="h-4 bg-gray-200 w-3/4 rounded mb-1" />
+        <div className="h-3 bg-gray-200 w-1/2 rounded" />
+      </div>
+    ))
+  ) : filteredTurfs.length === 0 ? (
+    <div className="col-span-full text-center py-6">
+      <img src="/empty.png" className="w-24 mx-auto mb-2 opacity-70" />
+      <p className="text-gray-400 text-sm">No turfs found</p>
+    </div>
+  ) : (
+    filteredTurfs.map((t) => (
+      <MobileTurfCard key={t.id} turf={t} router={router} />
+    ))
+  )}
+
+</div>
 
       </div>
     </div>
@@ -202,7 +239,20 @@ export default function SportsPage() {
 
           {/* DESKTOP SPORTS */}
           <div className="flex gap-4 mt-4 flex-wrap">
-            {sports.map((s) => (
+            {loading ? (
+
+  // 🔥 SHIMMER UI
+  [...Array(5)].map((_, i) => (
+    <div
+      key={i}
+      className="min-w-[110px] h-[150px] rounded-2xl bg-gray-200 animate-pulse"
+    />
+  ))
+
+) : (
+
+  // ✅ REAL DATA
+  sports.map((s) => (
               <div
                 key={s.id}
                 onClick={() => {
@@ -231,7 +281,7 @@ export default function SportsPage() {
                   </div>
                 </div>
               </div>
-            ))}
+            )))}
           </div>
 
           {selectedSport && (
@@ -245,9 +295,30 @@ export default function SportsPage() {
 
           {/* DESKTOP GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {filteredTurfs.map((t) => (
-              <TurfCard key={t.id} turf={t} router={router} />
-            ))}
+            {loading ? (
+
+  [...Array(8)].map((_, i) => (
+    <div key={i} className="animate-pulse">
+      <div className="h-40 bg-gray-200 rounded-xl mb-2" />
+      <div className="h-4 bg-gray-200 w-1/2 rounded mb-1" />
+      <div className="h-3 bg-gray-200 w-3/4 rounded" />
+    </div>
+  ))
+
+) : filteredTurfs.length === 0 ? (
+
+  <div className="col-span-full text-center py-10">
+    <img src="/empty.png" className="w-28 mx-auto mb-3 opacity-70" />
+    <p className="text-gray-400">No turfs found</p>
+  </div>
+
+) : (
+
+  filteredTurfs.map((t) => (
+    <TurfCard key={t.id} turf={t} router={router} />
+  ))
+
+)}
           </div>
 
         </div>
@@ -331,7 +402,7 @@ const max = turf.max_price ?? turf.price;
     >
       <img
         src={turf.image_url || "/turf.jpg"}
-        className="h-47 w-full object-cover rounded-xl"
+        className="h-[190px] w-full object-cover rounded-xl"
       />
 
       <div className="p-3">

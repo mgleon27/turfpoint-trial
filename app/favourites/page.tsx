@@ -60,7 +60,9 @@ export default function FavouritesPage() {
   const router = useRouter();
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
+  const [pageLoading, setPageLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
    const { user, loading } = useUser(); // ✅ GLOBAL AUTH
 
@@ -77,8 +79,11 @@ export default function FavouritesPage() {
   if (loading) return;
 
   const load = async () => {
+    setPageLoading(true); // 🔥 START LOADING
+
     if (!user) {
       setTurfs([]);
+      setPageLoading(false); // 🔥 STOP (important)
       return;
     }
 
@@ -89,6 +94,7 @@ export default function FavouritesPage() {
 
     if (!favs || favs.length === 0) {
       setTurfs([]);
+      setPageLoading(false);
       return;
     }
 
@@ -99,13 +105,13 @@ export default function FavouritesPage() {
       .select(`
         *,
         reviews ( rating ),
-        turf_sports (
-          sports ( name )
-        )
+        turf_sports ( sports ( name ) )
       `)
       .in("id", turfIds);
 
     setTurfs((turfData as Turf[]) || []);
+
+    setPageLoading(false); // 🔥 END LOADING
   };
 
   load();
@@ -158,26 +164,36 @@ if (loading) {
 
   // ================= REMOVE =================
   const handleRemove = async (turf: Turf) => {
-    if (!user) return;
+  if (!user) return;
 
+  setRemovingId(turf.id); // 🔥 start animation
+
+  setTimeout(async () => {
+    // remove from UI
     setTurfs((prev) => prev.filter((t) => t.id !== turf.id));
+
+    // store for undo
     setRemovedTurf(turf);
 
+    // delete from DB
     await supabase
       .from("favorites")
       .delete()
       .eq("user_id", user.id)
       .eq("turf_id", turf.id);
 
-    setTimeout(() => setRemovedTurf(null), 4000);
-  };
+    setRemovingId(null); // reset
+  }, 300); // 🔥 animation duration
+};
 
   const handleUndo = async () => {
   if (!removedTurf || !user) return;
 
   setTurfs((prev) => [removedTurf, ...prev]);
 
-  await supabase.from("favorites").insert({
+  await supabase
+  .from("favorites")
+  .upsert({
     user_id: user.id,
     turf_id: removedTurf.id,
   });
@@ -221,22 +237,45 @@ if (loading) {
         {/* ✅ LOGGED IN */}
         {user && (
           <div className="grid grid-cols-2 gap-3">
-            {sortedTurfs
-  .filter((t) =>
-    t.name.toLowerCase().includes(search.toLowerCase()) ||
-    t.address.toLowerCase().includes(search.toLowerCase())
-  )
-  .map((t) => (
-              <MobileFavCard
-                key={t.id}
-                turf={t}
-                router={router}
-                onRemove={() => handleRemove(t)}
-              />
-            ))}
-          </div>
-        )}
+
+  {pageLoading ? (
+    [...Array(6)].map((_, i) => (
+      <div key={i} className="animate-pulse">
+        <div className="h-32 bg-gray-200 rounded-xl mb-2" />
+        <div className="h-4 bg-gray-200 w-3/4 rounded mb-1" />
       </div>
+    ))
+  ) : sortedTurfs.length === 0 ? (
+
+    // ✅ EMPTY STATE INSIDE GRID
+    <div className="col-span-2 text-center py-10">
+      <img src="/empty.png" className="w-24 mx-auto mb-3 opacity-70" />
+      <p className="text-gray-400 text-sm">
+        No favourites yet
+      </p>
+      <button
+        onClick={() => router.push("/")}
+        className="mt-3 text-green-600 font-medium"
+      >
+        Explore Turfs
+      </button>
+    </div>
+
+  ) : (
+    sortedTurfs.map((t) => (
+      <MobileFavCard
+        key={t.id}
+        turf={t}
+        router={router}
+        onRemove={() => handleRemove(t)}
+        removingId={removingId}
+      />
+    ))
+  )}
+
+</div>
+
+      
 
       {/* 🔥 TOAST */}
       {removedTurf && (
@@ -305,22 +344,45 @@ if (loading) {
 
           {/* GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {sortedTurfs
-  .filter((t) =>
-    t.name.toLowerCase().includes(search.toLowerCase()) ||
-    t.address.toLowerCase().includes(search.toLowerCase())
-  )
-  .map((t) => (
+            {pageLoading ? (
+  [...Array(6)].map((_, i) => (
+    <div key={i} className="animate-pulse">
+      <div className="h-32 bg-gray-200 rounded-xl mb-2" />
+      <div className="h-4 bg-gray-200 w-3/4 rounded mb-1" />
+    </div>
+  ))
+) : (
+  sortedTurfs.map((t) => (
               <TurfCard
                 key={t.id}
                 turf={t}
                 router={router}
                 onRemove={() => handleRemove(t)}
+                removingId={removingId}
               />
-            ))}
+            )))}
           </div>
         </div>
       )}
+
+
+
+      {user && sortedTurfs.length === 0 && (
+  <div className="col-span-full text-center py-10">
+    <img src="/empty.png" className="w-24 mx-auto mb-3 opacity-70" />
+    <p className="text-gray-400 text-sm">
+      No favourites yet
+    </p>
+    <button
+      onClick={() => router.push("/")}
+      className="mt-3 text-green-600 font-medium"
+    >
+      Explore Turfs
+    </button>
+  </div>
+)}
+
+
 
       {/* TOAST */}
       {removedTurf && (
@@ -385,13 +447,21 @@ function MobileFavCard({
   turf,
   router,
   onRemove,
+  removingId,
 }: {
   turf: Turf;
   router: AppRouterInstance;
   onRemove: () => void;
+  removingId: string | null;
 }) {
   return (
-    <div className="relative">
+    <div
+  className={`relative transition-all duration-300 ${
+    removingId === turf.id
+      ? "opacity-0 scale-90"
+      : "opacity-100 scale-100"
+  }`}
+>
 
       {/* CARD */}
       <MobileTurfCard turf={turf} router={router} />
@@ -420,10 +490,12 @@ function TurfCard({
   turf,
   router,
   onRemove,
+  removingId,
 }: {
   turf: Turf;
   router: AppRouterInstance;
   onRemove: () => void;
+  removingId: string | null;
 }) {
 
   const [liked, setLiked] = useState(true);
@@ -439,7 +511,12 @@ function TurfCard({
   return (
     <div 
      onClick={() => router.push(`/turf/${turf.id}`)}
-     className="bg-white rounded-xl overflow-hidden shadow-xl/20 transition">
+     className={`bg-white rounded-xl overflow-hidden shadow-xl/20 transition-all duration-300 ${
+    removingId === turf.id
+      ? "opacity-0 scale-90"
+      : "opacity-100 scale-100"
+  }`}
+>
 
       {/* IMAGE */}
       <div className="relative">

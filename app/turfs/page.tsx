@@ -45,6 +45,7 @@ type Turf = {
 
 export default function TurfsPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   const [turfs, setTurfs] = useState<Turf[]>([]);
   const [search, setSearch] = useState("");
@@ -64,7 +65,7 @@ export default function TurfsPage() {
 
     return (
       t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.address.toLowerCase().includes(search.toLowerCase())
+      (t.address || "").toLowerCase().includes(search.toLowerCase())
     );
   });
 
@@ -72,7 +73,9 @@ export default function TurfsPage() {
   // ================= FETCH =================
  useEffect(() => {
   const load = async () => {
-    const { data: turfData } = await supabase
+    setLoading(true);
+
+    const { data, error } = await supabase
       .from("turfs")
       .select(`
         *,
@@ -82,9 +85,13 @@ export default function TurfsPage() {
         )
       `);
 
-    if (turfData) {
-      setTurfs(turfData);
+    if (error) {
+      console.error("Error fetching turfs:", error);
+    } else if (data) {
+      setTurfs(data);
     }
+
+    setLoading(false);
   };
 
   load();
@@ -106,13 +113,51 @@ return (
 
         <h2 className="text-lg text-black ml-2 font-medium font-sans mb-3">All Turfs</h2>
 
+
+        <p className="text-gray-400 text-sm mt-2">
+  {filteredTurfs.length} turfs found
+</p>
+
+
+
+
+
+{!location && !loading && (
+  <div
+    onClick={() => setShowLocationModal(true)}
+    className="text-center py-3 cursor-pointer"
+  >
+    <p className="text-gray-400 text-sm">
+      Select location for better results 📍
+    </p>
+  </div>
+)}
+
+
+
+
+
+
         {/* ✅ 2 CARDS PER ROW (NO OVERLAP) */}
         <div className="grid grid-cols-2 gap-3">
-          {filteredTurfs.map((t) => (
-            <div key={t.id} className="w-full">
-              <MobileTurfCard turf={t} router={router} />
-            </div>
-          ))}
+          {loading ? (
+  [...Array(6)].map((_, i) => (
+    <div key={i} className="animate-pulse">
+      <div className="h-32 bg-gray-200 rounded-xl mb-2" />
+      <div className="h-4 bg-gray-200 w-3/4 rounded mb-1" />
+      <div className="h-3 bg-gray-200 w-1/2 rounded" />
+    </div>
+  ))
+) : filteredTurfs.length === 0 ? (
+  <div className="col-span-full text-center py-6">
+    <img src="/empty.png" className="w-24 mx-auto mb-2 opacity-70" />
+    <p className="text-gray-400 text-sm">No turfs found</p>
+  </div>
+) : (
+  filteredTurfs.map((t) => (
+    <MobileTurfCard key={t.id} turf={t} router={router} />
+  ))
+)}
         </div>
 
       </div>
@@ -137,11 +182,53 @@ return (
             <h2 className="text-2xl font-semibold">All Turfs</h2>
           </div>
 
+
+
+
+          {!location && !loading && (
+  <div
+    onClick={() => setShowLocationModal(true)}
+    className="text-center py-6 cursor-pointer"
+  >
+    <p className="text-gray-400">
+      Select location to see nearby turfs 📍
+    </p>
+  </div>
+)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           {/* DESKTOP GRID */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {filteredTurfs.map((t) => (
-              <TurfCard key={t.id} turf={t} router={router} />
-            ))}
+            {loading ? (
+  [...Array(6)].map((_, i) => (
+    <div key={i} className="animate-pulse">
+      <div className="h-32 bg-gray-200 rounded-xl mb-2" />
+      <div className="h-4 bg-gray-200 w-3/4 rounded mb-1" />
+      <div className="h-3 bg-gray-200 w-1/2 rounded" />
+    </div>
+  ))
+) : filteredTurfs.length === 0 ? (
+  <div className="col-span-full text-center py-6">
+    <img src="/empty.png" className="w-24 mx-auto mb-2 opacity-70" />
+    <p className="text-gray-400 text-sm">No turfs found</p>
+  </div>
+) : (
+  filteredTurfs.map((t) => (
+    <MobileTurfCard key={t.id} turf={t} router={router} />
+  ))
+)}
           </div>
 
         </div>
@@ -229,7 +316,7 @@ const max = turf.max_price ?? turf.price;
     >
       <img
         src={turf.image_url || "/turf.jpg"}
-        className="h-47 w-full object-cover rounded-xl"
+        className="h-[190px] w-full object-cover rounded-xl"
       />
 
       <div className="p-3">

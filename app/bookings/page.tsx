@@ -40,6 +40,7 @@ export default function BookingsPage() {
   const router = useRouter();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [pageLoading, setPageLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<"upcoming" | "completed">("upcoming");
 
@@ -52,23 +53,30 @@ export default function BookingsPage() {
   
 useEffect(() => {
   const loadBookings = async () => {
-    if (!user) return;
+  if (!user) {
+  setPageLoading(false);
+  return;
+}
 
-    const { data: bookingsData } = await supabase
-      .from("bookings")
-      .select(`
-        *,
-        turfs (
-          name,
-          locality,
-          image_url
-        )
-      `)
-      .eq("user_id", user.id)
-      .order("booking_date", { ascending: true });
+  setPageLoading(true); // 🔥 start loading
 
-    if (bookingsData) setBookings(bookingsData);
-  };
+  const { data: bookingsData } = await supabase
+    .from("bookings")
+    .select(`
+      *,
+      turfs (
+        name,
+        locality,
+        image_url
+      )
+    `)
+    .eq("user_id", user.id)
+    .order("booking_date", { ascending: true });
+
+  if (bookingsData) setBookings(bookingsData);
+
+  setPageLoading(false); // 🔥 stop loading
+};
 
   loadBookings();
 }, [user]);
@@ -84,13 +92,21 @@ if (loading) {
   // ================= FILTER =================
   const now = new Date();
 
-  const upcoming = bookings.filter((b) => {
-    return new Date(`${b.booking_date}T${b.start_time}`) >= now;
-  });
+  const upcoming = bookings
+  .filter((b) => new Date(`${b.booking_date}T${b.start_time}`) >= now)
+  .sort(
+    (a, b) =>
+      new Date(`${a.booking_date}T${a.start_time}`).getTime() -
+      new Date(`${b.booking_date}T${b.start_time}`).getTime()
+  );
 
-  const completed = bookings.filter((b) => {
-    return new Date(`${b.booking_date}T${b.end_time}`) < now;
-  });
+const completed = bookings
+  .filter((b) => new Date(`${b.booking_date}T${b.end_time}`) < now)
+  .sort(
+    (a, b) =>
+      new Date(`${b.booking_date}T${b.end_time}`).getTime() -
+      new Date(`${a.booking_date}T${a.end_time}`).getTime()
+  );
 
   const dataToShow = activeTab === "upcoming" ? upcoming : completed;
 
@@ -154,10 +170,27 @@ if (loading) {
 
               {/* BOOKINGS */}
               <div className="flex flex-col gap-1">
-                {dataToShow.map((b) => (
-                  <MobileBookingCard key={b.id} booking={b} />
-                ))}
-              </div>
+
+  {pageLoading ? (
+    [...Array(3)].map((_, i) => (
+      <div key={i} className="animate-pulse mt-3">
+        <div className="h-28 bg-gray-200 rounded-xl" />
+      </div>
+    ))
+  ) : dataToShow.length === 0 ? (
+    <div className="text-center py-6">
+      <img src="/empty.png" className="w-24 mx-auto mb-2 opacity-70" />
+      <p className="text-gray-400 text-sm">
+        No {activeTab} bookings
+      </p>
+    </div>
+  ) : (
+    dataToShow.map((b) => (
+      <MobileBookingCard key={b.id} booking={b} />
+    ))
+  )}
+
+</div>
             </>
           )}
         </div>
@@ -229,13 +262,18 @@ if (loading) {
         {/* BOOKINGS */}
         <div className="max-w-[1200px] mx-auto px-6 mt-6 grid gap-4">
 
-          {dataToShow.length === 0 && (
-            <p className="text-gray-500">
-              No {activeTab} bookings found
-            </p>
-          )}
-
-          {dataToShow.map((b) => (
+          {pageLoading ? (
+  [...Array(4)].map((_, i) => (
+    <div key={i} className="animate-pulse">
+      <div className="h-32 bg-gray-200 rounded-xl mb-2" />
+    </div>
+  ))
+) : dataToShow.length === 0 ? (
+  <p className="text-gray-500">
+    No {activeTab} bookings found
+  </p>
+) : (
+  dataToShow.map((b) => (
             <div
               key={b.id}
               onClick={() => router.push(`/ticket/${b.id}`)}
@@ -286,7 +324,7 @@ if (loading) {
 
               </div>
             </div>
-          ))}
+          )))}
 
         </div>
       </>
@@ -348,6 +386,9 @@ if (loading) {
 function MobileBookingCard({ booking }: { booking: Booking }) {
   const router = useRouter();
 
+  const isUpcoming =
+  new Date(`${booking.booking_date}T${booking.start_time}`) >= new Date();
+
   return (
     <div className="w-full">
 
@@ -355,10 +396,26 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
       
 
         {/* 🎟 TOP TICKET */}
-        <div className="flex rounded-xl overflow-hidden relative mt-3 mb-2 shadow-sm">
+        <div className="flex rounded-xl overflow-hidden relative mt-3 mb-2 shadow-sm active:scale-95 transition">
 
           {/* LEFT GREEN */}
         <div className="bg-green-600 text-white pt-2 pl-2 pr-2 pb-0 flex-1 rounded-l-xl relative w-4/6 ">
+
+
+
+
+        <div
+  className={`absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full ${
+    isUpcoming ? "bg-blue-500" : "bg-green-700"
+  }`}
+>
+  {isUpcoming ? "Upcoming" : "Completed"}
+</div>
+
+
+
+
+
 
           <div className="flex items-center justify-between">
 
@@ -382,12 +439,24 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
 
             <p className="text-[11px] font-sans font-light text-white mt-1 opacity-90 ml-1">Date</p>
             <p className="text-sm text-white font-sans font-normal ml-1">
-              {booking.booking_date} </p>
+              {new Date(booking.booking_date).toLocaleDateString()} </p>
 
             <div className="flex justify-end -mt-2.5 gap-1"> 
               <img src="/icons/location-white.png" className="h-4" />
               <p className=" text-sm/5 text-white font-sans font-normal">{booking.turfs?.locality}</p>
             </div>  
+
+            {!isUpcoming && (
+  <button
+  onClick={(e) => {
+    e.stopPropagation(); // 🔥 important
+    router.push(`/turf/${booking.turf_id}`);
+  }}
+  className="mt-2 text-xs bg-white text-green-600 px-3 py-1 rounded"
+>
+  Book Again
+</button>
+)}
 
         </div>
 
