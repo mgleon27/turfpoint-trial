@@ -153,7 +153,7 @@ if (loading) {
               </div>
 
               {/* BOOKINGS */}
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
                 {dataToShow.map((b) => (
                   <MobileBookingCard key={b.id} booking={b} />
                 ))}
@@ -346,52 +346,81 @@ if (loading) {
 //////////////////////////////////////////////////////////////
 
 function MobileBookingCard({ booking }: { booking: Booking }) {
-
   const router = useRouter();
 
   return (
-    <div onClick={() => router.push(`/ticket/${booking.id}`)}
-    className="flex gap-3 bg-white rounded-xl p-3 shadow-lg/20">
+    <div className="w-full">
 
-      {/* IMAGE */}
-      <img
-        src={booking.turfs?.image_url || "/turf.jpg"}
-        className="w-25 h-25 rounded-lg object-cover"
-      />
+      {/* MAIN CARD */}
+      
 
-      {/* DETAILS */}
-      <div className="flex flex-col justify-between w-full">
+        {/* 🎟 TOP TICKET */}
+        <div className="flex rounded-xl overflow-hidden relative mt-3 mb-2 shadow-sm">
 
-        <div>
-          <div className="flex justify-between items-center">
-            <h2 className="font-semibold text-base text-black font-sans">
-              {booking.turfs?.name}
-            </h2>
+          {/* LEFT GREEN */}
+        <div className="bg-green-600 text-white pt-2 pl-2 pr-2 pb-0 flex-1 rounded-l-xl relative w-4/6 ">
 
-            <span className="text-sm text-black font-sans flex flex-row">
-              <img src="/icons/locationtop.png" className="h-4 pr-0.5" />{booking.turfs?.locality}
-            </span>
+          <div className="flex items-center justify-between">
+
+            <div className="flex items-center">
+
+              <img src="/icons/sports.png" className="h-5 " />
+ 
+              <p className="text-sm font-sans pl-1">{booking.turfs?.name}</p>
+
+            </div>
+
+            <p className="text-base text-white font-sans font-semibold">₹{booking.price}</p>
+
+          </div> 
+
+
+            <p className="text-[11px] font-sans font-light text-white mt-1 opacity-90">Time</p>
+            <p className="text-sm text-white font-sans font-normal">
+              {booking.start_time} - {booking.end_time} </p>
+
+
+            <p className="text-[11px] font-sans font-light text-white mt-1 opacity-90">Date</p>
+            <p className="text-sm text-white font-sans font-normal">
+              {booking.booking_date} </p>
+
+            <div className="flex justify-end -mt-2.5 gap-1"> 
+              <img src="/icons/location-white.png" className="h-4" />
+              <p className=" text-sm/5 text-white font-sans font-normal">{booking.turfs?.locality}</p>
+            </div>  
+
+        </div>
+
+
+
+{/* ✂️ PERFORATION */}
+  <div className="relative flex flex-col justify-between items-center bg-white">
+
+    {/* TOP CUT DOT */}
+    <div className="w-3 h-3 bg-white rounded-full border border-green-600 -mt-1.5 z-10"></div>
+
+    {/* DASHED LINE */}
+    <div className="flex-1 border-l border-dashed border-gray-500"></div>
+
+    {/* BOTTOM CUT DOT */}
+    <div className="w-3 h-3 bg-white rounded-full border border-green-600 -mb-1.5 z-10"></div>
+
+  </div>
+
+
+          {/* RIGHT QR */}
+          <div onClick={() => router.push(`/ticket/${booking.id}`)}
+          className="bg-white border border-green-600 p-1 flex items-center justify-center rounded-r-xl w-2/6">
+          <div className="relative">
+            <img
+              src="/icons/qrframe.png"
+              className="w-120 blur-xs"
+            />
+            <p className="absolute top-[38%] left-[17%] font-medium font-sans text-lg text-black">Show QR</p>
+            </div>
           </div>
-
-          <p className="text-sm text-black mt-1 font-sans font-medium flex flex-row items-center text-center">
-            <img src="/icons/calendar.png" className="h-4 pr-0.5" />
-           {booking.booking_date}</p>
-          <p className="text-sm text-black font-sans font-medium flex flex-row items-center text-center">
-            <img src="/icons/clock.png" className="h-4 pr-0.5" />
-             {booking.start_time} - {booking.end_time}
-          </p>
         </div>
 
-<div className="flex flex-rows justify-between items-center">
-        <p className="font-semibold text-base text-black mt-1 font-sans ">
-          ₹{booking.price} <span className="font-medium text-sm text-gray-700 font-sans"> /hr</span>
-        </p>
-        <div className=" bg-green-500 px-3 py-0.5 text-white text-sm font-sans font-medium rounded-full text-center">
-          View Ticket
         </div>
-</div>        
-
-      </div>
-    </div>
   );
 }
