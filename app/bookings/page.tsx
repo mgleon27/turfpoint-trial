@@ -362,9 +362,9 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
 
           <div className="flex items-center justify-between">
 
-            <div className="flex items-center">
+            <div className="flex items-center ml-1">
 
-              <img src="/icons/sports.png" className="h-5 " />
+              <img src="/icons/ground.png" className="h-5 " />
  
               <p className="text-sm font-sans pl-1">{booking.turfs?.name}</p>
 
@@ -375,13 +375,13 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
           </div> 
 
 
-            <p className="text-[11px] font-sans font-light text-white mt-1 opacity-90">Time</p>
-            <p className="text-sm text-white font-sans font-normal">
+            <p className="text-[11px] font-sans font-light text-white mt-1 opacity-90 ml-1">Time</p>
+            <p className="text-sm text-white font-sans font-normal ml-1">
               {booking.start_time} - {booking.end_time} </p>
 
 
-            <p className="text-[11px] font-sans font-light text-white mt-1 opacity-90">Date</p>
-            <p className="text-sm text-white font-sans font-normal">
+            <p className="text-[11px] font-sans font-light text-white mt-1 opacity-90 ml-1">Date</p>
+            <p className="text-sm text-white font-sans font-normal ml-1">
               {booking.booking_date} </p>
 
             <div className="flex justify-end -mt-2.5 gap-1"> 
