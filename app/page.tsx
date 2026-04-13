@@ -7,6 +7,7 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import dynamic from "next/dynamic";
 import { useLocation } from "@/lib/locationContext";
 import Header from "@/components/Header";
+import Image from "next/image";
 
 import { useUser } from "@/lib/userContext";
 
@@ -95,47 +96,53 @@ const prevSlide = () => {
 
   // ================= LOAD =================
   useEffect(() => {
-    const loadData = async () => {
-      const { data } = await supabase
-        .from("turfs")
-        .select(`
-          *,
-          reviews ( rating ),
-          turf_sports (
-            sports ( name )
-          )
-        `);
+  const loadData = async () => {
+    setPageLoading(true);
 
-      if (data) setTurfs(data);
+    const [turfsRes, bookingsRes, bannersRes] = await Promise.all([
+  supabase
+    .from("turfs")
+    .select(`
+      id, name, locality, address, price, min_price, max_price,
+      image_url, map_lat, map_lng,
+      reviews ( rating ),
+      turf_sports ( sports ( name ) )
+    `)
+    .returns<Turf[]>(),   // ✅ ADD THIS
 
-      const { data: bookings } = await supabase.from("bookings").select("turf_id");
+  supabase.from("bookings").select("turf_id"),
 
+  supabase
+    .from("banners")
+    .select("image_url, redirect_url")
+    .eq("active", true)
+    .order("display_order", { ascending: true }),
+]);
 
-      // 🔥 FETCH BANNERS
-const { data: bannerData } = await supabase
-  .from("banners")
-  .select("image_url, redirect_url")
-  .eq("active", true)
-  .order("display_order", { ascending: true });
-
-if (bannerData) {
-  setBanners(bannerData);
+    if (turfsRes.error) {
+  console.error("Turfs error:", turfsRes.error);
+} else {
+  setTurfs(turfsRes.data || []);
 }
-      
+    if (bannersRes.error) {
+  console.error("Banners error:", bannersRes.error);
+} else {
+  setBanners(bannersRes.data || []);
+}
 
-      if (bookings) {
-        const counts: Record<string, number> = {};
-        bookings.forEach((b) => {
-          counts[b.turf_id] = (counts[b.turf_id] || 0) + 1;
-        });
-        setBookingCounts(counts);
-      }
+    if (bookingsRes.data) {
+      const counts: Record<string, number> = {};
+      bookingsRes.data.forEach((b) => {
+        counts[b.turf_id] = (counts[b.turf_id] || 0) + 1;
+      });
+      setBookingCounts(counts);
+    }
 
-      setPageLoading(false);
-    };
+    setPageLoading(false);
+  };
 
-    loadData();
-  }, []);
+  loadData();
+}, []);
 
 useEffect(() => {
   if (loading) return;
@@ -156,20 +163,32 @@ useEffect(() => {
   }, [turfs, search]);
 
   const trendingTurfs = useMemo(() => {
-    return [...filteredTurfs]
-      .sort((a, b) => (bookingCounts[b.id] || 0) - (bookingCounts[a.id] || 0))
-      .slice(0, 7);
-  }, [filteredTurfs, bookingCounts]);
+  return [...filteredTurfs]
+    .map((t) => {
+      const bookings = bookingCounts[t.id] || 0;
+      const rating =
+        t.reviews?.length
+          ? t.reviews.reduce((s, r) => s + r.rating, 0) / t.reviews.length
+          : 0;
+
+      const score = bookings * 0.7 + rating * 0.3;
+
+      return { ...t, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 7);
+}, [filteredTurfs, bookingCounts]);
 
   const nearbyTurfs = useMemo(() => {
-    if (!location) return filteredTurfs;
+  if (!location) return filteredTurfs;
 
-    return [...filteredTurfs].sort((a, b) => {
-      const d1 = getDistance(location.lat, location.lng, a.map_lat, a.map_lng);
-      const d2 = getDistance(location.lat, location.lng, b.map_lat, b.map_lng);
-      return d1 - d2;
-    });
-  }, [filteredTurfs, location]);
+  return filteredTurfs
+    .map((t) => ({
+      ...t,
+      distance: getDistance(location.lat, location.lng, t.map_lat, t.map_lng),
+    }))
+    .sort((a, b) => a.distance - b.distance);
+}, [filteredTurfs, location]);
 
   const allTurfs = filteredTurfs.slice(0, 7);
 
@@ -194,9 +213,11 @@ const interval = setInterval(() => {
     <div className="md:hidden bg-white min-h-screen">
       <MobileHeader setShowLocationModal={setShowLocationModal} />
       <MobileNav />
-      <p className="text-center mt-10 text-gray-400">
-        Loading turfs...
-      </p>
+      <div className="animate-pulse space-y-3 p-4">
+  <div className="h-40 bg-gray-200 rounded-xl" />
+  <div className="h-5 bg-gray-200 w-3/4 rounded" />
+  <div className="h-5 bg-gray-200 w-1/2 rounded" />
+</div>
     </div>
   );
 }
@@ -235,9 +256,7 @@ const interval = setInterval(() => {
         transform: `translateX(-${current * 100}%)`,
       }}
     >
-      {(banners.length > 0
-  ? banners
-  : [{ image_url: "/banner1.jpg" }]
+      {(safeBanners.length > 0 ? safeBanners : [{ image_url: "/banner1.jpg" }]
 ).map((b, i) => (
   <img
     key={i}
@@ -258,7 +277,7 @@ const interval = setInterval(() => {
 
     {/* DOTS */}
     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
-  {(banners.length > 0 ? banners : [{ image_url: "/banner1.jpg" }]).map((_, i) => (
+  {(safeBanners.length > 0 ? safeBanners : [{ image_url: "/banner1.jpg" }]).map((_, i) => (
   <div
     key={i}
     className={`h-2 w-2 rounded-full ${
@@ -272,9 +291,9 @@ const interval = setInterval(() => {
 </div>
 
         {/* SECTIONS */}
-        <MobileSection title="Todays Trending" turfs={trendingTurfs} router={router} />
-        <MobileSection title="Nearby Me" turfs={nearbyTurfs} router={router} />
-        <MobileSection title="All Turfs" turfs={allTurfs} router={router} />
+        <MobileSection title="Todays Trending" turfs={trendingTurfs} router={router} loading={pageLoading} />
+        <MobileSection title="Nearby Me" turfs={nearbyTurfs} router={router} loading={pageLoading} />
+        <MobileSection title="All Turfs" turfs={allTurfs} router={router} loading={pageLoading} />
 
       </div>
 
@@ -344,24 +363,51 @@ const interval = setInterval(() => {
 
       {/* ================= TRENDING ================= */}
       <Section title="Trending Turfs">
-        {trendingTurfs.map((t) => (
-          <TurfCard key={t.id} turf={t} router={router} />
-        ))}
-      </Section>
+  {pageLoading ? (
+    [...Array(4)].map((_, i) => <TurfCardSkeleton key={i} />)
+  ) : trendingTurfs.length === 0 ? (
+    <div className="text-center py-10 col-span-full">
+  <img src="/empty.png" className="w-28 mx-auto mb-3 opacity-70" />
+  <p className="text-gray-400">No turfs found</p>
+</div>
+  ) : (
+    trendingTurfs.map((t) => (
+      <TurfCard key={t.id} turf={t} router={router} />
+    ))
+  )}
+</Section>
 
       {/* ================= NEARBY ================= */}
-      <Section title="Nearby You">
-        {nearbyTurfs.slice(0, 4).map((t) => (
-          <TurfCard key={t.id} turf={t} router={router} />
-        ))}
-      </Section>
+      <Section title="Nearby Me">
+  {pageLoading ? (
+    [...Array(4)].map((_, i) => <TurfCardSkeleton key={i} />)
+  ) : nearbyTurfs.length === 0 ? (
+    <div className="text-center py-10 col-span-full">
+  <img src="/empty.png" className="w-28 mx-auto mb-3 opacity-70" />
+  <p className="text-gray-400">No turfs found</p>
+</div>
+  ) : (
+    nearbyTurfs.map((t) => (
+      <TurfCard key={t.id} turf={t} router={router} />
+    ))
+  )}
+</Section>
 
       {/* ================= ALL ================= */}
       <Section title="All Turfs">
-        {allTurfs.map((t) => (
-          <TurfCard key={t.id} turf={t} router={router} />
-        ))}
-      </Section>
+  {pageLoading ? (
+    [...Array(4)].map((_, i) => <TurfCardSkeleton key={i} />)
+  ) : allTurfs.length === 0 ? (
+    <div className="text-center py-10 col-span-full">
+  <img src="/empty.png" className="w-28 mx-auto mb-3 opacity-70" />
+  <p className="text-gray-400">No turfs found</p>
+</div>
+  ) : (
+    allTurfs.map((t) => (
+      <TurfCard key={t.id} turf={t} router={router} />
+    ))
+  )}
+</Section>
 
 
       
@@ -453,20 +499,39 @@ function MobileSection({
   title,
   turfs,
   router,
+  loading,
 }: {
   title: string;
   turfs: Turf[];
   router: AppRouterInstance;
+  loading: boolean;
 }) {
   return (
     <div className="px-4 mt-1 ">
       <h2 className="font-medium font-sans text-black mb-3">{title}</h2>
 
-      <div className="flex gap-4 overflow-x-auto pb-5 no-scrollbar">
-        {turfs.map((t) => (
-          <MobileTurfCard key={t.id} turf={t} router={router} />
-        ))}
+      {loading ? (
+  <div className="flex gap-4">
+    {[1,2,3].map((i) => (
+      <div key={i} className="w-40 animate-pulse">
+        <div className="h-[120px] bg-gray-200 rounded-xl mb-2" />
+        <div className="h-4 w-3/4 bg-gray-200 rounded mb-1" />
+        <div className="h-3 w-1/2 bg-gray-200 rounded" />
       </div>
+    ))}
+  </div>
+) : turfs.length === 0 ? (
+  <div className="text-center py-6 w-full">
+    <img src="/empty.png" className="w-24 mx-auto mb-2 opacity-70" />
+    <p className="text-gray-400 text-sm">No turfs found</p>
+  </div>
+) : (
+  <div className="flex gap-4 overflow-x-auto pb-5 no-scrollbar snap-x snap-mandatory">
+    {turfs.map((t) => (
+      <MobileTurfCard key={t.id} turf={t} router={router} />
+    ))}
+  </div>
+)}
     </div>
   );
 }
@@ -515,10 +580,16 @@ const sports = turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()).filte
       onClick={() => router.push(`/turf/${turf.id}`)}
       className="bg-white rounded-xl shadow-xl/30 cursor-pointer overflow-hidden p-2"
     >
-      <img
-        src={turf.image_url || "/turf.jpg"}
-        className="h-47 w-full object-cover rounded-xl"
-      />
+      <Image
+  src={turf.image_url || "/turf.jpg"}
+  alt={`${turf.name} turf in ${turf.locality}`}
+  width={400}
+  height={250}
+  sizes="(max-width: 768px) 100vw, 400px"
+  className="object-cover rounded-xl"
+  placeholder="blur"
+  blurDataURL="/blur.jpg"
+/>
 
       <div className="p-3">
 
@@ -558,6 +629,28 @@ const sports = turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()).filte
           <img src="/icons/open.png" className="h-7" />
         </div>
         
+      </div>
+    </div>
+  );
+}
+
+
+function TurfCardSkeleton() {
+  return (
+    <div className="bg-white rounded-xl p-2 animate-pulse">
+      <div className="h-[180px] w-full bg-gray-200 rounded-xl" />
+
+      <div className="p-3 space-y-2">
+        <div className="h-4 w-1/3 bg-gray-200 rounded" />
+        <div className="h-4 w-2/3 bg-gray-200 rounded" />
+        <div className="h-3 w-1/2 bg-gray-200 rounded" />
+
+        <div className="flex gap-2 mt-2">
+          <div className="h-5 w-5 bg-gray-200 rounded-full" />
+          <div className="h-5 w-5 bg-gray-200 rounded-full" />
+        </div>
+
+        <div className="h-5 w-1/4 bg-gray-200 rounded mt-3" />
       </div>
     </div>
   );
