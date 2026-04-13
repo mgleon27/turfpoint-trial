@@ -274,8 +274,8 @@ if (loading) {
   )}
 
 </div>
-
-      
+)}
+      </div>
 
       {/* 🔥 TOAST */}
       {removedTurf && (
@@ -344,24 +344,43 @@ if (loading) {
 
           {/* GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {pageLoading ? (
-  [...Array(6)].map((_, i) => (
-    <div key={i} className="animate-pulse">
-      <div className="h-32 bg-gray-200 rounded-xl mb-2" />
-      <div className="h-4 bg-gray-200 w-3/4 rounded mb-1" />
+
+  {pageLoading ? (
+    [...Array(6)].map((_, i) => (
+      <div key={i} className="animate-pulse">
+        <div className="h-32 bg-gray-200 rounded-xl mb-2" />
+        <div className="h-4 bg-gray-200 w-3/4 rounded mb-1" />
+      </div>
+    ))
+  ) : sortedTurfs.length === 0 ? (
+
+    // ✅ EMPTY STATE INSIDE GRID
+    <div className="col-span-full text-center py-10">
+      <img src="/empty.png" className="w-24 mx-auto mb-3 opacity-70" />
+      <p className="text-gray-400 text-sm">
+        No favourites yet
+      </p>
+      <button
+        onClick={() => router.push("/")}
+        className="mt-3 text-green-600 font-medium"
+      >
+        Explore Turfs
+      </button>
     </div>
-  ))
-) : (
-  sortedTurfs.map((t) => (
-              <TurfCard
-                key={t.id}
-                turf={t}
-                router={router}
-                onRemove={() => handleRemove(t)}
-                removingId={removingId}
-              />
-            )))}
-          </div>
+
+  ) : (
+    sortedTurfs.map((t) => (
+      <TurfCard
+        key={t.id}
+        turf={t}
+        router={router}
+        onRemove={() => handleRemove(t)}
+        removingId={removingId}
+      />
+    ))
+  )}
+
+</div>
         </div>
       )}
 
