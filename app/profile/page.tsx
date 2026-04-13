@@ -48,6 +48,8 @@ export default function ProfilePage() {
       setTimeout(() => {
         setShowLogoutToast(false);
         setLoggingOut(false);
+
+        router.replace("/");
       }, 1200);
 
     } catch (err) {
@@ -56,11 +58,17 @@ export default function ProfilePage() {
     }
   };
 
+
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
+  <div className="animate-pulse">
+    <div className="w-20 h-20 bg-gray-200 rounded-full mb-4 mx-auto" />
+    <div className="h-4 w-40 bg-gray-200 rounded mb-2" />
+    <div className="h-3 w-28 bg-gray-200 rounded mx-auto" />
+  </div>
+</div>
     );
   }
 
@@ -157,7 +165,7 @@ export default function ProfilePage() {
             <button
               onClick={logout}
               disabled={loggingOut}
-              className="w-full bg-red-500 text-white py-3 rounded-xl mt-8 flex items-center justify-center gap-2 font-sans"
+              className="w-full bg-red-500 text-white py-3 rounded-xl mt-8 flex items-center justify-center gap-2 font-sans disabled:opacity-60"
             >
               {loggingOut ? "Logging out..." : "Logout Now"}
             </button>
@@ -363,13 +371,25 @@ export default function ProfilePage() {
 }
 
 function MenuItem({ title, onClick }: { title: string; onClick: () => void }) {
+  const [clicked, setClicked] = useState(false);
+
   return (
     <div
-      onClick={onClick}
-      className="bg-white p-4 border border-gray-100 rounded-xl shadow-lg/20 flex justify-between items-center cursor-pointer text-black font-sans"
+      onClick={() => {
+        if (clicked) return;
+
+        setClicked(true);
+        onClick();
+
+        // 🔥 RESET after short delay
+        setTimeout(() => setClicked(false), 1500);
+      }}
+      className={`bg-white p-4 border border-gray-100 rounded-xl shadow-lg/20 flex justify-between items-center cursor-pointer ${
+        clicked ? "opacity-60" : ""
+      }`}
     >
-      <span className="text-sm font-medium text-black font-sans">{title}</span>
-      <span className="text-gray-400 text-black font-sans">›</span>
+      <span className="text-sm font-medium">{title}</span>
+      <span className="text-gray-400">›</span>
     </div>
   );
 }

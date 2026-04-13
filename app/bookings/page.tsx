@@ -390,7 +390,8 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
   new Date(`${booking.booking_date}T${booking.start_time}`) >= new Date();
 
   return (
-    <div className="w-full">
+    <div onClick={() => router.push(`/ticket/${booking.id}`)}
+    className="w-full">
 
       {/* MAIN CARD */}
       
@@ -478,7 +479,7 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
 
 
           {/* RIGHT QR */}
-          <div onClick={() => router.push(`/ticket/${booking.id}`)}
+          <div 
           className="bg-white border border-green-600 p-1 flex items-center justify-center rounded-r-xl w-2/6">
           <div className="relative">
             <img

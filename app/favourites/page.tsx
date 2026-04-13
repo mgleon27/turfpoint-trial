@@ -175,6 +175,10 @@ if (loading) {
     // store for undo
     setRemovedTurf(turf);
 
+    setTimeout(() => {
+      setRemovedTurf(null);
+    }, 3000 );
+
     // delete from DB
     await supabase
       .from("favorites")
@@ -504,7 +508,6 @@ function TurfCard({
   removingId: string | null;
 }) {
 
-  const [liked, setLiked] = useState(true);
 
   const avg =
     turf.reviews?.length

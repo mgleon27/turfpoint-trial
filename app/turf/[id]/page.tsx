@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/Header";
@@ -73,6 +73,8 @@ export default function TurfDetailsPage() {
 
   const [isFav, setIsFav] = useState<boolean | null>(null);
   const [favLoading, setFavLoading] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
+  const [favToast, setFavToast] = useState("");
 
 
 
@@ -147,12 +149,97 @@ export default function TurfDetailsPage() {
 
 
   if (!turf) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
+  return (
+    <div className="min-h-screen bg-white animate-pulse">
+
+      {/* HEADER */}
+      <div className="px-4 py-4 flex items-center gap-3">
+        <div className="w-4 h-4 bg-gray-300 rounded"></div>
+        <div className="h-5 w-32 bg-gray-300 rounded"></div>
       </div>
-    );
-  }
+
+      {/* IMAGE */}
+      <div className="px-4">
+        <div className="w-full h-[220px] bg-gray-300 rounded-xl"></div>
+
+        {/* THUMBNAILS */}
+        <div className="flex gap-2 mt-2">
+          {[1,2,3,4].map((_,i) => (
+            <div key={i} className="w-16 h-14 bg-gray-300 rounded"></div>
+          ))}
+        </div>
+      </div>
+
+      {/* NAME + RATING */}
+      <div className="px-4 mt-4 text-center">
+        <div className="h-6 w-40 bg-gray-300 rounded mx-auto"></div>
+        <div className="h-4 w-24 bg-gray-300 rounded mx-auto mt-2"></div>
+      </div>
+
+      {/* ADDRESS */}
+      <div className="px-4 mt-3 flex justify-center">
+        <div className="h-4 w-64 bg-gray-300 rounded"></div>
+      </div>
+
+      {/* PRICE */}
+      <div className="px-4 mt-3 flex justify-center">
+        <div className="h-5 w-32 bg-gray-300 rounded"></div>
+      </div>
+
+      {/* BUTTONS */}
+      <div className="flex justify-center gap-4 mt-4 px-4">
+        <div className="h-10 w-36 bg-gray-300 rounded-full"></div>
+        <div className="h-10 w-36 bg-gray-300 rounded-full"></div>
+      </div>
+
+      {/* DETAILS */}
+      <div className="px-4 mt-6 space-y-3">
+        <div className="h-4 w-48 bg-gray-300 rounded"></div>
+        <div className="h-4 w-32 bg-gray-300 rounded"></div>
+      </div>
+
+      {/* SPORTS */}
+      <div className="px-4 mt-6">
+        <div className="h-5 w-40 bg-gray-300 rounded mb-4"></div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {[1,2,3,4].map((_,i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-gray-300 rounded"></div>
+              <div className="h-4 w-20 bg-gray-300 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* AMENITIES */}
+      <div className="px-4 mt-6">
+        <div className="h-5 w-40 bg-gray-300 rounded mb-4"></div>
+
+        <div className="grid grid-cols-4 gap-4">
+          {[1,2,3,4].map((_,i) => (
+            <div key={i} className="text-center">
+              <div className="w-8 h-8 bg-gray-300 rounded mx-auto"></div>
+              <div className="h-3 w-16 bg-gray-300 rounded mx-auto mt-2"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* REVIEWS */}
+      <div className="px-4 mt-6">
+        <div className="h-5 w-32 bg-gray-300 rounded mb-4"></div>
+
+        <div className="flex gap-4">
+          {[1,2,3].map((_,i) => (
+            <div key={i} className="w-[200px] h-[160px] bg-gray-300 rounded-xl"></div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  );
+}
 
   const openMap = () => {
   const url = `https://www.google.com/maps/search/?api=1&query=${turf.map_lat},${turf.map_lng}`;
@@ -208,6 +295,7 @@ const toggleFavourite = async () => {
         .eq("turf_id", turf.id);
 
       setIsFav(false);
+      setFavToast("Removed from favourites"); // ✅ here
     } else {
       await supabase.from("favorites").insert({
         user_id: user.id,
@@ -215,12 +303,25 @@ const toggleFavourite = async () => {
       });
 
       setIsFav(true);
+      setFavToast("Added to favourites"); // ✅ here
     }
+
+    setTimeout(() => setFavToast(""), 1500);
+
   } catch (err) {
     console.log(err);
   }
 
   setFavLoading(false);
+};
+
+
+
+const iconMap: Record<string, string> = {
+  football: "/icons/football.png",
+  cricket: "/icons/cricket.png",
+  badminton: "/icons/badminton.png",
+  volleyball: "/icons/volleyball.png",
 };
 
 
@@ -242,7 +343,11 @@ const toggleFavourite = async () => {
           </div>
 
           {/* IMAGE */}
-          <img src={activeImg || "/turf.jpg"} className="w-full h-[220px] rounded-xl object-cover" />
+          <img
+  src={activeImg || "/turf.jpg"}
+  onClick={() => setShowGallery(true)}
+  className="w-full h-[220px] rounded-xl object-cover"
+/>
 
           <div className="flex gap-2 mt-2 overflow-x-auto ">
             {images.map((img, i) => (
@@ -300,7 +405,7 @@ const toggleFavourite = async () => {
           <button
   onClick={toggleFavourite}
   disabled={isFav === null || favLoading}
-  className={`px-4 py-1 font-sans text-base font-medium rounded-full mt-3 mb-1 flex items-center gap-2 whitespace-nowrap
+  className={`px-4 py-1 font-sans text-base font-medium rounded-full mt-3 mb-1 flex items-center gap-2 whitespace-nowrap transition-all duration-200
   ${
     isFav === null
       ? "bg-gray-300 text-gray-500"
@@ -362,12 +467,19 @@ const toggleFavourite = async () => {
 
           <div className="grid grid-cols-2 gap-5 ml-5">
             
-            {sports.map((s, i) => (
-              <div key={i} className="flex font-sans gap-2 items-center text-black text-base">
-                <img src={`/icons/${s}.png`} className="w-6 h-6" />
-                {s}
-              </div>
-            ))}
+            {sports.map((s, i) => {
+  const sport = (s || "").trim().toLowerCase(); // ✅ FIX
+
+  return (
+    <div key={i} className="flex gap-2 items-center text-black text-base">
+      <img
+        src={iconMap[sport] || "/icons/sport.png"}
+        className="w-6 h-6"
+      />
+      {sport.charAt(0).toUpperCase() + sport.slice(1)}
+    </div>
+  );
+})}
           </div>
 
           <hr className="my-4 mt-7" />
@@ -634,7 +746,7 @@ const toggleFavourite = async () => {
 
               <div className="flex gap-15 flex-wrap">
   {sports.map((s, i) => {
-    const sport = (s || "").toLowerCase(); // ✅ FIX
+    const sport = (s || "").trim().toLowerCase(); // ✅ FIX
 
     const iconMap: Record<string, string> = {
       football: "/icons/football.png",
@@ -792,6 +904,55 @@ const toggleFavourite = async () => {
 
   </div>
 )}
+
+
+
+
+{showGallery && (
+  <div
+  className="fixed inset-0 bg-black/90 z-50 flex flex-col"
+  onClick={() => setShowGallery(false)}
+>
+
+    {/* CLOSE */}
+    <button
+      onClick={() => setShowGallery(false)}
+      className="text-white text-lg p-4 text-left"
+    >
+      ✕ Close
+    </button>
+
+    {/* IMAGE */}
+    <div className="flex-1 flex items-center justify-center">
+      <img src={activeImg} 
+      onClick={(e) => e.stopPropagation()}
+      className="max-h-[80%]" />
+    </div>
+
+    {/* THUMBNAILS */}
+    <div className="flex gap-2 p-3 overflow-x-auto">
+      {images.map((img, i) => (
+        <img
+          key={i}
+          src={img.image_url}
+          onClick={() => setActiveImg(img.image_url)}
+          className="w-16 h-14 rounded object-cover"
+        />
+      ))}
+    </div>
+
+  </div>
+)}
+
+
+
+{favToast && (
+  <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-full text-sm">
+    {favToast}
+  </div>
+)}
+
+
 
     </div>
   );

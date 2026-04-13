@@ -30,9 +30,16 @@ type BookingType = {
 export default function TicketPage() {
   const { id } = useParams();
   const router = useRouter();
+  const [showQR, setShowQR] = useState(false);
+  
 
   const [booking, setBooking] = useState<BookingType | null>(null);
   const [loading, setLoading] = useState(true);
+   const [openingMap, setOpeningMap] = useState(false);
+
+  
+
+  
 
   useEffect(() => {
     const load = async () => {
@@ -65,9 +72,19 @@ export default function TicketPage() {
     load();
   }, [id]);
 
+
+
   if (loading || !booking) {
-    return <div className="p-5">Loading...</div>;
-  }
+  return (
+    <div className="p-5 animate-pulse">
+      <div className="h-40 bg-gray-200 rounded-xl mb-4" />
+      <div className="h-4 bg-gray-200 w-1/2 mb-2" />
+      <div className="h-4 bg-gray-200 w-1/3" />
+    </div>
+  );
+}
+
+
 
   const turf = Array.isArray(booking.turfs)
   ? booking.turfs[0]
@@ -75,11 +92,18 @@ export default function TicketPage() {
 
   const user = booking?.profile;
 
-  const openMap = () => {
-    window.open(
-      `https://www.google.com/maps/search/?api=1&query=${turf.map_lat},${turf.map_lng}`
-    );
-  };
+ 
+
+const openMap = () => {
+  if (openingMap) return;
+  setOpeningMap(true);
+
+  window.open(
+    `https://www.google.com/maps/search/?api=1&query=${turf.map_lat},${turf.map_lng}`
+  );
+
+  setTimeout(() => setOpeningMap(false), 1500);
+};
 
   const formatTime = (t: string) => {
     const [h] = t.split(":").map(Number);
@@ -88,12 +112,9 @@ export default function TicketPage() {
     return `${hh}:00 ${am}`;
   };
 
-
-
-  if (loading || !booking || !booking.turfs) {
-  return <div className="p-5">Loading...</div>;
-}
-
+  const copyId = () => {
+  navigator.clipboard.writeText(booking.id);
+};
 
 
 
@@ -135,9 +156,12 @@ export default function TicketPage() {
             </p>
 
             <p className="text-[11px] font-sans font-light text-white mt-2 opacity-90">Booking ID</p>
-            <p className="text-sm text-white font-sans font-normal tracking-widest">
-              {booking.id.slice(0, 10)}
-            </p>
+           <p
+  onClick={copyId}
+  className="text-sm text-white font-sans underline cursor-pointer"
+>
+  {booking.id.slice(0, 10)}
+</p>
 
           </div>
 
@@ -159,12 +183,19 @@ export default function TicketPage() {
 
 
           {/* RIGHT QR */}
-          <div className="bg-white border border-green-600 p-3 flex items-center justify-center rounded-r-xl ">
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${booking.id}`}
-              className="w-[110px] h-[110px]"
-            />
-          </div>
+          <div onClick={() => { 
+            if (!showQR) setShowQR(true);
+          }}
+          className="bg-white border border-green-600 p-3 flex items-center justify-center rounded-r-xl">
+  {showQR ? (
+    <img
+      src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${booking.id}`}
+      className="w-[110px] h-[110px]"
+    />
+  ) : (
+    <p className="text-sm text-gray-500">Tap to view QR</p>
+  )}
+</div>
         </div>
 
         {/* DETAILS */}
@@ -175,7 +206,11 @@ export default function TicketPage() {
             <div className="ml-3">
               <p className="text-gray-500 text-sm font-sans font-normal ">Date</p>
               <p className="font-medium text-base text-black font-sans">
-                {new Date(booking.booking_date).toDateString()}
+                {new Date(booking.booking_date).toLocaleDateString("en-IN", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+})}
               </p>
             </div>
 
@@ -214,9 +249,15 @@ export default function TicketPage() {
 
             <div className="mr-5">
               <p className="text-gray-500 text-sm font-sans font-normal">Status</p>
-              <p className="font-medium text-base text-black font-sans">
-                {booking.status}
-              </p>
+              <span
+  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+    booking.status === "confirmed"
+      ? "bg-green-100 text-green-700"
+      : "bg-gray-200 text-gray-600"
+  }`}
+>
+  {booking.status}
+</span>
             </div>
           </div>
 
@@ -243,9 +284,12 @@ export default function TicketPage() {
               Get Direction
             </button>
 
-            <button className="px-5 bg-white text-green-700 py-1 rounded-md font-medium font-sans text-base border border-green-300">
-              Show QR
-            </button>
+            <button
+  onClick={() => setShowQR(!showQR)}
+  className="px-5 bg-white text-green-700 py-1 rounded-md font-medium border border-green-300"
+>
+  {showQR ? "Hide QR" : "Show QR"}
+</button>
           </div>
 
         </div>
