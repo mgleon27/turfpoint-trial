@@ -386,20 +386,7 @@ if (loading) {
 
 
 
-      {user && sortedTurfs.length === 0 && (
-  <div className="col-span-full text-center py-10">
-    <img src="/empty.png" className="w-24 mx-auto mb-3 opacity-70" />
-    <p className="text-gray-400 text-sm">
-      No favourites yet
-    </p>
-    <button
-      onClick={() => router.push("/")}
-      className="mt-3 text-green-600 font-medium"
-    >
-      Explore Turfs
-    </button>
-  </div>
-)}
+      
 
 
 
