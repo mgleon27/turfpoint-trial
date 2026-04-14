@@ -146,7 +146,7 @@ export default function OwnerHome() {
         <div className="flex gap-3 mt-3">
 
           {/* Earnings */}
-          <div className="flex-1 bg-green-50 rounded-lg p-4 shadow">
+          <div className="flex-1 bg-green-100 rounded-lg p-4 shadow">
             <p className="text-gray-600 text-sm font-sans font-medium">Todays Earnings</p>
             <p className="text-base font-semibold font-sans text-black mt-1 ">₹{earnings}</p>
             <p className="text-green-700 mt-2 text-sm font-sans font-medium">+4.6%</p>
