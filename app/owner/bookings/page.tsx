@@ -110,7 +110,7 @@ export default function OwnerBookings() {
       </div>
 
       {/* STATS CARD */}
-      <div className="bg-green-100 rounded-2xl shadow-sm/20 pl-1 pr-8 py-3 flex justify-around items-center">
+      <div className="bg-green-100 rounded-2xl shadow-md/20 pl-1 pr-8 py-3 flex justify-around items-center border border-gray-300">
 
         <div className=" flex flex-col gap-3">
           <div className="flex items-center gap-2">
