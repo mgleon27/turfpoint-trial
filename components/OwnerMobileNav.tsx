@@ -25,8 +25,8 @@ const items = [
   },
   {
     name: "Analysis",
-    icon: "/icons/analysis.png", // 🔥 add this icon
-    activeIcon: "/icons/analysis-active.png",
+    icon: "/icons/analytics.png", // 🔥 add this icon
+    activeIcon: "/icons/analytics-active.png",
     path: "/owner/analysis",
   },
   {
