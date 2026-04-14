@@ -186,7 +186,7 @@ export default function OwnerHome() {
 
               <div className="flex-1">
                 <p className="font-medium font-sans text-black text-base">{b.turfs?.name}</p>
-                <p className="font-medium font-sans text-sm text-gray-700">Booking date</p>
+                <p className="font-medium font-sans text-sm text-gray-700">{new Date(b.booking_date).toDateString()}</p>
                 <p className="font-medium font-sans text-sm text-gray-700">{b.start_time} → {b.end_time}</p>
               </div>
 
