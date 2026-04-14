@@ -253,14 +253,14 @@ const label = formatHour(h);
                     status === 
                       "booked" ? "bg-red-50 "
                      : status === 
-                     "available" ? "bg-green-50"
+                     "available" ? "bg-white"
 
-                                : "bg-gray-100"
+                                : "bg-gray-50"
                   }`}
                 >
                   <p className="text-xs font-sans font-medium text-black">{label}</p>
                   <p
-                    className={`text-xs mt-0 font-sans font-medium ${
+                    className={`text-xs mt-0 font-sans font-medium text-center ${
                       status === 
                       "booked" ? "text-red-700 "
                      : status === 
