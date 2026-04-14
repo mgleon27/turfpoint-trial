@@ -147,10 +147,10 @@ const completed = bookings
               <div className="flex gap-3 mb-4">
                 <button
                   onClick={() => setActiveTab("upcoming")}
-                  className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 border-1 border-green-400 ${
+                  className={`flex-1 py-1.5 rounded-full text-sm shadow-lg/20 border-1 border-green-400 ${
                     activeTab === "upcoming"
-                      ? "bg-green-500 text-white font-sans"
-                      : "bg-emerald-50 text-black font-sans"
+                      ? "bg-emerald-500 text-white font-sans font-medium"
+                      : "bg-emerald-50 text-black font-sans font-normal"
                   }`}
                 >
                   Upcoming
@@ -160,8 +160,8 @@ const completed = bookings
                   onClick={() => setActiveTab("completed")}
                   className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 border-1 border-green-400 ${
                     activeTab === "completed"
-                      ? "bg-green-500 text-white font-sans"
-                      : "bg-emerald-50 text-black font-sans"
+                      ? "bg-emerald-600 text-white font-sans font-medium"
+                      : "bg-emerald-50 text-black font-sans font-normal"
                   }`}
                 >
                   Completed
@@ -397,21 +397,12 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
       
 
         {/* 🎟 TOP TICKET */}
-        <div className="flex rounded-xl overflow-hidden relative mt-3 mb-2 shadow-sm active:scale-95 transition">
+        <div className="flex rounded-xl overflow-hidden relative mt-3 mb-0 shadow-sm active:scale-95 transition h-29">
 
           {/* LEFT GREEN */}
-        <div className="bg-green-600 text-white pt-2 pl-2 pr-2 pb-0 flex-1 rounded-l-xl relative w-4/6 ">
+        <div className="bg-green-500 text-white pt-2 pl-2 pr-2 pb-0 flex-1 rounded-l-xl relative w-4/6 h-29 ">
 
 
-
-
-        <div
-  className={`absolute top-2 right-2 text-xs px-2 py-0.5 rounded-full ${
-    isUpcoming ? "bg-blue-500" : "bg-green-700"
-  }`}
->
-  {isUpcoming ? "Upcoming" : "Completed"}
-</div>
 
 
 
@@ -428,7 +419,7 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
 
             </div>
 
-            <p className="text-base text-white font-sans font-semibold">₹{booking.price}</p>
+            <p className="text-[14px] text-white font-sans font-normal">₹{booking.price}</p>
 
           </div> 
 
@@ -439,13 +430,20 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
 
 
             <p className="text-[11px] font-sans font-light text-white mt-1 opacity-90 ml-1">Date</p>
+
+
+<div className="flex justify-between">
             <p className="text-sm text-white font-sans font-normal ml-1">
               {new Date(booking.booking_date).toLocaleDateString()} </p>
 
-            <div className="flex justify-end -mt-2.5 gap-1"> 
-              <img src="/icons/location-white.png" className="h-4" />
-              <p className=" text-sm/5 text-white font-sans font-normal">{booking.turfs?.locality}</p>
+            <div className="flex items-center gap-0.5"> 
+              <img src="/icons/location-white.png" className="h-3.5 -mt-1" />
+              <p className=" text-[12px]/5 text-white font-sans font-normal">{booking.turfs?.locality}</p>
             </div>  
+
+</div>
+
+
 
             {!isUpcoming && (
   <button
@@ -486,7 +484,7 @@ function MobileBookingCard({ booking }: { booking: Booking }) {
               src="/icons/qrframe.png"
               className="w-120 blur-xs"
             />
-            <p className="absolute top-[38%] left-[17%] font-medium font-sans text-lg text-black">Show QR</p>
+            <p className="absolute top-[44%] left-[27%] font-normal font-sans text-[12px] text-black">Show QR</p>
             </div>
           </div>
         </div>

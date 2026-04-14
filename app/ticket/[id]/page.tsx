@@ -135,30 +135,31 @@ const openMap = () => {
       <div className="bg-emerald-50 rounded-3xl p-4 shadow-md">
 
         {/* 🎟 TOP TICKET */}
-        <div className="flex items-stretch rounded-xl overflow-hidden relative mt-3 mb-2 shadow-sm">
+        <div className="flex items-stretch rounded-xl overflow-hidden relative mt-3 mb-2 shadow-sm h-33">
 
           {/* LEFT GREEN */}
-          <div className="bg-green-600 text-white p-4 flex-1 rounded-l-xl relative  ">
+          <div className="bg-green-500 text-white pt-2 pb-4 pl-4 pr-4 flex-1 rounded-l-xl relative  ">
 
-
+<div className="flex justify-between items-center">
             <div className="flex items-center">
-
-            <img src="/icons/ticket-new.png" className="h-5" />
-
-            <p className="text-sm font-sans pl-1">{turf.name}</p>
-
+                <img src="/icons/ticket-new.png" className="h-5 -ml-2" />
+                <p className="text-sm/5 font-sans pl-1">{turf.name}</p>
             </div>
 
+            <p className="text-sm/5 font-sans pl-1 mt-1">₹{booking.price}</p>
 
-            <p className="text-[11px] font-sans font-light text-white mt-2 opacity-90">Name</p>
-            <p className="text-base text-white font-sans font-semibold">
+</div>
+
+
+            <p className="text-[11px]/5 font-sans font-light text-white mt-2 opacity-90">Name</p>
+            <p className="text-[13px]/4 text-white font-sans font-semibold">
               {user?.full_name || "User"}
             </p>
 
-            <p className="text-[11px] font-sans font-light text-white mt-2 opacity-90">Booking ID</p>
+            <p className="text-[11px]/5 font-sans font-light text-white mt-2 opacity-90">Booking ID</p>
            <p
   onClick={copyId}
-  className="text-sm text-white font-sans underline cursor-pointer"
+  className="text-[13px]/4 text-white font-sans font-semibold"
 >
   {booking.id.slice(0, 10)}
 </p>
@@ -193,7 +194,7 @@ const openMap = () => {
       className="w-[110px] h-[110px]"
     />
   ) : (
-    <p className="text-sm text-gray-500">Tap to view QR</p>
+    <p className="text-[12px] text-gray-500 font-sans font-normal pt-1">Tap to view QR</p>
   )}
 </div>
         </div>
@@ -248,16 +249,18 @@ const openMap = () => {
             </div>
 
             <div className="mr-5">
-              <p className="text-gray-500 text-sm font-sans font-normal">Status</p>
+              <p className="text-gray-500 text-sm font-sans font-normal pb-1">Status</p>
+
               <span
-  className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-    booking.status === "confirmed"
-      ? "bg-green-100 text-green-700"
-      : "bg-gray-200 text-gray-600"
+  className={`px-4 py-1 rounded-full text-sm font-medium font-sans items-center justify-center flex gap-2
+    ${booking.status === "confirmed"
+      ? "bg-green-600 text-white"
+      : "bg-blue-500 text-white"
   }`}
 >
-  {booking.status}
+  {booking.status} <img src="/icons/tick-white.png" className="h-3" />
 </span>
+
             </div>
           </div>
 

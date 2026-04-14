@@ -644,11 +644,11 @@ if (error) {
                 key={s.key}
                 onClick={() => toggle(s.key)}
                 className={`relative rounded-full px-3 py-1 text-center text-sm shadow-lg
-                ${s.isNowSlot && "ring-2 ring-yellow-400"}
+                ${s.isNowSlot && "ring-2 ring-green-300"}
                 ${s.status === "timeout" && "bg-gray-300 border border-gray-400 text-white"}
                 ${s.status === "booked" && "bg-gray-300 border border-gray-400 text-red-400"}
                 ${s.status === "available" && "text-black text-base font-sans font-medium border-1 border-green-300 "}
-                ${isSelected && "bg-green-500 text-white border border-gray-200"}
+                ${isSelected && "bg-green-500 text-white border border-gray-200 ring-2 ring-green-200"}
               `}
               >
                 <div>{s.label}</div>
