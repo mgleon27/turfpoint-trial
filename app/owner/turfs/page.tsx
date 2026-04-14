@@ -109,9 +109,9 @@ export default function OwnerTurfs() {
         {/* ADD BUTTON */}
         <div
           onClick={() => router.push("/owner/add-turf")}
-          className="mt-4 bg-gray-200 rounded-full py-2 flex items-center justify-center gap-2 shadow cursor-pointer"
+          className="mt-4 bg-gray-200 rounded-full py-2 flex items-center justify-center gap-2 shadow-md cursor-pointer border border-gray-300"
         >
-          <div className="w-5 h-5 border rounded-full flex items-center justify-center text-lg">
+          <div className="w-5 h-5 border-2 rounded-full flex items-center justify-center text-lg">
             +
           </div>
           <p className="font-medium font-sans text-black text-sm">Add New Turf</p>
@@ -129,7 +129,7 @@ export default function OwnerTurfs() {
             return (
               <div
                 key={turf.id}
-                className="border rounded-2xl p-3 shadow bg-white"
+                className="border rounded-2xl pr-3 pt-3 pl-3 pb-1 shadow bg-white"
               >
 
                 {/* TOP */}

@@ -249,7 +249,7 @@ const label = formatHour(h);
               return (
                 <div
                   key={i}
-                  className={`border rounded-md px-1.5 py-1 text-center border-gray-700 ${
+                  className={`border rounded-md px-1.5 py-1 text-center border-gray-700 items-center ${
                     status === 
                       "booked" ? "bg-red-50 "
                      : status === 
@@ -260,7 +260,7 @@ const label = formatHour(h);
                 >
                   <p className="text-xs font-sans font-medium text-black">{label}</p>
                   <p
-                    className={`text-xs mt-0 font-sans font-medium text-center ${
+                    className={`text-xs mt-0 font-sans font-medium text-center items-center ${
                       status === 
                       "booked" ? "text-red-700 "
                      : status === 
