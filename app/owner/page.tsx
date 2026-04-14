@@ -1,419 +1,276 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/userContext";
-import { useRouter } from "next/navigation";
-
-
 
 import OwnerMobileNav from "@/components/OwnerMobileNav";
 import OwnerMobileHeader from "@/components/OwnerMobileHeader";
 
-// ================= TYPES =================
+type Booking = {
+  id: string;
+  turf_id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  price: number;
+  booked_by: string;
+  status: string;
+ turfs: {
+    name: string;
+    owner_id: string;
+ };
+};
+
 type Turf = {
   id: string;
   name: string;
 };
 
-type Booking = {
-  turf_id: string;
-  start_time: string;
-  end_time: string;
-  booking_date: string;
-  price: number;
-  booked_by: string;
+const getToday = () => {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  return new Date(now.getTime() - offset * 60000)
+    .toISOString()
+    .split("T")[0];
 };
 
-// ================= HELPERS =================
-const getDate = (offsetDays = 0) => {
-  const d = new Date();
-  d.setDate(d.getDate() + offsetDays);
-
-  const offset = d.getTimezoneOffset();
-  const local = new Date(d.getTime() - offset * 60000);
-
-  return local.toISOString().split("T")[0];
-};
-
-const timeToMinutes = (t: string) => {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-};
-
-const formatLabel = (hour: number) => {
-  if (hour === 0) return "12 AM";
-  if (hour < 12) return `${hour} AM`;
-  if (hour === 12) return "12 PM";
-  return `${hour - 12} PM`;
-};
-
-// ================= PAGE =================
 export default function OwnerHome() {
-  const { user ,profile } = useUser();
-  const router = useRouter();
+  const { user } = useUser();
 
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [turfs, setTurfs] = useState<Turf[]>([]);
-  const [selectedTurf, setSelectedTurf] = useState<Turf | null>(null);
+  const [selectedTurf, setSelectedTurf] = useState<string>("");
 
-  const [earnings, setEarnings] = useState(0);
-  const [bookingsCount, setBookingsCount] = useState(0);
-
-  const [yesterdayEarnings, setYesterdayEarnings] = useState(0);
-  const [yesterdayBookings, setYesterdayBookings] = useState(0);
-
-  const [earningChange, setEarningChange] = useState(0);
-  const [bookingChange, setBookingChange] = useState(0);
-
-  const [upcoming, setUpcoming] = useState<Booking[]>([]);
-  const [todayBookings, setTodayBookings] = useState<Booking[]>([]);
-
-  const [showDropdown, setShowDropdown] = useState(false);
-
-  const channelRef = useRef<any>(null);
-
-
-  const today = getDate(0);
-  const yesterday = getDate(-1);
+  const today = getToday();
 
   // ================= LOAD =================
-  const loadDashboard = async () => {
-    if (!user) return;
+  const load = async () => {
+  if (!user) return;
 
-    // 🔹 TURFS
-    const { data: turfData } = await supabase
-      .from("turfs")
-      .select("id,name")
-      .eq("owner_id", user.id);
+  const { data: turfData } = await supabase
+    .from("turfs")
+    .select("id,name")
+    .eq("owner_id", user.id);
 
-    if (!turfData || turfData.length === 0) return;
+  const turfsList = turfData || [];
 
-    setTurfs(turfData);
-    setSelectedTurf((prev) => prev || turfData[0]);
+  setTurfs(turfsList);
 
-    const turfIds = turfData.map((t) => t.id);
-
-    // 🔹 TODAY BOOKINGS
-    const { data: todayData } = await supabase
-      .from("bookings")
-      .select("*")
-      .in("turf_id", turfIds)
-      .eq("booking_date", today)
-      .eq("status", "confirmed");
-
-    const todayBookingsData = todayData || [];
-
-    setTodayBookings(todayBookingsData);
-    setBookingsCount(todayBookingsData.length);
-
-    const todayTotal = todayBookingsData.reduce(
-      (sum, b) => sum + (b.price || 0),
-      0
-    );
-
-    setEarnings(todayTotal);
-
-    // 🔹 YESTERDAY BOOKINGS
-    const { data: yData } = await supabase
-      .from("bookings")
-      .select("*")
-      .in("turf_id", turfIds)
-      .eq("booking_date", yesterday)
-      .eq("status", "confirmed");
-
-    const yBookings = yData || [];
-
-    setYesterdayBookings(yBookings.length);
-
-    const yTotal = yBookings.reduce(
-      (sum, b) => sum + (b.price || 0),
-      0
-    );
-
-    setYesterdayEarnings(yTotal);
-
-    // 🔹 CALCULATE %
-    if (yTotal > 0) {
-      setEarningChange(((todayTotal - yTotal) / yTotal) * 100);
-    } else {
-      setEarningChange(0);
-    }
-
-    if (yBookings.length > 0) {
-      setBookingChange(
-        ((todayBookingsData.length - yBookings.length) /
-          yBookings.length) *
-          100
-      );
-    } else {
-      setBookingChange(0);
-    }
-
-    // 🔹 UPCOMING
-    const nowMin =
-      new Date().getHours() * 60 + new Date().getMinutes();
-
-    const upcomingFiltered = todayBookingsData
-      .filter((b) => timeToMinutes(b.start_time) > nowMin)
-      .sort(
-        (a, b) =>
-          timeToMinutes(a.start_time) -
-          timeToMinutes(b.start_time)
-      )
-      .slice(0, 2);
-
-    setUpcoming(upcomingFiltered);
-  };
-
-  // ================= INITIAL LOAD =================
-  useEffect(() => {
-    if (user) loadDashboard();
-  }, [user]);
-
-  // ================= REALTIME =================
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel("owner-live")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "bookings",
-        },
-        async () => {
-          console.log("Realtime update ⚡");
-          await loadDashboard();
-        }
-      )
-      .subscribe();
-
-    channelRef.current = channel;
-
-    return () => {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current);
-      }
-    };
-  }, [user]);
-
-  // ================= SLOT GRID =================
-  const buildSlots = () => {
-  const arr = [];
-
-  const nowMin =
-    new Date().getHours() * 60 + new Date().getMinutes();
-
-  for (let i = 0; i < 24; i++) {
-    const start = i * 60;
-
-    const isBooked = todayBookings.some(
-      (b) =>
-        timeToMinutes(b.start_time) === start &&
-        b.turf_id === selectedTurf?.id
-    );
-
-    const isTimeout = start <= nowMin;
-
-    let status = "available";
-
-    if (isBooked) {
-      status = "booked"; // ✅ FIRST PRIORITY
-    } else if (isTimeout) {
-      status = "timeout"; // ✅ SECOND
-    }
-
-    arr.push({
-      label: formatLabel(i),
-      status,
-    });
+  // ✅ SET DEFAULT HERE (NO WARNING)
+  if (turfsList.length > 0) {
+    setSelectedTurf((prev) => prev || turfsList[0].id);
   }
 
-  return arr;
+  const { data: bookingData } = await supabase
+    .from("bookings")
+    .select(`
+      *,
+      turfs!inner(name, owner_id)
+    `)
+    .eq("turfs.owner_id", user.id);
+
+  setBookings(bookingData || []);
 };
 
-  const slots = buildSlots();
 
-  const availableCount = slots.filter(
-    (s) => s.status === "available"
-  ).length;
 
-  const bookedCount = slots.filter(
-    (s) => s.status === "booked"
-  ).length;
+
+  useEffect(() => {
+  if (!user) return;
+
+  const fetchData = async () => {
+    await load();
+  };
+
+  fetchData();
+}, [user]);
+
+  // ================= CALCULATIONS =================
+
+  const todayBookings = bookings.filter(
+  (b) =>
+    b.booking_date === today &&
+    b.turf_id === selectedTurf
+);
+
+  const earnings = todayBookings.reduce((s, b) => s + (b.price || 0), 0);
+
+  const upcoming = bookings
+  .filter(
+    (b) =>
+      b.booking_date >= today &&
+      b.turf_id === selectedTurf
+  )
+  .slice(0, 3);
+
+  const bookingCount = todayBookings.length;
+
+  const percentage = Math.round((bookingCount / 24) * 100);
+
+  // ================= SLOT STATUS =================
+
+  const hours = Array.from({ length: 24 }).map((_, i) => i);
+
+  const slotStatus = hours.map((h) => {
+    const key = `${String(h).padStart(2, "0")}:00:00`;
+
+    const isBooked = todayBookings.some(
+      (b) => b.start_time.slice(0,5) === key.slice(0,5) && b.turf_id === selectedTurf
+    );
+
+    const now = new Date().getHours();
+
+    if (h < now) return "timeout";
+    if (isBooked) return "booked";
+    return "available";
+  });
+
+  const availableCount = slotStatus.filter(s => s === "available").length;
+  const bookedCount = slotStatus.filter(s => s === "booked").length;
 
   // ================= UI =================
+
   return (
-    <div className="min-h-screen bg-white px-3">
+    <div className="min-h-screen bg-white pt-3">
 
-      
+      <OwnerMobileHeader />
+      <OwnerMobileNav />
 
-        <OwnerMobileHeader />
-        <OwnerMobileNav />
-        
+      <div className="px-4">
 
+        <p className="text-base text-black font-sans font-medium mt-2">Home</p>
 
-      {/* STATS */}
-      <div className="flex gap-4 mb-6">
+        {/* TOP CARDS */}
+        <div className="flex gap-3 mt-3">
 
-        {/* EARNINGS */}
-        <div className="flex-1 bg-green-100 px-4 py-3 rounded-2xl shadow-lg/10 border border-gray-300">
-          <p className="text-sm text-gray-600 font-sans mb-1">Todays Earnings</p>
-          <p className="text-xl font-semibold font-sans">₹{earnings}</p>
-          <p className="text-green-700 text-sm font-sans">
-            {earningChange >= 0 ? "+" : ""}
-            {earningChange.toFixed(1)}%
-          </p>
-        </div>
-
-        {/* BOOKINGS */}
-        <div className="flex-1 bg-green-100 px-4 py-3 rounded-2xl shadow-lg/10 border border-gray-300">
-          <p className="text-sm text-gray-600 font-sans mb-1">Bookings Today</p>
-          <p className="text-xl font-semibold font-sans">{bookingsCount}</p>
-          <p className="text-green-700 text-sm font-sans">
-            {bookingChange >= 0 ? "+" : ""}
-            {bookingChange.toFixed(0)}%
-          </p>
-        </div>
-      </div>
-
-
-
-
-      {/* Actions */}
-      <p className="text-black font-sans font-medium text-lg mb-3"> Quick Actions</p>
-      <div className="flex flex-row items-center mb-3 justify-between px-2.5">
-        <div className="h-27 w-27 rounded-xl border border-gray-500 bg-green-400 shadow-lg/20">
-          <img src="/icons/add-booking.png" className=" p-4.5" />
-        </div>
-
-        <div className="h-27 w-27 rounded-xl border border-gray-500 bg-lime-300 shadow-lg/20"><img src="/icons/water.png" className=" p-8" /></div>
-
-        <div className="h-27 w-27 rounded-xl border border-gray-500 bg-rose-400 shadow-lg/20"><img src="/icons/water.png" className=" p-8" /></div>
-
-      </div>
-
-
-
-
-
-
-      {/* UPCOMING */}
-      <div className="mb-6">
-        <div className="flex justify-between mb-3">
-          <h2 className="font-semibold text-lg font-sans">Upcoming Bookings</h2>
-          <button
-            onClick={() => router.push("/owner/bookings")}
-            className="text-sm text-gray-500 font-sans"
-          >
-            View All →
-          </button>
-        </div>
-
-        {upcoming.length === 0 && (
-          <p className="text-gray-500 text-sm">No upcoming bookings Today</p>
-        )}
-
-        {upcoming.map((b, i) => (
-          <div
-            key={i}
-            className="flex items-center gap-3 border p-3 rounded-2xl mb-3"
-          >
-            <div className="w-14 h-14 bg-purple-400 rounded-xl" />
-
-            <div className="flex-1">
-              <p className="font-medium">
-                {turfs.find((t) => t.id === b.turf_id)?.name}
-              </p>
-              <p className="text-sm text-gray-500">
-                {b.booking_date}
-              </p>
-              <p className="text-sm">
-                {b.start_time} → {b.end_time}
-              </p>
-            </div>
-
-            <div className="text-right">
-              <p className="text-sm text-gray-500">
-                ({b.booked_by})
-              </p>
-              <p className="font-medium">₹{b.price}</p>
-            </div>
+          {/* Earnings */}
+          <div className="flex-1 bg-green-100 rounded-lg p-4 shadow">
+            <p className="text-gray-600 text-sm font-sans font-medium">Todays Earnings</p>
+            <p className="text-base font-semibold font-sans text-black mt-1 ">₹{earnings}</p>
+            <p className="text-green-700 mt-2 text-sm font-sans font-medium">+4.6%</p>
           </div>
-        ))}
-      </div>
 
-      {/* SLOT STATUS */}
-      <div className="border p-4 rounded-xl">
+          {/* Bookings */}
+          <div className="flex-1 bg-green-200 rounded-lg p-4 shadow">
+            <p className="text-gray-600 text-sm font-sans font-medium">Bookings Today</p>
+            <p className="text-base font-medium font-sans text-black mt-1">
+              {bookingCount} ({percentage}%)
+            </p>
+            <p className="text-green-700 mt-2 text-sm font-sans font-medium">+2</p>
+          </div>
 
-        <div className="flex justify-between mb-4">
-          <h2 className="font-medium text-black text-lg font-sans">
-            Todays Slot Status
-          </h2>
+        </div>
 
-          <div className="relative">
-            <button
-              onClick={() => setShowDropdown(!showDropdown)}
-              className="border px-2 py-0.5 rounded-full text-sm text-gray-800 font-sans shadow-sm border-gray-500 flex flex-row items-center"
-            >
-              {selectedTurf?.name} <img src="/icons/down.png" className="h-4 ml-1" />
-            </button>
+        {/* UPCOMING */}
+        <div className="mt-6 flex justify-between">
+          <p className="text-base text-black font-sans font-medium">Upcoming Bookings</p>
+          <div className="flex items-center gap-1">
+          <p className="text-sm text-black font-sans font-medium">View All</p><img src="/icons/next.png" className="h-5" />
+          </div>
+        </div>
 
-            {showDropdown && (
-              <div className="absolute right-0 mt-2 bg-white border rounded-xl shadow p-2">
-                {turfs.map((t) => (
-                  <div
-                    key={t.id}
-                    onClick={() => {
-                      setSelectedTurf(t);
-                      setShowDropdown(false);
-                    }}
-                    className="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-                  >
-                    {t.name}
-                  </div>
-                ))}
+        <div className="mt-3 space-y-3">
+          {upcoming.map((b) => (
+            <div key={b.id} className=" bg-white rounded-lg pl-2 pr-4 py-2 flex gap-3 border border-gray-300 shadow-lg/10">
+
+              <div className="w-20 h-17 bg-gradient-to-r from-purple-400 to-pink-500 rounded-md" />
+
+              <div className="flex-1">
+                <p className="font-medium font-sans text-black text-base">{b.turfs?.name}</p>
+                <p className="font-medium font-sans text-sm text-gray-700">Booking date</p>
+                <p className="font-medium font-sans text-sm text-gray-700">{b.start_time} → {b.end_time}</p>
               </div>
-            )}
-          </div>
-        </div>
 
-        {/* GRID */}
-        <div className="grid grid-cols-5 gap-2">
-          {slots.map((s, i) => (
-            <div
-              key={i}
-              className={`border border-gray-700 rounded-xl text-center py-1.5 text-xs font-sans font-medium shadow-md
-                ${s.status === "timeout" && "bg-gray-200"}
-                ${s.status === "booked" && "bg-gray-200"}
-                ${s.status === "available" && "bg-white"}
-                 `}
-            >
-              <p>{s.label}</p>
-              <p
-                className={`
-                ${s.status === "timeout" && "text-gray-500 font-sans"}
-                ${s.status === "booked" && "text-red-600 font-sans"}
-                ${s.status === "available" && "text-green-700 font-sans font-medium"}
-              `}
-              >
-                {s.status}
-              </p>
+              <div className="text-right">
+
+                <div
+             className={`text-white text-sm px-2 py-0 rounded-full  font-normal font-sans items-center gap-1 inline-flex ${
+                b.booked_by === "online"
+                        ? "bg-green-600"
+                        : "bg-red-600"
+                        }`} >
+
+
+            <div className="w-2 h-2 rounded-full bg-white mt-0.5 " />
+            
+              <div>{b.booked_by}</div>
+
+            </div>
+
+
+                <p className="font-medium font-sans text-sm text-black mt-4.5 mr-2">₹{b.price}</p>
+              </div>
+
             </div>
           ))}
         </div>
 
-        <div className="flex justify-between mt-4 text-sm px-15">
-          <p className="text-green-600 font-sans text-medium">
-            Available: ({availableCount})
-          </p>
-          <p className="text-red-500 font-sans text-medium">
-            Booked: ({bookedCount})
-          </p>
+        {/* SLOT STATUS */}
+        <div className="mt-6 border rounded-2xl p-4 mb-17">
+
+          <div className="flex justify-between items-center">
+            <p className="text-base text-black font-sans font-medium">Todays Slot Status</p>
+
+            <select
+              value={selectedTurf || ""}
+              onChange={(e) => setSelectedTurf(e.target.value)}
+              className="border rounded-full px-1 py-0 text-sm text-black font-sans font-medium"
+            >
+              {turfs.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* GRID */}
+          <div className="grid grid-cols-5 gap-2 mt-4">
+
+            {hours.map((h, i) => {
+              const formatHour = (h: number) => {
+  const hour = h % 12 === 0 ? 12 : h % 12;
+  const ampm = h >= 12 ? "PM" : "AM";
+  return `${String(hour).padStart(2, "0")} ${ampm}`;
+};
+
+const label = formatHour(h);
+
+              const status = slotStatus[i];
+
+              return (
+                <div
+                  key={i}
+                  className="border rounded-md p-1.5 text-center border-gray-700"
+                >
+                  <p className="text-xs font-sans font-medium text-black">{label}</p>
+                  <p
+                    className={`text-xs mt-0 font-sans font-medium ${
+                      status === "booked"
+                        ? "text-red-500"
+                        : status === "available"
+                        ? "text-green-700"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {status}
+                  </p>
+                </div>
+              );
+            })}
+
+          </div>
+
+          {/* FOOTER */}
+          <div className="flex gap-7 mt-4 ml-1">
+
+            <p className="text-red-600 text-sm font-sans font-medium ">Booked : ({bookedCount})</p>
+            <p className="text-green-700 text-sm font-sans font-medium">Available : ({availableCount})</p>
+            
+          </div>
+
         </div>
+
       </div>
     </div>
   );
-}
+} 
