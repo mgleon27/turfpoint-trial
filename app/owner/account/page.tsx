@@ -89,7 +89,7 @@ export default function OwnerAccount() {
         <p className="text-lg text-black font-sans font-medium mt-2">Account</p>
 
         {/* PROFILE */}
-        <div className="border rounded-2xl px-4 py-3 flex items-center gap-4 border-gray-500 shadow-md bg-green-50">
+        <div className="border rounded-2xl px-4 py-3 flex items-center gap-4 border-gray-400 shadow-sm bg-green-50">
 
           <div className="w-14 h-14 bg-black rounded-full" />
 
@@ -105,7 +105,7 @@ export default function OwnerAccount() {
         </div>
 
         {/* BUSINESS DETAILS */}
-        <div className="border rounded-2xl p-4 border-gray-500 shadow-sm bg-green-50">
+        <div className="border rounded-2xl p-4 border-gray-400 shadow-sm bg-green-50">
 
           <p className="text-base text-black font-sans font-medium mb-3">
             Business Details
@@ -123,7 +123,7 @@ export default function OwnerAccount() {
         </div>
 
         {/* PAYMENT DETAILS (STATIC) */}
-        <div className="border rounded-2xl p-4 border-gray-400 shadow-md bg-green-50">
+        <div className="border rounded-2xl p-4 border-gray-400 shadow-sm bg-green-50">
 
           <p className="text-base text-black font-sans font-medium mb-3">
             Payment Details
@@ -149,7 +149,7 @@ export default function OwnerAccount() {
         ].map((text) => (
           <div
             key={text}
-            className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-500 shadow-md bg-green-50"
+            className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-400 shadow-sm bg-green-50"
           >
             {text}
           </div>
