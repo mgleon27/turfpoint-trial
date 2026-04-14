@@ -120,10 +120,11 @@ export default function OwnerHome() {
       (b) => b.start_time.slice(0,5) === key.slice(0,5) && b.turf_id === selectedTurf
     );
 
-    const now = new Date().getHours();
+    const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+    const slotMin = h * 60;
 
-    if (h < now) return "timeout";
     if (isBooked) return "booked";
+    if (slotMin < nowMin) return "timeout";
     return "available";
   });
 
@@ -248,16 +249,24 @@ const label = formatHour(h);
               return (
                 <div
                   key={i}
-                  className="border rounded-md p-1.5 text-center border-gray-700"
+                  className={`border rounded-md px-1.5 py-1 text-center border-gray-700 ${
+                    status === 
+                      "booked" ? "bg-red-50 "
+                     : status === 
+                     "available" ? "bg-green-50"
+
+                                : "bg-gray-100"
+                  }`}
                 >
                   <p className="text-xs font-sans font-medium text-black">{label}</p>
                   <p
                     className={`text-xs mt-0 font-sans font-medium ${
-                      status === "booked"
-                        ? "text-red-500"
-                        : status === "available"
-                        ? "text-green-700"
-                        : "text-gray-500"
+                      status === 
+                      "booked" ? "text-red-700 "
+                     : status === 
+                     "available" ? "text-green-700"
+
+                                : "text-gray-500"
                     }`}
                   >
                     {status}
