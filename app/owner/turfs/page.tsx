@@ -14,6 +14,7 @@ type Turf = {
   price: number;
   locality: string;
   is_active: boolean;
+  image_url?: string;
 };
 
 type Booking = {
@@ -135,7 +136,17 @@ export default function OwnerTurfs() {
                 <div className="flex gap-3">
 
                   {/* IMAGE */}
-                  <div className="w-24 h-20 rounded-xl bg-gradient-to-r from-purple-400 to-pink-500" />
+                  <img
+  src={turf.image_url || "/icons/turf-placeholder.png"}
+  onError={(e) => {
+    (e.target as HTMLImageElement).src = "/icons/turf-placeholder.png";
+  }}
+  className="w-24 h-20 rounded-xl object-cover"
+  alt="turf"
+/>
+
+
+
 
                   {/* DETAILS */}
                   <div className="flex-1">
@@ -144,7 +155,7 @@ export default function OwnerTurfs() {
                       <p className="font-medium text-base font-sans text-black">{turf.name}</p>
 
                       <div
-                        className={`text-sm px-4 rounded-xl text-white font-sans font-medium items-center ${
+                        className={`text-sm px-4 rounded-xl text-white font-sans font-medium items-center pt-[1.5px] ${
                           turf.is_active ? "bg-green-600" : "bg-red-600"
                         }`}
                       >

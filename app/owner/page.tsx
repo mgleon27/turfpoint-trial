@@ -19,6 +19,7 @@ type Booking = {
  turfs: {
     name: string;
     owner_id: string;
+    image_url?: string;
  };
 };
 
@@ -66,7 +67,7 @@ export default function OwnerHome() {
     .from("bookings")
     .select(`
       *,
-      turfs!inner(name, owner_id)
+      turfs!inner(name, owner_id, image_url)
     `)
     .eq("turfs.owner_id", user.id);
 
@@ -174,7 +175,14 @@ export default function OwnerHome() {
           {upcoming.map((b) => (
             <div key={b.id} className=" bg-white rounded-lg pl-2 pr-4 py-2 flex gap-3 border border-gray-300 shadow-lg/10">
 
-              <div className="w-20 h-17 bg-gradient-to-r from-purple-400 to-pink-500 rounded-md" />
+              <img
+  src={b.turfs?.image_url || "/icons/turf-placeholder.png"}
+  onError={(e) => {
+    (e.target as HTMLImageElement).src = "/icons/turf-placeholder.png";
+  }}
+  className="w-20 h-17 rounded-md object-cover"
+  alt="turf"
+/>
 
               <div className="flex-1">
                 <p className="font-medium font-sans text-black text-base">{b.turfs?.name}</p>
@@ -194,7 +202,7 @@ export default function OwnerHome() {
 
             <div className="w-2 h-2 rounded-full bg-white mt-0.5 " />
             
-              <div>{b.booked_by}</div>
+              <div className="-mt-[1px]">{b.booked_by}</div>
 
             </div>
 
