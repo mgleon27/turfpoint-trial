@@ -131,6 +131,11 @@ export default function OwnerHome() {
   const availableCount = slotStatus.filter(s => s === "available").length;
   const bookedCount = slotStatus.filter(s => s === "booked").length;
 
+
+
+  const selectedTurfName =
+  turfs.find((t) => t.id === selectedTurf)?.name || "Turf";
+
   // ================= UI =================
 
   return (
@@ -173,7 +178,28 @@ export default function OwnerHome() {
         </div>
 
         <div className="mt-3 space-y-3">
-          {upcoming.map((b) => (
+
+  {upcoming.length === 0 ? (
+
+    // 🔹 EMPTY STATE
+    <div className="border border-dashed border-gray-500 rounded-lg p-6 text-center bg-gray-50">
+
+  <img src="/empty.png" className="w-15 mx-auto mb-1 opacity-80" />
+
+
+  <p className="text-sm text-gray-500 font-sans font-medium">
+    No upcoming bookings today for
+  </p>
+
+  <p className="text-base font-medium font-sans text-black  mt-1">
+    {selectedTurfName}
+  </p>
+
+</div>
+
+  ) : (
+
+    upcoming.map((b) => (
             <div key={b.id} className=" bg-white rounded-lg pl-2 pr-4 py-2 flex gap-3 border border-gray-300 shadow-lg/10">
 
               <img
@@ -212,7 +238,7 @@ export default function OwnerHome() {
               </div>
 
             </div>
-          ))}
+          )))}
         </div>
 
         {/* SLOT STATUS */}
