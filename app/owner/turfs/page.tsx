@@ -129,7 +129,7 @@ export default function OwnerTurfs() {
             return (
               <div
                 key={turf.id}
-                className="border rounded-2xl pr-3 pt-3 pl-3 pb-1 shadow bg-white"
+                className="border rounded-2xl pr-3 pt-3 pl-3 pb-1 shadow-md/20 bg-white border-gray-300"
               >
 
                 {/* TOP */}
@@ -163,11 +163,11 @@ export default function OwnerTurfs() {
                       </div>
                     </div>
 
-                    <p className="text-gray-900 text-sm mt-0.5 font-sans font-medium">
+                    <p className="text-black text-sm mt-0.5 font-sans font-medium">
                       ₹{turf.price} /hr
                     </p>
 
-                    <p className="text-gray-900 text-sm mt-0.5 font-sans font-medium">
+                    <p className="text-black text-sm mt-0.5 font-sans font-medium">
                       Todays Bookings : {count} (₹{revenue})
                     </p>
 

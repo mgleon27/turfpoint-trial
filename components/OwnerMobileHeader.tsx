@@ -20,21 +20,24 @@ export default function OwnerMobileHeader() {
       {/* TOP ROW */}
       <div className="flex items-center justify-between">
 
+
+       <div className="flex items-center">
         {/* LOGO */}
         <img
                 src={profile?.avatar_url || "/profile.png"}
                 onError={(e) => (e.currentTarget.src = "/profile.png")}
-                className="w-11 h-11 rounded-full object-cover border border-gray-400"
+                className="w-11 h-11 rounded-full object-cover border border-gray-400 ml-2"
               />
 
 
 
-          <div className="-ml-5">
+          <div className="ml-3">
             <p className="text-[11px]/4 font-sans text-gray-500 -mt-1.5">Welcome</p>
-            <p className="font-medium text-black font-sans text-lg/4">
+            <p className="font-medium text-black font-sans text-lg/4 capitalize">
               {profile?.full_name}
             </p>
           </div>
+       </div>  
 
 
 
@@ -43,20 +46,27 @@ export default function OwnerMobileHeader() {
         <div className="flex items-center gap-4">
 
           {/* SEARCH ICON */}
-          <div className="bg-gray-300 px-17 py-1 rounded-full grid grid-flow-col justify-items-end ">
+          <div className=" flex bg-gray-100 gap-5 px-4 py-1 rounded-full grid grid-flow-col justify-between items-center border border-gray-200 shadow-xs">
 
-          <div><Search
-            size={22}
-            onClick={() => setShowSearch(!showSearch)}
-            className="cursor-pointer stroke-black"
-          /></div>
+
+
+            <p className="font-sans font-normal text-gray-700 text-base">Search...</p>
+
+            <Search
+                  size={16}
+                  onClick={() => setShowSearch(!showSearch)}
+                  className="cursor-pointer stroke-black" 
+            />
+            
 
           </div>
 
-        </div>
+        
 
-        <div className="border border-black rounded-full p-1.5">
-          <img src="/icons/bell.png" className="h-4.5" />
+          <div className="border border-black rounded-full p-1.5 mr-1">
+            <img src="/icons/bell.png" className="h-4" />
+          </div>
+
         </div>
 
       </div>

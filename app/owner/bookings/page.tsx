@@ -36,6 +36,8 @@ export default function OwnerBookings() {
   const [date, setDate] = useState(getToday());
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filter, setFilter] = useState<"all" | "upcoming" | "completed">("upcoming");
+  const [turfCount, setTurfCount] = useState(0);
+  const [inactiveturfCount, setInactiveTurfCount] = useState(0);
 
   const loadBookings = async () => {
   if (!user) return;
@@ -49,6 +51,8 @@ export default function OwnerBookings() {
 
   const turfIds = bookingsData.map(b => b.turf_id);
 
+  
+
   const { data: turfs } = await supabase
     .from("turfs")
     .select("id, name, owner_id")
@@ -59,6 +63,23 @@ export default function OwnerBookings() {
     ...b,
     turfs: turfs?.filter(t => t.id === b.turf_id) || []
   }));
+
+  const { data: allTurfs } = await supabase
+  .from("turfs")
+  .select("id")
+  .eq("owner_id", user.id)
+  .eq("is_active",true);
+
+setTurfCount(allTurfs?.length || 0);
+
+  const { data: inactiveTurfs } = await supabase
+   .from("turfs")
+   .select("id")
+   .eq("owner_id", user.id)
+   .eq("is_active", false);
+
+setInactiveTurfCount(inactiveTurfs?.length || 0);
+
 
   setBookings(merged);
 };
@@ -87,7 +108,14 @@ export default function OwnerBookings() {
 
   const revenue = bookings.reduce((sum, b) => sum + (b.price || 0), 0);
 
-  const slotFilled = Math.round((totalBookings / 24) * 100); // simple logic
+  const totalSlots = 24 * (turfCount || 1);
+
+  const totalturfcount =(turfCount + inactiveturfCount);
+
+  const slotFilled =
+    totalSlots === 0
+      ? 0
+      : Math.round((totalBookings / totalSlots) * 100);
 
   // ================= UI =================
   return (
@@ -99,7 +127,7 @@ export default function OwnerBookings() {
       {/* HEADER */}
       <div className="px-4">
       <div className="flex justify-between items-center mb-1.5">
-        <h1 className="text-base text-black font-medium font-sans mb-4 pt-3">Bookings</h1>
+        <h1 className="text-lg text-black font-medium font-sans mb-4 pt-3">Bookings</h1>
 
         <input
           type="date"
@@ -115,24 +143,27 @@ export default function OwnerBookings() {
         <div className=" flex flex-col gap-3">
           <div className="flex items-center gap-2">
              <p className="text-gray-600 text-sm font-sans font-medium">Total Bookings :</p>
-             <p className="font-medium text-sm font-sans text-black ">{totalBookings}</p>
+             <p className="font-medium text-base font-sans text-black ">{totalBookings}</p>
           </div>
 
           <div className="flex items-center gap-2 mt-2">
              <p className="text-gray-600 text-sm font-sans font-medium">Revenue :</p>
-             <p className="font-medium text-sm font-sans text-black">₹{revenue}</p>
+             <p className="font-medium text-base font-sans text-black">₹{revenue}</p>
           </div>
         </div>
 
         <div className="border-l h-18 mx-2 "></div>
 
         <div className="  flex flex-col gap-3 ">
-          <div className="flex items-center gap-2">
-              <p className="text-gray-600 text-sm font-medium font-sans">Slot Filled</p>
-              <p className="font-medium  text-sm font-sans text-black ">{slotFilled}%</p>
-          </div>
+            <div className="flex items-center gap-2">
+                <p className="text-gray-600 text-sm font-medium font-sans">Slot Filled :</p>
+                <p className="font-medium  text-base font-sans text-black ">{slotFilled}%</p>
+            </div>
 
-          <p className="text-green-700 text-sm mt-2 font-sans font-medium">+7.27% </p>
+            <div className="flex items-center gap-2 mt-2">
+                <p className="text-gray-600 text-sm font-sans font-medium">Active  Turfs :</p>
+                <p className="font-medium text-base font-sans text-black">{turfCount}<span className="text-gray-500 text-[14px]"> / {totalturfcount}</span></p>
+            </div>
         </div>
 
       </div>

@@ -36,6 +36,18 @@ const getToday = () => {
     .split("T")[0];
 };
 
+const getYesterday = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+
+  const offset = d.getTimezoneOffset();
+  return new Date(d.getTime() - offset * 60000)
+    .toISOString()
+    .split("T")[0];
+};
+
+const yesterday = getYesterday();
+
 export default function OwnerHome() {
   const { user } = useUser();
 
@@ -101,12 +113,33 @@ const allTodayBookings = bookings.filter(
 
   const earnings = allTodayBookings.reduce((s, b) => s + (b.price || 0), 0);
 
-  const upcoming = bookings
-  .filter(
-    (b) =>
-      b.booking_date >= today &&
-      b.turf_id === selectedTurf
-  )
+  const now = new Date();
+const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+const upcoming = bookings
+  .filter((b) => {
+    if (b.turf_id !== selectedTurf) return false;
+
+    // Future dates → always include
+    if (b.booking_date > today) return true;
+
+    // Today → check time
+    if (b.booking_date === today) {
+      const [h, m] = b.end_time.split(":").map(Number);
+      const bookingMinutes = h * 60 + m;
+
+      return bookingMinutes > nowMinutes;
+    }
+
+    return false;
+  })
+  .sort((a, b) => {
+    // Sort by nearest upcoming time
+    const getTime = (x: Booking) =>
+      new Date(`${x.booking_date}T${x.start_time}`).getTime();
+
+    return getTime(a) - getTime(b);
+  })
   .slice(0, 3);
 
   const bookingCount = allTodayBookings.length;
@@ -140,6 +173,38 @@ const allTodayBookings = bookings.filter(
   const selectedTurfName =
   turfs.find((t) => t.id === selectedTurf)?.name || "Turf";
 
+
+  const yesterdayBookings = bookings.filter(
+  (b) => b.booking_date === yesterday
+);
+
+
+const yesterdayRevenue = yesterdayBookings.reduce(
+  (s, b) => s + (b.price || 0),
+  0
+);
+
+const revenueChange =
+  yesterdayRevenue === 0
+    ? 100
+    : Math.round(
+        ((earnings - yesterdayRevenue) / yesterdayRevenue) * 100
+      );
+
+
+      const yesterdayBookingCount = yesterdayBookings.length;
+
+const bookingChange =
+  yesterdayBookingCount === 0
+    ? bookingCount > 0
+      ? 100
+      : 0
+    : Math.round(
+        ((bookingCount - yesterdayBookingCount) /
+          yesterdayBookingCount) *
+          100
+      );
+
   // ================= UI =================
 
   return (
@@ -150,34 +215,58 @@ const allTodayBookings = bookings.filter(
 
       <div className="px-4">
 
-        <p className="text-base text-black font-sans font-medium mt-2">Home</p>
+        <p className="text-lg text-black font-sans font-medium mt-2">Home</p>
 
         {/* TOP CARDS */}
         <div className="flex gap-3 mt-3">
 
           {/* Earnings */}
-          <div className="flex-1 bg-green-100 rounded-lg p-4 shadow-md border border-gray-300">
-            <p className="text-gray-600 text-sm font-sans font-medium">Todays Earnings (All) </p>
-            <p className="text-base font-semibold font-sans text-black mt-1 ">₹{earnings}</p>
-            <p className="text-green-700 mt-2 text-sm font-sans font-medium">+4.6%</p>
+          <div className="flex-1 bg-green-100 rounded-lg px-4 py-3.5 shadow-md border border-gray-300">
+            <p className="text-gray-600 text-sm font-sans font-medium">Todays Revenue (All) </p>
+
+            <div className="flex items-center justify-center gap-2  mb-1">
+            <p className="text-lg font-semibold font-sans text-black mt-2.5 text-center">₹{earnings}</p>
+
+            <p
+  className={`mt-2 text-sm font-sans font-medium  ${
+    revenueChange >= 0 ? "text-green-700" : "text-red-600"
+  }`}
+>
+  {revenueChange >= 0 ? "+" : ""}
+  {revenueChange}%
+</p>
+          </div>
+
           </div>
 
           {/* Bookings */}
-          <div className="flex-1 bg-green-100 rounded-lg p-4 shadow-md border border-gray-300">
+          <div className="flex-1 bg-green-100 rounded-lg px-4 py-3.5 shadow-md border border-gray-300">
             <p className="text-gray-600 text-sm font-sans font-medium">Bookings Today (All) </p>
-            <p className="text-base font-medium font-sans text-black mt-1">
+
+            <div className="flex items-center justify-center gap-2 mb-1">
+            <p className="text-lg font-medium font-sans text-black mt-2.5 text-center">
               {bookingCount} ({percentage}%)
             </p>
-            <p className="text-green-700 mt-2 text-sm font-sans font-medium">+2</p>
+
+            <p
+  className={`mt-2 text-sm font-sans font-medium  ${
+    bookingChange >= 0 ? "text-green-700" : "text-red-600"
+  }`}
+>
+  {bookingChange >= 0 ? "+" : ""}
+  {bookingChange}%
+</p>
+          </div>
+
           </div>
 
         </div>
 
         {/* UPCOMING */}
         <div className="mt-6 flex justify-between">
-          <p className="text-base text-black font-sans font-medium">Upcoming Bookings</p>
+          <p className="text-lg text-black font-sans font-medium">Upcoming Bookings</p>
           <div className="flex items-center gap-1">
-          <p className="text-sm text-black font-sans font-medium">View All</p><img src="/icons/next.png" className="h-5" />
+          <p className="text-base text-black font-sans font-medium">View All</p><img src="/icons/next.png" className="h-5" />
           </div>
         </div>
 
@@ -246,7 +335,7 @@ const allTodayBookings = bookings.filter(
         </div>
 
         {/* SLOT STATUS */}
-        <div className="mt-6 border rounded-2xl p-4 mb-17">
+        <div className="mt-6 border rounded-2xl p-4 mb-17 border-gray-400 shadow-sm/20">
 
           <div className="flex justify-between items-center">
             <p className="text-base text-black font-sans font-medium">Todays Slot Status</p>
@@ -279,7 +368,7 @@ const label = formatHour(h);
               return (
                 <div
                   key={i}
-                  className={`border rounded-md px-1.5 py-1 text-center border-gray-700 items-center ${
+                  className={`border rounded-md px-0 py-1 text-center border-gray-700 items-center ${
                     status === 
                       "booked" ? "bg-red-50 "
                      : status === 
@@ -310,8 +399,8 @@ const label = formatHour(h);
           {/* FOOTER */}
           <div className="flex gap-7 mt-4 ml-1">
 
-            <p className="text-red-600 text-sm font-sans font-medium ">Booked : ({bookedCount})</p>
-            <p className="text-green-700 text-sm font-sans font-medium">Available : ({availableCount})</p>
+            <p className="text-red-600 text-sm font-sans font-medium ">Booked : ( {bookedCount} )</p>
+            <p className="text-green-700 text-sm font-sans font-medium">Available : ( {availableCount} )</p>
             
           </div>
 

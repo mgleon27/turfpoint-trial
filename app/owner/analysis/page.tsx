@@ -88,11 +88,37 @@ export default function OwnerAnalysis() {
 
   const today = new Date().toISOString().split("T")[0];
 
+  const now = new Date();
+
+  // ✅ TODAY
+  const todayStr = now.toISOString().split("T")[0];
+
+  // ✅ WEEK (Monday → Today)
+  const dayOfWeek = now.getDay(); // 0 (Sun) - 6 (Sat)
+  const diffToMonday = (dayOfWeek === 0 ? -6 : 1) - dayOfWeek;
+
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diffToMonday);
+  monday.setHours(0, 0, 0, 0);
+
+  // ✅ MONTH (1st → Today)
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
   // ================= CALCULATIONS =================
 
-  const todayBookings = bookings.filter(b => b.booking_date === today);
-  const weekBookings = bookings; // simplify for now
-  const monthBookings = bookings;
+const todayBookings = bookings.filter(
+  (b) => b.booking_date === todayStr
+);
+
+const weekBookings = bookings.filter((b) => {
+  const d = new Date(b.booking_date);
+  return d >= monday && d <= now;
+});
+
+const monthBookings = bookings.filter((b) => {
+  const d = new Date(b.booking_date);
+  return d >= firstDayOfMonth && d <= now;
+});
 
   const calcRevenue = (list: Booking[]) =>
     list.reduce((s, b) => s + (b.price || 0), 0);
@@ -103,8 +129,6 @@ export default function OwnerAnalysis() {
 
   const onlineCount = bookings.filter(b => b.booked_by === "online").length;
   const manualCount = bookings.filter(b => b.booked_by !== "online").length;
-
-  const slotFillRate = Math.round((todayBookings.length / 24) * 100);
 
 
   // 📊 GROUP BOOKINGS BY DATE (for line chart)
@@ -299,6 +323,70 @@ const avgBookings = Math.round(totalBookings7Days / 7);
 
 
 
+// ✅ THIS WEEK (Mon → Today already exists as monday → now)
+
+// ✅ LAST WEEK (previous Monday → Sunday)
+const lastWeekStart = new Date(monday);
+lastWeekStart.setDate(monday.getDate() - 7);
+
+const lastWeekEnd = new Date(monday);
+lastWeekEnd.setDate(monday.getDate() - 1);
+lastWeekEnd.setHours(23, 59, 59, 999);
+
+// ✅ WEEK BEFORE LAST
+const prevWeekStart = new Date(lastWeekStart);
+prevWeekStart.setDate(lastWeekStart.getDate() - 7);
+
+const prevWeekEnd = new Date(lastWeekStart);
+prevWeekEnd.setDate(lastWeekStart.getDate() - 1);
+prevWeekEnd.setHours(23, 59, 59, 999);
+
+
+
+// 🔹 THIS WEEK
+const thisWeekBookings = bookings.filter((b) => {
+  const d = new Date(b.booking_date);
+  return d >= monday && d <= now;
+});
+
+// 🔹 LAST WEEK
+const lastWeekBookings = bookings.filter((b) => {
+  const d = new Date(b.booking_date);
+  return d >= lastWeekStart && d <= lastWeekEnd;
+});
+
+// 🔹 WEEK BEFORE LAST
+const prevWeekBookings = bookings.filter((b) => {
+  const d = new Date(b.booking_date);
+  return d >= prevWeekStart && d <= prevWeekEnd;
+});
+
+
+const thisWeekRevenue = calcRevenue(thisWeekBookings);
+const lastWeekRevenue = calcRevenue(lastWeekBookings);
+const prevWeekRevenue = calcRevenue(prevWeekBookings);
+
+const thisWeekCount = thisWeekBookings.length;
+const lastWeekCount = lastWeekBookings.length;
+
+
+
+const getGrowth = (current: number, previous: number) => {
+  if (previous === 0) return current === 0 ? 0 : 100;
+  return Math.round(((current - previous) / previous) * 100);
+};
+
+
+
+// This week vs last week
+const thisWeekGrowth = getGrowth(thisWeekRevenue, lastWeekRevenue);
+
+// Last week vs previous week
+const lastWeekGrowth = getGrowth(lastWeekRevenue, prevWeekRevenue);
+
+
+
+
 const barData = last7DaysData.map((d, i) => ({
   index: i, // ⭐ IMPORTANT
   name: new Date(d.date)
@@ -324,7 +412,7 @@ const barData = last7DaysData.map((d, i) => ({
 
           {/* Revenue */}
           <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
-            <p className="font-medium font-sans text-gray-800 text-base">Revenue</p>
+            <p className="font-medium font-sans text-gray-900 text-base">Revenue</p>
             <p className="text-sm mt-1 font-medium font-sans text-gray-600 -ml-1">Today :<span className="text-black pl-8"> ₹{todayRevenue}/- </span></p>
             <p className="text-sm font-medium font-sans text-gray-600 -ml-1"> This Week :<span className="text-black pl-1"> ₹{weekRevenue}/-</span></p>
             <p className="text-sm font-medium font-sans text-gray-600 -ml-1">This Month :<span className="text-black "> ₹{monthRevenue}/-</span></p>
@@ -339,21 +427,45 @@ const barData = last7DaysData.map((d, i) => ({
           </div>
 
 
-          {/* Growth */}
+          {/* This Week */}
           <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
-            <p className="font-medium font-sans text-gray-800 text-base">Growth %</p>
-            <p className="text-sm mt-1 font-medium font-sans text-gray-600">Today : <span className="text-green-800 pl-10">+5%</span></p>
-            <p className="text-sm font-medium font-sans text-gray-600">This Week : <span className="text-red-600 pl-3">-2%</span></p>
-            <p className="text-sm font-medium font-sans text-gray-600">This Month : <span className="text-red-600 pl-2">-2%</span></p>
-          </div>
+  <p className="font-medium font-sans text-gray-800 text-base">This Week</p>
 
-          {/* Slot Fill */}
+  <p className="text-sm mt-1 text-gray-600">
+    Bookings : <span className="text-black pl-2">{thisWeekCount}</span>
+  </p>
+
+  <p className="text-sm text-gray-600">
+    Revenue : <span className="text-black pl-2">₹{thisWeekRevenue}</span>
+  </p>
+
+
+  <p className="text-sm text-gray-600">
+    Growth : <span className={`text-sm pl-4.5 ${thisWeekGrowth >= 0 ? "text-green-700" : "text-red-600"}`}> {thisWeekGrowth}%</span>
+  </p>
+
+  </div>
+
+
+
+
+
+          {/* Past Week */}
           <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
-            <p className="font-medium font-sans text-gray-800 text-base">Slot fill Rate %</p>
-            <p className="text-sm mt-1 font-medium font-sans text-gray-600">Today :<span className="text-green-800 pl-10"> {slotFillRate}% </span></p>
-            <p className="text-sm font-medium font-sans text-gray-600">This Week :<span className="text-green-800 pl-2.5"> 15%</span></p>
-            <p className="text-sm font-medium font-sans text-gray-600">This Month :<span className="text-green-800 pl-1.5"> 15%</span></p>
-          </div>
+  <p className="font-medium font-sans text-gray-800 text-base">Past Week</p>
+
+  <p className="text-sm mt-1 text-gray-600">
+    Bookings : <span className="text-black pl-1.5">{lastWeekCount}</span>
+  </p>
+
+  <p className="text-sm text-gray-600">
+    Revenue : <span className="text-black pl-2">₹{lastWeekRevenue}</span>
+  </p>
+
+  <p className="text-sm text-gray-600">
+    Growth : <span className={`text-sm pl-4.5 ${lastWeekGrowth >= 0 ? "text-green-700" : "text-red-600"}`}> {lastWeekGrowth}%</span>
+  </p>
+</div>
 
         </div>
 
@@ -388,7 +500,7 @@ const barData = last7DaysData.map((d, i) => ({
 
 <div className="border rounded-xl mt-3 h-44 p-2 font-sans font-medium">
   <ResponsiveContainer width="100%" height="100%">
-  <AreaChart data={revenueData}>
+  <AreaChart data={revenueData} margin={{ top: 20, right: 13 , left: -7, bottom: -10 }} >
 
     {/* Gradient */}
     <defs>
@@ -419,7 +531,14 @@ const barData = last7DaysData.map((d, i) => ({
 />
 
     {/* Y Axis */}
-    <YAxis hide />
+    <YAxis
+  tick={{ fontSize: 10 }}
+  width={45}
+  tickFormatter={(value) => {
+    if (value >= 1000) return `₹${value / 1000}k`;
+    return `₹${value}`;
+  }}
+/>
 
     {/* Tooltip */}
     <Tooltip
@@ -452,7 +571,7 @@ const barData = last7DaysData.map((d, i) => ({
         {/* ================= PEAK ================= */}
         <div className="mt-6 border rounded-xl p-3">
           <div className="flex justify-between items-center">
-            <p className="font-medium text-lg text-black font-sans">Peak Timings</p>
+            <p className="font-medium text-base text-black font-sans">Peak Timings</p>
             <select
   value={selectedTurf}
   onChange={(e) => setSelectedTurf(e.target.value)}
@@ -638,18 +757,25 @@ const barData = last7DaysData.map((d, i) => ({
 
             </div>
 
-            <div className="text-[13px] mt-8 text-black font-sans font-medium">
-              <div className="flex gap-1 items-center">
-                  <div className="h-2.5 w-2.5 rounded-full bg-red-700" />
-                  <p>Manual Bookings</p>
-              </div>
+            <div className="text-[13px] mt-8 text-black font-sans font-medium space-y-1">
 
-              <div className="flex gap-1 items-center">
-                  <div className="h-2.5 w-2.5 rounded-full bg-green-700" />
-                  <p>Online Bookings</p>
-              </div>
+  <div className="flex justify-between items-center">
+    <div className="flex gap-1 items-center">
+      <div className="h-2.5 w-2.5 rounded-full bg-red-700" />
+      <p>Manual Bookings</p>
+    </div>
+    <p className="text-gray-800">{manualCount}</p>
+  </div>
 
-            </div>
+  <div className="flex justify-between items-center">
+    <div className="flex gap-1 items-center">
+      <div className="h-2.5 w-2.5 rounded-full bg-green-700" />
+      <p>Online Bookings</p>
+    </div>
+    <p className="text-gray-800">{onlineCount}</p>
+  </div>
+
+</div>
           </div>
 
         </div>
