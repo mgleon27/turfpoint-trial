@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/userContext";
 import { CartesianGrid, AreaChart, Area } from "recharts";
@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { PieChart, Pie, Cell } from "recharts";
-import { BarChart, Bar } from "recharts";
+import { BarChart, Bar, LabelList } from "recharts";
 
 import OwnerMobileNav from "@/components/OwnerMobileNav";
 import OwnerMobileHeader from "@/components/OwnerMobileHeader";
@@ -21,6 +21,7 @@ type Booking = {
   booking_date: string;
   booked_by: string;
   start_time: string;
+  turf_id: string;
 };
 
 type RevenueData = {
@@ -35,16 +36,36 @@ export default function OwnerAnalysis() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [range, setRange] = useState<"today" | "week" | "month">("today");
 
+  const [turfs, setTurfs] = useState<{ id: string; name: string }[]>([]);
+  const [selectedTurf, setSelectedTurf] = useState<string>("");
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+
+
+
   // ================= LOAD =================
   const load = async () => {
-    if (!user) return;
+  if (!user) return;
 
-    const { data } = await supabase
-      .from("bookings")
-      .select("price, booking_date, booked_by, start_time");
+  // 🔹 Get turfs
+  const { data: turfData } = await supabase
+    .from("turfs")
+    .select("id, name")
+    .eq("owner_id", user.id);
 
-    setBookings(data || []);
-  };
+  setTurfs(turfData || []);
+
+  if (turfData && turfData.length > 0) {
+    setSelectedTurf((prev) => prev || turfData[0].id);
+  }
+
+  // 🔹 Get bookings
+  const { data } = await supabase
+    .from("bookings")
+    .select("price, booking_date, booked_by, start_time, turf_id");
+
+  setBookings(data || []);
+};
 
   useEffect(() => {
   if (!user) return;
@@ -127,6 +148,8 @@ const getHourlyData = () => {
   });
 };
 
+const last7Days = getDates("week");
+
 
 
 const revenueData = (
@@ -167,15 +190,10 @@ const COLORS = ["#16a34a", "#ef4444"];
 
 
 
-const barData = bookings.slice(0, 7).map((b, i) => ({
-  name: i,
-  value: b.price,
-}));
 
 
 
-
-const getHeatmapData = () => {
+ const getHeatmapData = () => {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
@@ -189,7 +207,11 @@ const getHeatmapData = () => {
           `1970-01-01T${b.start_time}`
         ).getHours();
 
-        return bookingDay === dayIndex && bookingHour === hour;
+        return (
+  bookingDay === dayIndex &&
+  bookingHour === hour &&
+  b.turf_id === selectedTurf
+);
       }).length;
 
       return count;
@@ -199,7 +221,41 @@ const getHeatmapData = () => {
   return { days, hours, matrix };
 };
 
-const { days, hours, matrix } = getHeatmapData();
+
+
+
+ const heatmapData = useMemo(() => {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+
+  const matrix = days.map((day, dayIndex) =>
+    hours.map((hour) => {
+      return bookings.filter((b) => {
+        const date = new Date(b.booking_date);
+        const bookingDay = date.getDay();
+
+        const bookingHour = new Date(`1970-01-01T${b.start_time}`).getHours();
+
+        return (
+          bookingDay === dayIndex &&
+          bookingHour === hour &&
+          b.turf_id === selectedTurf
+        );
+      }).length;
+    })
+  );
+
+  return { days, hours, matrix };
+}, [bookings, selectedTurf]);
+
+
+
+
+
+
+const { days, hours, matrix } = heatmapData;
+
+
 
 
 const getColor = (value: number) => {
@@ -212,11 +268,40 @@ const getColor = (value: number) => {
 
 
 
+const last7DaysData = last7Days.map((date) => {
+  const dayBookings = bookings.filter((b) => b.booking_date === date);
+
+  const revenue = dayBookings.reduce((sum, b) => sum + (b.price || 0), 0);
+
+  return {
+    date,
+    revenue,
+    bookings: dayBookings.length,
+  };
+});
+
+
+
+const totalRevenue7Days = last7DaysData.reduce((s, d) => s + d.revenue, 0);
+const totalBookings7Days = last7DaysData.reduce((s, d) => s + d.bookings, 0);
+
+const avgRevenue = Math.round(totalRevenue7Days / 7);
+const avgBookings = Math.round(totalBookings7Days / 7);
+
+
+
+const barData = last7DaysData.map((d) => ({
+  name: new Date(d.date).toLocaleDateString("en-US", { weekday: "short" })
+  .charAt(0),
+  value: d.revenue,
+}));
+
+
 
   // ================= UI =================
 
   return (
-    <div className="min-h-screen bg-white pt-3">
+    <div className="min-h-screen bg-white pt-3 pb-20">
 
       <OwnerMobileHeader />
       <OwnerMobileNav />
@@ -272,7 +357,7 @@ const getColor = (value: number) => {
   <button
     key={r}
     onClick={() => setRange(r)}
-    className={`px-3 py-1 text-sm rounded-full border ${
+    className={`px-2 py-0.5 text-sm rounded-full border font-sans font-normal capitalize ${
       range === r
         ? "bg-black text-white"
         : "bg-white text-black"
@@ -287,19 +372,10 @@ const getColor = (value: number) => {
 
           </div>
 
-          <div className="flex gap-3 mt-2 text-sm">
-            <p className="flex items-center gap-1 text-green-600">
-              ● Online
-            </p>
-            <p className="flex items-center gap-1 text-red-500">
-              ● Offline
-            </p>
-          </div>
-
           {/* CHART PLACEHOLDER */}
           
 
-<div className="border rounded-xl mt-3 h-44 p-2">
+<div className="border rounded-xl mt-3 h-44 p-2 font-sans font-medium">
   <ResponsiveContainer width="100%" height="100%">
   <AreaChart data={revenueData}>
 
@@ -365,18 +441,27 @@ const getColor = (value: number) => {
         {/* ================= PEAK ================= */}
         <div className="mt-6 border rounded-xl p-3">
           <div className="flex justify-between items-center">
-            <p className="font-medium">Peak Timings</p>
-            <select className="border rounded-full px-2 py-1 text-sm">
-              <option>Turf 1</option>
-            </select>
+            <p className="font-medium text-lg text-black font-sans">Peak Timings</p>
+            <select
+  value={selectedTurf}
+  onChange={(e) => setSelectedTurf(e.target.value)}
+  className="border rounded-full px-2 py-0.5 text-sm font-sans font-normal text-black"
+>
+  {turfs.map((t) => (
+    <option key={t.id} value={t.id}>
+      {t.name}
+    </option>
+  ))}
+</select>
           </div>
 
           <div className="mt-4">
 
   {/* HOURS */}
-  <div className="flex ml-10 mb-1">
+  <div className="grid grid-cols-[40px_repeat(24,1fr)] mb-1">
+    <div></div>
     {hours.map((h) => (
-      <div key={h} className="w-[12px] text-[9px] text-center text-gray-500">
+      <div key={h} className="text-[8px] text-center text-gray-900 font-sans font-medium">
         {h + 1}
       </div>
     ))}
@@ -384,29 +469,32 @@ const getColor = (value: number) => {
 
   {/* GRID */}
   {matrix.map((row, i) => (
-    <div key={i} className="flex items-center mb-[2px]">
+    <div
+      key={i}
+      className="grid grid-cols-[40px_repeat(24,1fr)] mb-[2px] items-center"
+    >
 
       {/* DAY */}
-      <div className="w-10 text-[10px] text-gray-600">
+      <div className="text-[10px] text-gray-800 font-sans font-medium">
         {days[i]}
       </div>
 
       {/* CELLS */}
-      <div className="flex gap-[2px]">
-        {row.map((value, j) => (
-          <div
-            key={j}
-            className={`w-[12px] h-[12px] rounded-[2px] ${getColor(value)}`}
-            title={`${days[i]} ${j}:00 → ${value}`}
-          />
-        ))}
-      </div>
+      {row.map((value, j) => (
+        <div
+          key={j}
+          className={`aspect-square rounded-[2px] ${getColor(value)} mx-[1px]`}
+          title={`${days[i]} ${j}:00 → ${value}`}
+        />
+      ))}
 
     </div>
   ))}
 
 </div>
-<div className="flex gap-3 mt-3 text-[10px] items-center">
+
+
+<div className="flex gap-3 mt-3 text-[10px] items-center text-black font-sans font-medium">
   <span>Low</span>
   <div className="w-3 h-3 bg-gray-100" />
   <div className="w-3 h-3 bg-green-200" />
@@ -420,19 +508,92 @@ const getColor = (value: number) => {
         <div className="grid grid-cols-2 gap-3 mt-5">
 
           <div className="border rounded-xl p-3">
+            <div>
             <p className="font-medium font-sans text-black text-base">Daily Average</p>
-            <p className="text-sm mt-1">₹12000 (15 bookings)</p>
+            <p className="font-medium font-sans text-black text-[9px]/3">(Past 7 days)</p> 
+            </div>
+            <p className="text-sm mt-1 font-semibold">
+  ₹{avgRevenue}
+</p>
+<p className="text-[11px] text-gray-500">
+  Avg {avgBookings} bookings/day
+</p>
 
             
 
 
 
-<ResponsiveContainer width="100%" height={100}>
-  <BarChart data={barData}>
-    <Bar dataKey="value" fill="#16a34a" radius={[4, 4, 0, 0]} />
+<ResponsiveContainer width="100%" height={120}>
+  <BarChart
+    data={barData}
+    onClick={(state) => {
+  const index = Number(state?.activeTooltipIndex);
+
+  if (!isNaN(index)) {
+    setActiveIndex(index);
+  }
+}}
+  >
+    <XAxis
+      dataKey="name"
+      tick={{ fontSize: 10 }}
+      axisLine={false}
+      tickLine={false}
+    />
+
+    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+  {barData.map((entry, index) => (
+    <Cell
+      key={index}
+      fill={index === activeIndex ? "#166534" : "#16a34a"}
+    />
+  ))}
+
+  <LabelList
+  dataKey="value"
+  content={(props) => {
+    const { x, y, width, value, index } = props;
+
+    if (index !== activeIndex) return null;
+
+    const cx = (Number(x) || 0) + (Number(width) || 0) / 2;
+    const cy = (Number(y) || 0) - 10;
+
+    return (
+      <g>
+        {/* Bubble background */}
+        <rect
+          x={cx - 22}
+          y={cy - 16}
+          width={44}
+          height={18}
+          rx={6}
+          fill="#111827"
+          opacity={0.95}
+        />
+
+        {/* Text */}
+        <text
+          x={cx}
+          y={cy - 3}
+          textAnchor="middle"
+          className="fill-white text-[9px] font-semibold"
+        >
+          ₹{Number(value).toLocaleString()}
+        </text>
+
+        {/* Small triangle pointer */}
+        <path
+          d={`M ${cx - 5} ${cy} L ${cx + 5} ${cy} L ${cx} ${cy + 6} Z`}
+          fill="#111827"
+        />
+      </g>
+    );
+  }}
+/>
+</Bar>
   </BarChart>
 </ResponsiveContainer>
-
 
           </div>
 
@@ -466,7 +627,7 @@ const getColor = (value: number) => {
 
             </div>
 
-            <div className="text-sm mt-2 text-black font-sans font-medium">
+            <div className="text-[13px] mt-2 text-black font-sans font-medium">
               <div className="flex gap-1 items-center">
                   <div className="h-2.5 w-2.5 rounded-full bg-red-700" />
                   <p>Manual Bookings</p>
