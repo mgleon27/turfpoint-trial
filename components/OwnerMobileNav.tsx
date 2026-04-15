@@ -65,7 +65,7 @@ export default function OwnerMobileNav() {
   return (
     <div
       ref={containerRef}
-      className="flex overflow-x-auto no-scrollbar gap-3 px-4 pb-2 pt-4 bg-white snap-x snap-mandatory"
+      className="flex gap-3 px-4 pb-2 pt-4 bg-white snap-x snap-mandatory justify-evenly"
     >
       {items.map((item) => {
         const active =

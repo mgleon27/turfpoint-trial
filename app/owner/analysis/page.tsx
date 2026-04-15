@@ -30,6 +30,15 @@ type RevenueData = {
   revenue: number;
 };
 
+
+type ChartClickState = {
+  activePayload?: {
+    payload: {
+      index: number;
+    };
+  }[];
+};
+
 export default function OwnerAnalysis() {
   const { user } = useUser();
 
@@ -290,9 +299,11 @@ const avgBookings = Math.round(totalBookings7Days / 7);
 
 
 
-const barData = last7DaysData.map((d) => ({
-  name: new Date(d.date).toLocaleDateString("en-US", { weekday: "short" })
-  .charAt(0),
+const barData = last7DaysData.map((d, i) => ({
+  index: i, // ⭐ IMPORTANT
+  name: new Date(d.date)
+    .toLocaleDateString("en-US", { weekday: "short" })
+    .charAt(0),
   value: d.revenue,
 }));
 
@@ -525,15 +536,17 @@ const barData = last7DaysData.map((d) => ({
 
 <ResponsiveContainer width="100%" height={120}>
   <BarChart
-    data={barData}
-    onClick={(state) => {
-  const index = Number(state?.activeTooltipIndex);
+  data={barData}
+  onMouseDown={(state) => {
+  const payload = (state as unknown as {
+    activePayload?: { payload: { index: number } }[];
+  })?.activePayload?.[0]?.payload;
 
-  if (!isNaN(index)) {
-    setActiveIndex(index);
+  if (payload?.index !== undefined) {
+    setActiveIndex(payload.index);
   }
 }}
-  >
+>
     <XAxis
       dataKey="name"
       tick={{ fontSize: 10 }}
@@ -568,7 +581,7 @@ const barData = last7DaysData.map((d) => ({
           width={44}
           height={18}
           rx={6}
-          fill="#111827"
+          fill="#39c339"
           opacity={0.95}
         />
 
@@ -577,7 +590,7 @@ const barData = last7DaysData.map((d) => ({
           x={cx}
           y={cy - 3}
           textAnchor="middle"
-          className="fill-white text-[9px] font-semibold"
+          className=" text-black text-[9px] font-semibold"
         >
           ₹{Number(value).toLocaleString()}
         </text>
@@ -585,7 +598,7 @@ const barData = last7DaysData.map((d) => ({
         {/* Small triangle pointer */}
         <path
           d={`M ${cx - 5} ${cy} L ${cx + 5} ${cy} L ${cx} ${cy + 6} Z`}
-          fill="#111827"
+          fill="#39c339"
         />
       </g>
     );
