@@ -325,9 +325,9 @@ const barData = last7DaysData.map((d, i) => ({
           {/* Revenue */}
           <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
             <p className="font-medium font-sans text-gray-800 text-base">Revenue</p>
-            <p className="text-sm mt-1 font-medium font-sans text-gray-600">Today :<span className="text-black pl-9"> ₹{todayRevenue}/- </span></p>
-            <p className="text-sm font-medium font-sans text-gray-600"> This Week :<span className="text-black pl-1.5"> ₹{weekRevenue}/-</span></p>
-            <p className="text-sm font-medium font-sans text-gray-600">This Month :<span className="text-black pl-0.5"> ₹{monthRevenue}/-</span></p>
+            <p className="text-sm mt-1 font-medium font-sans text-gray-600 -ml-1">Today :<span className="text-black pl-8"> ₹{todayRevenue}/- </span></p>
+            <p className="text-sm font-medium font-sans text-gray-600 -ml-1"> This Week :<span className="text-black pl-1"> ₹{weekRevenue}/-</span></p>
+            <p className="text-sm font-medium font-sans text-gray-600 -ml-1">This Month :<span className="text-black "> ₹{monthRevenue}/-</span></p>
           </div>
 
           {/* Bookings */}
