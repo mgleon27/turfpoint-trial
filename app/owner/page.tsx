@@ -95,7 +95,11 @@ export default function OwnerHome() {
     b.turf_id === selectedTurf
 );
 
-  const earnings = todayBookings.reduce((s, b) => s + (b.price || 0), 0);
+const allTodayBookings = bookings.filter(
+  (b) => b.booking_date === today
+);
+
+  const earnings = allTodayBookings.reduce((s, b) => s + (b.price || 0), 0);
 
   const upcoming = bookings
   .filter(
@@ -105,9 +109,9 @@ export default function OwnerHome() {
   )
   .slice(0, 3);
 
-  const bookingCount = todayBookings.length;
+  const bookingCount = allTodayBookings.length;
 
-  const percentage = Math.round((bookingCount / 24) * 100);
+  const percentage = Math.round((bookingCount / (24 * turfs.length || 1)) * 100);
 
   // ================= SLOT STATUS =================
 
@@ -153,14 +157,14 @@ export default function OwnerHome() {
 
           {/* Earnings */}
           <div className="flex-1 bg-green-100 rounded-lg p-4 shadow-md border border-gray-300">
-            <p className="text-gray-600 text-sm font-sans font-medium">Todays Earnings</p>
+            <p className="text-gray-600 text-sm font-sans font-medium">Todays Earnings (All) </p>
             <p className="text-base font-semibold font-sans text-black mt-1 ">₹{earnings}</p>
             <p className="text-green-700 mt-2 text-sm font-sans font-medium">+4.6%</p>
           </div>
 
           {/* Bookings */}
           <div className="flex-1 bg-green-100 rounded-lg p-4 shadow-md border border-gray-300">
-            <p className="text-gray-600 text-sm font-sans font-medium">Bookings Today</p>
+            <p className="text-gray-600 text-sm font-sans font-medium">Bookings Today (All) </p>
             <p className="text-base font-medium font-sans text-black mt-1">
               {bookingCount} ({percentage}%)
             </p>
