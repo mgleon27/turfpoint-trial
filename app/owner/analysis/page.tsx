@@ -523,10 +523,10 @@ const barData = last7DaysData.map((d, i) => ({
             <p className="font-medium font-sans text-black text-base">Daily Average</p>
             <p className="font-medium font-sans text-black text-[9px]/3">(Past 7 days)</p> 
             </div>
-            <p className="text-sm mt-1 font-semibold">
+            <p className="text-sm mt-1 font-semibold text-black font-sans">
   ₹{avgRevenue}
 </p>
-<p className="text-[11px] text-gray-500">
+<p className="text-[11px] text-gray-500 font-medium font-sans">
   Avg {avgBookings} bookings/day
 </p>
 
@@ -534,19 +534,11 @@ const barData = last7DaysData.map((d, i) => ({
 
 
 
-<ResponsiveContainer width="100%" height={120}>
-  <BarChart
+<ResponsiveContainer width="100%" height={150} >
+  <BarChart 
   data={barData}
-  onMouseDown={(state) => {
-  const payload = (state as unknown as {
-    activePayload?: { payload: { index: number } }[];
-  })?.activePayload?.[0]?.payload;
-
-  if (payload?.index !== undefined) {
-    setActiveIndex(payload.index);
-  }
-}}
->
+  margin={{ top: 30 }} >
+    <YAxis hide domain={[0, "dataMax + 20"]} />
     <XAxis
       dataKey="name"
       tick={{ fontSize: 10 }}
@@ -554,7 +546,13 @@ const barData = last7DaysData.map((d, i) => ({
       tickLine={false}
     />
 
-    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+    <Bar
+  dataKey="value"
+  radius={[4, 4, 0, 0]}
+  onClick={(data, index) => {
+    setActiveIndex(index);
+  }}
+>
   {barData.map((entry, index) => (
     <Cell
       key={index}
@@ -567,10 +565,10 @@ const barData = last7DaysData.map((d, i) => ({
   content={(props) => {
     const { x, y, width, value, index } = props;
 
-    if (index !== activeIndex) return null;
+    if (Number(index) !== activeIndex) return null;
 
     const cx = (Number(x) || 0) + (Number(width) || 0) / 2;
-    const cy = (Number(y) || 0) - 10;
+    const cy = Math.max((Number(y) || 0) - 10, 10);
 
     return (
       <g>
@@ -581,7 +579,7 @@ const barData = last7DaysData.map((d, i) => ({
           width={44}
           height={18}
           rx={6}
-          fill="#39c339"
+          fill="#1ba91b"
           opacity={0.95}
         />
 
@@ -590,7 +588,7 @@ const barData = last7DaysData.map((d, i) => ({
           x={cx}
           y={cy - 3}
           textAnchor="middle"
-          className=" text-black text-[9px] font-semibold"
+          className=" text-white font-sans  text-[9px] font-semibold"
         >
           ₹{Number(value).toLocaleString()}
         </text>
@@ -598,7 +596,7 @@ const barData = last7DaysData.map((d, i) => ({
         {/* Small triangle pointer */}
         <path
           d={`M ${cx - 5} ${cy} L ${cx + 5} ${cy} L ${cx} ${cy + 6} Z`}
-          fill="#39c339"
+          fill="#1ba91b"
         />
       </g>
     );
@@ -613,7 +611,7 @@ const barData = last7DaysData.map((d, i) => ({
           <div className="border rounded-xl p-3">
             <p className="font-medium font-sans text-black text-base">Portal Analysis</p>
 
-            <div className="h-24 mt-2 flex items-center justify-center">
+            <div className="h-24 mt-7 flex items-center justify-center">
               
               
 
@@ -621,12 +619,12 @@ const barData = last7DaysData.map((d, i) => ({
 
 
 
-<ResponsiveContainer width="100%" height={120}>
+<ResponsiveContainer width="100%" height={145}>
   <PieChart>
     <Pie
       data={pieData}
       dataKey="value"
-      outerRadius={50}
+      outerRadius={65}
     >
       {pieData.map((entry, index) => (
         <Cell key={index} fill={COLORS[index]} />
@@ -640,7 +638,7 @@ const barData = last7DaysData.map((d, i) => ({
 
             </div>
 
-            <div className="text-[13px] mt-2 text-black font-sans font-medium">
+            <div className="text-[13px] mt-8 text-black font-sans font-medium">
               <div className="flex gap-1 items-center">
                   <div className="h-2.5 w-2.5 rounded-full bg-red-700" />
                   <p>Manual Bookings</p>
