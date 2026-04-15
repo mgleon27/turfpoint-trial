@@ -175,8 +175,40 @@ const barData = bookings.slice(0, 7).map((b, i) => ({
 
 
 
+const getHeatmapData = () => {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+
+  const matrix = days.map((day, dayIndex) => {
+    return hours.map((hour) => {
+      const count = bookings.filter((b) => {
+        const date = new Date(b.booking_date);
+        const bookingDay = date.getDay();
+
+        const bookingHour = new Date(
+          `1970-01-01T${b.start_time}`
+        ).getHours();
+
+        return bookingDay === dayIndex && bookingHour === hour;
+      }).length;
+
+      return count;
+    });
+  });
+
+  return { days, hours, matrix };
+};
+
+const { days, hours, matrix } = getHeatmapData();
 
 
+const getColor = (value: number) => {
+  if (value === 0) return "bg-gray-100";
+  if (value < 2) return "bg-green-200";
+  if (value < 4) return "bg-green-300";
+  if (value < 6) return "bg-green-400";
+  return "bg-green-600";
+};
 
 
 
@@ -339,9 +371,49 @@ const barData = bookings.slice(0, 7).map((b, i) => ({
             </select>
           </div>
 
-          <div className="mt-3 h-40 bg-green-100 rounded-md flex items-center justify-center text-sm text-gray-600">
-            Heatmap here
-          </div>
+          <div className="mt-4">
+
+  {/* HOURS */}
+  <div className="flex ml-10 mb-1">
+    {hours.map((h) => (
+      <div key={h} className="w-[12px] text-[9px] text-center text-gray-500">
+        {h + 1}
+      </div>
+    ))}
+  </div>
+
+  {/* GRID */}
+  {matrix.map((row, i) => (
+    <div key={i} className="flex items-center mb-[2px]">
+
+      {/* DAY */}
+      <div className="w-10 text-[10px] text-gray-600">
+        {days[i]}
+      </div>
+
+      {/* CELLS */}
+      <div className="flex gap-[2px]">
+        {row.map((value, j) => (
+          <div
+            key={j}
+            className={`w-[12px] h-[12px] rounded-[2px] ${getColor(value)}`}
+            title={`${days[i]} ${j}:00 → ${value}`}
+          />
+        ))}
+      </div>
+
+    </div>
+  ))}
+
+</div>
+<div className="flex gap-3 mt-3 text-[10px] items-center">
+  <span>Low</span>
+  <div className="w-3 h-3 bg-gray-100" />
+  <div className="w-3 h-3 bg-green-200" />
+  <div className="w-3 h-3 bg-green-400" />
+  <div className="w-3 h-3 bg-green-600" />
+  <span>High</span>
+</div>
         </div>
 
         {/* ================= SECOND ROW ================= */}
