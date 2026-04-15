@@ -91,7 +91,13 @@ export default function OwnerAnalysis() {
   const now = new Date();
 
   // ✅ TODAY
-  const todayStr = now.toISOString().split("T")[0];
+  const getLocalDate = (date: Date) => {
+  const offset = date.getTimezoneOffset();
+  const local = new Date(date.getTime() - offset * 60000);
+  return local.toISOString().split("T")[0];
+};
+
+const todayStr = getLocalDate(new Date());
 
   // ✅ WEEK (Monday → Today)
   const dayOfWeek = now.getDay(); // 0 (Sun) - 6 (Sat)
@@ -111,12 +117,12 @@ const todayBookings = bookings.filter(
 );
 
 const weekBookings = bookings.filter((b) => {
-  const d = new Date(b.booking_date);
+  const d = new Date(b.booking_date + "T00:00:00");
   return d >= monday && d <= now;
 });
 
 const monthBookings = bookings.filter((b) => {
-  const d = new Date(b.booking_date);
+  const d = new Date(b.booking_date + "T00:00:00");
   return d >= firstDayOfMonth && d <= now;
 });
 
@@ -345,19 +351,19 @@ prevWeekEnd.setHours(23, 59, 59, 999);
 
 // 🔹 THIS WEEK
 const thisWeekBookings = bookings.filter((b) => {
-  const d = new Date(b.booking_date);
+  const d = new Date(b.booking_date + "T00:00:00");
   return d >= monday && d <= now;
 });
 
 // 🔹 LAST WEEK
 const lastWeekBookings = bookings.filter((b) => {
-  const d = new Date(b.booking_date);
+  const d = new Date(b.booking_date + "T00:00:00");
   return d >= lastWeekStart && d <= lastWeekEnd;
 });
 
 // 🔹 WEEK BEFORE LAST
 const prevWeekBookings = bookings.filter((b) => {
-  const d = new Date(b.booking_date);
+  const d = new Date(b.booking_date + "T00:00:00");
   return d >= prevWeekStart && d <= prevWeekEnd;
 });
 

@@ -55,7 +55,7 @@ export default function OwnerHome() {
   const [turfs, setTurfs] = useState<Turf[]>([]);
   const [selectedTurf, setSelectedTurf] = useState<string>("");
 
-  const today = getToday();
+  const today = getToday(); 
 
   // ================= LOAD =================
   const load = async () => {
