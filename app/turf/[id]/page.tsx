@@ -24,10 +24,6 @@ type Turf = {
   image_url?: string;
   map_lat: number;
   map_lng: number;
-  is_24_7: boolean;
-
-  opening_time?: string;
-  closing_time?: string;
   area_sqm?: number;
 
   parking?: boolean;
@@ -437,9 +433,11 @@ const iconMap: Record<string, string> = {
           <div className="mt-4 space-y-2 text-sm">
 
             <div className="flex justify-between pt-1">
-                 <div className="flex gap-3 text-base font-sans text-black font-medium ml-2">
-                   <img src="/icons/timing.png" className="w-5 h-5" />
-                   {turf.is_24_7 ? "24/7  Available" : `${turf.opening_time} - ${turf.closing_time}`}
+                 <div className="flex gap-3 text-base font-sans text-black font-medium ml-3">
+    
+                   <img src="/icons/area.png" className="w-5 h-5" />
+                   {turf.area_sqm} sq.m
+
                  </div>
 
 
@@ -448,14 +446,7 @@ const iconMap: Record<string, string> = {
                    {turf.locality}
                  </div>
             </div>
-
-
-                 {turf.area_sqm && (
-            <div className="flex gap-3 text-base font-sans text-black font-medium items-center mt-4 ml-2">
-                <img src="/icons/area.png" className="w-4 h-4" />
-                {turf.area_sqm} sq.m
-            </div>
-            )}
+           
           </div>
 
           <hr className="my-4" />
@@ -658,21 +649,11 @@ const iconMap: Record<string, string> = {
 ))}
     </div>
             {/* TIME */}
-            <div className="flex items-center gap-2 text-sm text-black font-sans">
-  <img src="/icons/clock.png" className="w-6 h-6" />
-
-  {turf.is_24_7
-    ? "24/7 Available"
-    : `${turf.opening_time} - ${turf.closing_time}`}
+            <div className="flex items-center gap-2 text-base text-black font-sans text-black font-medium">
+   <img src="/icons/area.png" className="w-6 h-6" />
+   {turf.area_sqm} sq.m
 </div>
 
-            {/* AREA */}
-            {turf.area_sqm && (
-  <div className="flex items-center gap-2 text-sm text-black font-sans ml-1">
-    <img src="/icons/area.png" className="w-4 h-4" />
-    {turf.area_sqm} sq.m
-  </div>
-)}
 
             {/* PRICE */}
             <div className="flex justify-between items-center font-sans">

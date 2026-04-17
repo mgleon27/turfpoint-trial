@@ -30,7 +30,7 @@ export default function Header({
 
           {/* LOGO */}
           <img
-            src="/logo.png"
+            src="/logo-new.png"
             alt="logo"
             className="h-12 cursor-pointer"
             onClick={() => router.push("/")}

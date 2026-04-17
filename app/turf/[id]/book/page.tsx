@@ -18,10 +18,6 @@ type Turf = {
 
   min_price?: number;
   max_price?: number;
-
-  is_24_7: boolean;
-  opening_time?: string;
-  closing_time?: string;
 };
 
 type Booking = {
@@ -34,6 +30,15 @@ type Pricing = {
   start_hour: number;
   day_of_week: number;
   price: number;
+};
+
+
+
+type WorkingHour = {
+  day_of_week: number; // 0–6
+  open_time: string;
+  close_time: string;
+  is_open: boolean;
 };
 
 
@@ -60,24 +65,56 @@ const label = (m: number) => {
 };
 
 // ================= SLOT BUILDER =================
-function buildSlots(turf: Turf) {
-  const open = turf.is_24_7 ? 0 : timeToMinutes(turf.opening_time);
-  const close = turf.is_24_7 ? 1440 : timeToMinutes(turf.closing_time);
 
-  const arr = [];
+function buildSlotsForDay(date: string, workingHours: WorkingHour[]) {
+  const selectedDate = new Date(date);
+  const day = selectedDate.getDay();
 
-  for (let m = open; m + 60 <= close; m += 60) {
-    arr.push({
-      key: `${m}-${m + 60}`,
-      start: minutesToTime(m),
-      end: minutesToTime(m + 60),
-      label: label(m),
-      startMin: m,
+  const config = workingHours.find(w => w.day_of_week === day);
+
+  // ❌ FULL DAY CLOSED
+  if (!config || !config.is_open) {
+    return Array.from({ length: 24 }).map((_, h) => {
+      const m = h * 60;
+      return {
+        key: `${m}-${m + 60}`,
+        start: minutesToTime(m),
+        end: minutesToTime(m + 60),
+        label: label(m),
+        startMin: m,
+        isClosed: true,
+      };
     });
   }
 
+  const open = timeToMinutes(config.open_time);
+  let close = timeToMinutes(config.close_time);
+
+// handle midnight crossing
+if (close <= open) {
+  close += 1440;
+}
+
+  const arr = [];
+
+  for (let m = 0; m < 1440; m += 60) {
+  const current = m < open ? m + 1440 : m;
+
+  const isClosed = current < open || current >= close;
+
+  arr.push({
+    key: `${m}-${m + 60}`,
+    start: minutesToTime(m),
+    end: minutesToTime(m + 60),
+    label: label(m),
+    startMin: m,
+    isClosed,
+  });
+}
+
   return arr;
 }
+
 
 
 const getToday = () => {
@@ -102,6 +139,7 @@ export default function Page() {
   const { user } = useUser();
 
   const [pricing, setPricing] = useState<Pricing[]>([]);
+  const [workingHours, setWorkingHours] = useState<WorkingHour[]>([]);
 
   const minPrice = turf?.min_price ?? turf?.price ?? 0;
   const maxPrice = turf?.max_price ?? turf?.price ?? 0;
@@ -211,6 +249,15 @@ const loadStatic = async () => {
     setTurf(turfRes.data);
   }
 
+
+  const { data: wh } = await supabase
+  .from("turf_working_hours")
+  .select("*")
+  .eq("turf_id", id);
+
+setWorkingHours(wh || []); 
+
+
   const { data: pricingData } = await supabase
     .from("turf_pricing")
     .select("*")
@@ -218,6 +265,9 @@ const loadStatic = async () => {
 
   setPricing(pricingData || []);
 };
+
+
+
 
 
 
@@ -343,7 +393,7 @@ useEffect(() => {
   );
 }
 
-  const slots = buildSlots(turf);
+  const slots = buildSlotsForDay(date, workingHours);
 
   const bookedSet = new Set(
     bookings.map(
@@ -392,11 +442,17 @@ const priceRow = pricing.find(
 
   const price = priceRow?.price ?? turf.price;
 
-  const status = isTimeout
-    ? "timeout"
-    : isBooked
-    ? "booked"
-    : "available";
+  let status: "available" | "booked" | "timeout" | "closed";
+
+if (s.isClosed) {
+  status = "closed";
+} else if (isTimeout) {
+  status = "timeout";
+} else if (isBooked) {
+  status = "booked";
+} else {
+  status = "available";
+}
 
   return { ...s, status, price, isNowSlot };
 });
@@ -648,6 +704,7 @@ if (error) {
                 ${s.status === "timeout" && "bg-gray-300 border border-gray-400 text-white"}
                 ${s.status === "booked" && "bg-gray-300 border border-gray-400 text-red-400"}
                 ${s.status === "available" && "text-black text-base font-sans font-medium border-1 border-green-300 "}
+                ${s.status === "closed" && "bg-gray-200 border border-gray-300 text-gray-500"}
                 ${isSelected && "bg-green-500 text-white border border-gray-200 ring-2 ring-green-200"}
               `}
               >
@@ -989,6 +1046,7 @@ if (error) {
                 ${s.status === "timeout" && "bg-gray-300 text-white border-gray-400 border-1"}
                 ${s.status === "booked" && "bg-gray-300 text-red-400 border-gray-400 border-1"}
                 ${s.status === "available" && "text-black text-base font-sans font-medium border-2 border-green-300"}
+                ${s.status === "closed" && "bg-gray-200 text-gray-500 border-gray-300 border-1"}
                 ${isSelected && "bg-green-500 text-white border border-gray-200"}
             `}
           >

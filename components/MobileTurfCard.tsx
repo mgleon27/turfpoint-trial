@@ -16,7 +16,6 @@ type Turf = {
   image_url?: string;
   map_lat: number;
   map_lng: number;
-  is_24_7: boolean;
   reviews?: { rating: number }[];
   turf_sports?: { sports?: { name?: string } }[];
 };

@@ -78,7 +78,7 @@ export default function ProfilePage() {
     <div className="bg-white min-h-screen">
 
       {/* ================= MOBILE ================= */}
-      <div className="md:hidden bg-white min-h-screen pt-2">
+      <div className="md:hidden bg-white min-h-screen">
 
         <MobileHeader setShowLocationModal={setShowLocationModal} />
         <MobileNav />

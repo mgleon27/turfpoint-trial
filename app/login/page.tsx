@@ -93,7 +93,7 @@ export default function AuthPage() {
 
       {/* LEFT SIDE */}
       <div className="w-1/2 bg-green-500 rounded-3xl relative flex flex-col items-center justify-center">
-        <img src="/logo.png" className="h-10 absolute top-6 left-6" />
+        <img src="/logo-new.png" className="h-10 absolute top-6 left-6" />
 
         <div className="w-[80%] h-[70%] rounded-lg overflow-hidden flex items-center justify-center">
           <img
@@ -239,7 +239,7 @@ export default function AuthPage() {
     <div className="md:hidden w-full min-h-screen bg-white px-6 py-10 flex flex-col justify-center">
 
       {/* OPTIONAL LOGO */}
-      <img src="/logo.png" className="h-10 mb-8 self-center" />
+      <img src="/logo-new.png" className="h-17 mb-5 self-center" />
 
       {/* SAME FORM (COPIED — NOT SEPARATE COMPONENT) */}
       <h1 className="text-2xl font-bold mb-6 text-center text-black font-sans">

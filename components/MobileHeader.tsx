@@ -75,12 +75,12 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
       <div className="flex items-center justify-between">
 
         {/* LOGO + LOCATION */}
-        <div className="flex flex-col pl-1 gap-0.5">
-          <img src="/logo.png" className="h-9" />
+        <div className="flex flex-col pl-0.5 gap-0.5">
+          <img src="/logo-new.png" className="h-10 w-28" />
 
           <span
             onClick={() => setShowLocationModal(true)}
-            className="text-sm text-gray-700 font-medium cursor-pointer flex pt-0.2 font-sans"
+            className="text-sm text-gray-700 font-medium cursor-pointer flex pt-0.5 font-sans"
           >
             <img src="/icons/locationtop.png" className="h-4 pr-0.5" />
             {mounted ? city : "..."} ›
