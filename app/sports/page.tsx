@@ -102,8 +102,29 @@ export default function SportsPage() {
         turf_sports ( sports ( name ) )
       `);
 
-    if (sportsData) setSports(sportsData);
-    if (turfData) setTurfs(turfData);
+    if (turfData) {
+      setTurfs(turfData);
+
+      // ✅ STEP 1: Get all sports used in turfs
+      const usedSports = new Set(
+        turfData.flatMap((t) =>
+          (t.turf_sports || [])
+            .map((sp: { sports?: { name?: string } }) =>
+  sp.sports?.name?.toLowerCase()
+)
+            .filter(Boolean)
+        )
+      );
+
+      // ✅ STEP 2: Filter sports list
+      if (sportsData) {
+        const filtered = sportsData.filter((s) =>
+          usedSports.has(s.name.toLowerCase())
+        );
+
+        setSports(filtered);
+      }
+    }
 
     setLoading(false);
   };

@@ -26,11 +26,13 @@ type Turf = {
   map_lng: number;
   area_sqm?: number;
 
-  parking?: boolean;
-  water?: boolean;
-  restroom?: boolean;
-  other_features?: string | null;
-  other_sports?: string | null;
+  turf_features?: {
+  feature_id: string;
+  features: {
+    name: string;
+    icon_url: string | null;
+  } | null;
+}[];
 
   reviews?: { rating: number }[];
   turf_sports?: { sports?: { name?: string } }[];
@@ -79,39 +81,60 @@ export default function TurfDetailsPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
-        .from("turfs")
-        .select(`
-          *,
-          reviews ( rating ),
-          turf_sports ( sports ( name ) )
-        `)
-        .eq("id", id)
-        .single();
+  try {
+    const { data, error } = await supabase
+      .from("turfs")
+      .select(`
+  *,
+  reviews ( rating ),
+  turf_sports ( sports ( name ) ),
+  turf_features (
+    feature_id,
+    features!fk_feature ( name, icon_url )
+  )
+`)
+      .eq("id", id)
+      .single();
 
-      if (data) setTurf(data);
+    if (error) {
+      console.error("TURF LOAD ERROR:", error);
+      return;
+    }
 
-      const { data: imgs } = await supabase
-        .from("turf_images")
-        .select("*")
-        .eq("turf_id", id)
-        .order("position", { ascending: true });
+    if (!data) {
+      console.error("No turf found");
+      return;
+    }
 
-      if (imgs && imgs.length > 0) {
-        setImages(imgs);
-        setActiveImg(imgs[0].image_url);
-      } else if (data?.image_url) {
-        setActiveImg(data.image_url);
-      }
+    setTurf(data);
 
-      const { data: reviewData } = await supabase
-        .from("reviews")
-        .select(`*, profiles ( full_name )`)
-        .eq("turf_id", id)
-        .limit(7);
+    // IMAGES
+    const { data: imgs } = await supabase
+      .from("turf_images")
+      .select("*")
+      .eq("turf_id", id)
+      .order("position", { ascending: true });
 
-      if (reviewData) setReviews(reviewData);
-    };
+    if (imgs && imgs.length > 0) {
+      setImages(imgs);
+      setActiveImg(imgs[0].image_url);
+    } else if (data?.image_url) {
+      setActiveImg(data.image_url);
+    }
+
+    // REVIEWS
+    const { data: reviewData } = await supabase
+      .from("reviews")
+      .select(`*, profiles ( full_name )`)
+      .eq("turf_id", id)
+      .limit(7);
+
+    if (reviewData) setReviews(reviewData);
+
+  } catch (err) {
+    console.error("LOAD FAILED:", err);
+  }
+};
 
     load();
   }, [id]);
@@ -254,22 +277,29 @@ const getDirections = () => {
         turf.reviews.length
       : 0;
 
-  const sports = [
-    ...(turf.turf_sports?.map((s) => s.sports?.name?.toLowerCase()) || []),
-    ...(turf.other_sports
-      ? turf.other_sports.toLowerCase().split(",")
-      : []),
-  ];
+  const sports = Array.from(
+  new Set(
+    (turf.turf_sports?.map((s) =>
+      s.sports?.name?.toLowerCase().trim()
+    ) || []).filter(Boolean)
+  )
+);
 
-  const amenities: Amenity[] = [
-    turf.parking && { label: "Parking", icon: "/icons/parking.png" },
-    turf.water && { label: "Water", icon: "/icons/water.png" },
-    turf.restroom && { label: "Restroom", icon: "/icons/restroom.png" },
-    turf.other_features && {
-      label: turf.other_features,
-      icon: "/icons/feature.png",
-    },
-  ].filter(Boolean) as Amenity[];
+
+
+  const amenities: Amenity[] = Array.from(
+  new Map(
+    (turf.turf_features || [])
+      .filter(f => f.features) // remove null relations
+      .map(f => [
+        f.features!.name,
+        {
+          label: f.features!.name,
+          icon: f.features!.icon_url || "/icons/feature.png",
+        }
+      ])
+  ).values()
+);
 
 
 const toggleFavourite = async () => {
@@ -481,12 +511,18 @@ const iconMap: Record<string, string> = {
           </h2>
 
           <div className="grid grid-cols-4 gap-4 font-sans mb-10">
-            {amenities.map((a, i) => (
-              <div key={i} className="text-center ">
-                <img src={a.icon} className="w-8 h-8 mx-auto" />
-                <p className="text-base text-black font-sans pt-2">{a.label}</p>
-              </div>
-            ))}
+            {amenities.length === 0 ? (
+  <p className="text-gray-400 text-sm text-center col-span-full">
+    No amenities mentioned
+  </p>
+) : (
+  amenities.map((a, i) => (
+    <div key={i} className="text-center">
+      <img src={a.icon} className="w-8 h-8 mx-auto" />
+      <p className="text-sm mt-1">{a.label}</p>
+    </div>
+  ))
+)}
           </div>
 
           {/* REVIEWS */}
@@ -756,7 +792,11 @@ const iconMap: Record<string, string> = {
               </h2>
 
               <div className="flex gap-15 flex-wrap">
-                {amenities.map((a , i) => (
+                {amenities.length === 0 ? (
+  <p className="text-gray-400 text-sm text-center col-span-full">
+    No amenities mentioned 
+  </p>
+) : (amenities.map((a , i) => (
                   <div key={i} className="text-center">
                     <img
                       src={a.icon}
@@ -764,7 +804,7 @@ const iconMap: Record<string, string> = {
                     />
                     <p className="text-sm mt-1">{a.label}</p>
                   </div>
-                ))}
+                )))}
               </div>
             </div>
 
