@@ -425,7 +425,7 @@ const barData = last7DaysData.map((d, i) => ({
           </div>
 
           {/* Bookings */}
-          <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
+          <div className="bg-green-200 rounded-lg p-3 shadow-md border border-gray-300">
             <p className="font-medium font-sans text-gray-800 text-base">Bookings</p>
             <p className="text-sm mt-1 font-medium font-sans text-gray-600">Today : <span className="text-black pl-10.5">{todayBookings.length}</span></p>
             <p className="text-sm font-medium font-sans text-gray-600">This Week : <span className="text-black pl-3">{weekBookings.length}</span></p>
@@ -434,7 +434,7 @@ const barData = last7DaysData.map((d, i) => ({
 
 
           {/* This Week */}
-          <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
+          <div className="bg-green-300 rounded-lg p-3 shadow-md border border-gray-300">
   <p className="font-medium font-sans text-gray-800 text-base">This Week</p>
 
   <p className="text-sm mt-1 text-gray-600">
@@ -457,7 +457,7 @@ const barData = last7DaysData.map((d, i) => ({
 
 
           {/* Past Week */}
-          <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
+          <div className="bg-green-400 rounded-lg p-3 shadow-md border border-gray-300">
   <p className="font-medium font-sans text-gray-800 text-base">Past Week</p>
 
   <p className="text-sm mt-1 text-gray-600">

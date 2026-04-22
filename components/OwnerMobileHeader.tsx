@@ -63,8 +63,8 @@ export default function OwnerMobileHeader() {
 
         
 
-          <div className="border border-black rounded-full p-1.5 mr-1">
-            <img src="/icons/bell.png" className="h-4" />
+          <div className=" rounded-full  mr-1.5 ml-1">
+            <img src="/icons/bell-black.png" className="h-5" />
           </div>
 
         </div>

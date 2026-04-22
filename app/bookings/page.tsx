@@ -125,15 +125,15 @@ const completed = bookings
 
           {/* ❌ NOT LOGGED IN */}
           {!user && (
-            <div className="flex flex-col items-center shadow-lg/20 text-center justify-center bg-green-100 rounded-xl p-6 text-center shadow">
+            <div className="flex flex-col items-center text-center justify-center p-6 text-center mt-7">
               <img src="/bookings.png" className="w-37 h-37 mb-4" />
-              <p className="mb-4 text-gray-700 text-sm">
+              <p className="mb-4 text-gray-700 text-md font-sans font-medium">
                 Please Login to View Your Bookings...
               </p>
 
               <button
                 onClick={() => router.push("/login")}
-                className="bg-blue-500 text-white px-5 font-semibold py-2 rounded-lg"
+                className="bg-blue-500 text-white px-5 font-semibold py-2 rounded-lg font-sans"
               >
                 Login Now
               </button>
@@ -160,7 +160,7 @@ const completed = bookings
                   onClick={() => setActiveTab("completed")}
                   className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 border-1 border-green-400 ${
                     activeTab === "completed"
-                      ? "bg-emerald-600 text-white font-sans font-medium"
+                      ? "bg-emerald-500 text-white font-sans font-medium"
                       : "bg-emerald-50 text-black font-sans font-normal"
                   }`}
                 >

@@ -222,15 +222,15 @@ if (loading) {
 
         {/* ❌ NOT LOGGED IN */}
         {!user && (
-          <div className=" flex flex-col items-center shadow-lg/20 text-center justify-center bg-green-200 rounded-xl p-6 text-center shadow ">
+          <div className=" flex flex-col items-center text-center justify-center p-6 text-center mt-7">
             <img src="/favourites.png" className="w-37 h-37 mb-4" />
-            <p className="mb-4 text-sm text-gray-700">
+            <p className="mb-4 text-gray-700 text-md font-sans font-medium">
               Please Login to View Your Favourites...
             </p>
 
             <button
               onClick={() => router.push("/login")}
-              className="bg-blue-500 text-white px-5 py-2 font-semibold rounded-lg"
+              className="bg-blue-500 text-white px-5 py-2 font-semibold rounded-lg font-sans"
             >
               Login Now
             </button>

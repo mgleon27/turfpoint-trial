@@ -175,10 +175,10 @@ export default function SportsPage() {
 
                 
               }}
-              className={`min-w-[110px] h-[150px] rounded-2xl border-2 ${
+              className={`  ${
                 selectedSport === s.name.toLowerCase()
-                  ? "border-green-500 border-3"
-                  : "border-gray-200"
+                  ? "min-w-[115px] h-[157px] rounded-2xl shadow-md shadow-green-500/60 "
+                  : "min-w-[110px] h-[150px] rounded-2xl border-2 border-gray-200"
               }`}
             >
               <div className="relative w-full h-full shadow-lg/20 overflow-hidden rounded-xl">

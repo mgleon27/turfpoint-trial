@@ -87,21 +87,21 @@ export default function ProfilePage() {
         {!user && (
           <div className="flex flex-col items-center justify-center mt-10 px-6 text-center ">
 
-            <div className=" flex flex-col bg-green-50 p-5 items-center justify-center rounded-xl">
+            <div className=" flex flex-col p-5 items-center justify-center">
 
             <img src="/profile.png" className="w-37 h-37 mb-4" />
 
-            <h2 className="text-lg font-semibold mb-2">
+            <h2 className="text-lg font-semibold mb-2 font-sans font-medium">
               Login to access your profile
             </h2>
 
-            <p className="text-gray-600 text-sm mb-5">
+            <p className="text-gray-600 text-sm mb-5 font-sans font-medium">
               View bookings, favourites and manage your account
             </p>
 
             <button
               onClick={() => router.push("/login")}
-              className="bg-green-500 text-white px-6 py-2 rounded-full"
+              className="bg-green-500 text-white px-6 py-2 rounded-full text-md font-sans font-medium"
             >
               Login
             </button>
