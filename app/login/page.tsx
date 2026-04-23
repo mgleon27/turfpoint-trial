@@ -430,14 +430,12 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
       </button>
 
 
-      <button
-  onClick={handleGoogleLogin}
-  className="w-full mt-3 border border-gray-300 py-2 rounded-lg flex items-center justify-center gap-2"
->
-  <img src="/google.png" className="h-5 w-5" />
-  Continue with Google
-</button>
+      <div className="flex flex-col align-center w-full justify-center items-center mt-5">
 
+        <div className="border border-black rounded-full p-2"><img src="/icons/google.png" className="h-6 w-6" /></div>
+        <p className="font-sans font-normal text-[12px] text-black mt-2">Continue with google</p>
+
+      </div>
 
     </div>
   </div>
