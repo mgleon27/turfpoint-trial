@@ -75,8 +75,8 @@ if (password.length < 6) {
 
 
 const handleGoogleLogin = async () => {
+  setLoading(true);
   setErrorMsg("");
-  setSuccessMsg("");
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: "google",
@@ -87,6 +87,7 @@ const handleGoogleLogin = async () => {
 
   if (error) {
     setErrorMsg("Google login failed");
+    setLoading(false);
   }
 };
 

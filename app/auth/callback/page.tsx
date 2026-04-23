@@ -8,7 +8,12 @@ export default function Callback() {
   const router = useRouter();
 
   useEffect(() => {
-    const handleLogin = async () => {
+    const handleAuth = async () => {
+      // 🔥 This is the missing piece
+      await supabase.auth.exchangeCodeForSession(
+        window.location.href
+      );
+
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
@@ -16,13 +21,10 @@ export default function Callback() {
         return;
       }
 
-      // Optional: wait briefly to ensure trigger has run
-      await new Promise((res) => setTimeout(res, 300));
-
       router.replace("/");
     };
 
-    handleLogin();
+    handleAuth();
   }, []);
 
   return <p className="text-center mt-10">Logging you in...</p>;
