@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
@@ -9,81 +9,154 @@ export default function AuthPage() {
 
   const [isLogin, setIsLogin] = useState(true);
 
+  const [loading, setLoading] = useState(false);
+
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState<"user" | "owner">("user");
 
   // ================= LOGIN =================
+
+  useEffect(() => {
+  supabase.auth.getSession().then(({ data }) => {
+    if (data.session) {
+      router.replace("/");
+    }
+  });
+
+}, []);
   const handleLogin = async () => {
+  if (loading) return;
+  setErrorMsg("");
+  setSuccessMsg("");
+  setLoading(true);
+
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+  setErrorMsg("Enter valid email");
+  setLoading(false);
+  return;
+}
+
+if (password.length < 6) {
+  setLoading(false);
+  setErrorMsg("Password must be at least 6 characters");
+  return;
+}
+
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    alert(error.message);
+    setErrorMsg(error.message);
+    setLoading(false);
     return;
   }
 
   const user = data.user;
-
-  if (!user) return;
-
-  // 🔥 FETCH PROFILE
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, owner_approved")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile) {
-    router.push("/");
+  if (!user) {
+    setLoading(false);
     return;
   }
 
-  // 🔥 ROLE BASED REDIRECT
-  if (profile.role === "owner") {
-  if (profile.owner_approved) {
-    router.push("/owner");
-  } else {
-    router.push("/owner-pending"); // 🔥 NOT home
-  }
-} else {
-  router.push("/");
-}
-  };
+  router.replace("/");
 
-  // ================= SIGNUP =================
-  const handleSignup = async () => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
+  setLoading(false);
+};
+
+
+
+
+const handleGoogleLogin = async () => {
+  setErrorMsg("");
+  setSuccessMsg("");
+
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
     options: {
-      data: {
-        name,
-        role,
-      },
+      redirectTo: `${window.location.origin}/auth/callback`,
     },
   });
 
   if (error) {
-    alert(error.message);
-    return;
+    setErrorMsg("Google login failed");
   }
-
-  // ✅ REDIRECTION
-  if (data.session) {
-    if (role === "owner") {
-      router.replace("/owner-pending");
-    } else {
-      router.replace("/");
-    }
-    return;
-  }
-
-  alert("Account created! Please verify your email.");
 };
+
+
+  // ================= SIGNUP =================
+  const handleSignup = async () => {
+  if (loading) return;
+
+  setErrorMsg("");
+  setSuccessMsg("");
+  setLoading(true);
+
+  if (password !== confirmPassword) {
+    setErrorMsg("Passwords do not match");
+    setLoading(false);
+    return;
+  }
+
+  if (name.trim().length < 2) {
+    setErrorMsg("Enter your name");
+    setLoading(false);
+    return;
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    setErrorMsg("Enter valid email");
+    setLoading(false);
+    return;
+  }
+
+  if (password.length < 6) {
+    setErrorMsg("Password must be at least 6 characters");
+    setLoading(false);
+    return;
+  }
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { name, role: "user" },
+    },
+  });
+
+  if (error) {
+    setErrorMsg(error.message);
+    setLoading(false);
+    return;
+  }
+
+  setSuccessMsg("Account created! Please verify your email.");
+  setLoading(false);
+
+  setEmail("");
+  setPassword("");
+  setConfirmPassword("");
+  setName("");
+};
+
+
+
+
+const handleKeyDown = (e: React.KeyboardEvent) => {
+  if (e.key === "Enter") {
+    if (loading) return;
+
+    isLogin ? handleLogin() : handleSignup();
+  }
+};
+
 
   return (
   <div className="min-h-screen bg-gray-200 flex items-center justify-center">
@@ -112,13 +185,25 @@ export default function AuthPage() {
         <h1 className="text-2xl font-bold mb-6">
           {isLogin ? "Welcome Back!!!" : "Create Account !!!"}
         </h1>
+        {errorMsg && (
+  <p className="text-red-500 text-sm mb-4 text-center">
+    {errorMsg}
+  </p>
+)}
+
+{successMsg && (
+  <p className="text-green-600 text-sm mb-4 text-center">
+    {successMsg}
+  </p>
+)}
 
         {!isLogin && (
           <input
             type="text"
             placeholder="Your Name"
             className="border-b p-2 mb-4 outline-none"
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {setName(e.target.value); setErrorMsg(""); setSuccessMsg("");} }
+            onKeyDown={handleKeyDown} 
           />
         )}
 
@@ -127,59 +212,30 @@ export default function AuthPage() {
           type="email"
           placeholder="Email ID"
           className="border-b p-2 mb-4 outline-none"
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {setEmail(e.target.value); setErrorMsg(""); setSuccessMsg("");}}
+          onKeyDown={handleKeyDown} 
         />
 
 
 
         <input
           type="password"
+          
           placeholder="Password"
           className="border-b p-2 mb-4 outline-none"
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => { setPassword(e.target.value) ; setErrorMsg(""); setSuccessMsg("");}}
+          onKeyDown={handleKeyDown} 
         />
 
         {!isLogin && (
           <input
             type="password"
+            onChange={(e) =>{ setConfirmPassword(e.target.value) ; setErrorMsg(""); setSuccessMsg("");}}
             placeholder="Confirm Password"
             className="border-b p-2 mb-4 outline-none"
+            onKeyDown={handleKeyDown} 
           />
         )}
-
-
-
-
-        {!isLogin && (
-  <div className="flex mb-4 gap-2">
-
-    <button
-      type="button"
-      onClick={() => setRole("user")}
-      className={`flex-1 py-2 rounded-lg border 
-      ${role === "user" 
-        ? "bg-green-500 text-white border-green-500" 
-        : "bg-white text-black"}
-      `}
-    >
-      User
-    </button>
-
-    <button
-      type="button"
-      onClick={() => setRole("owner")}
-      className={`flex-1 py-2 rounded-lg border 
-      ${role === "owner" 
-        ? "bg-green-500 text-white border-green-500" 
-        : "bg-white text-black"}
-      `}
-    >
-      Owner
-    </button>
-
-  </div>
-)}
-
 
 
 
@@ -195,18 +251,23 @@ export default function AuthPage() {
         )}
 
         <button
-          onClick={isLogin ? handleLogin : handleSignup}
-          className="bg-green-500 text-white py-2 rounded-lg mt-2"
-        >
-          {isLogin ? "Sign in Now" : "Sign Up Now"}
-        </button>
+  onClick={isLogin ? handleLogin : handleSignup}
+  disabled={loading}
+  className="bg-green-500 text-white py-2 rounded-lg mt-2 disabled:opacity-50"
+>
+  {loading ? "Please wait..." : isLogin ? "Sign in Now" : "Sign Up Now"}
+</button>
 
         <p className="text-sm mt-4 text-center">
           {isLogin ? (
             <>
               Don’t have an Account?{" "}
               <span
-                onClick={() => setIsLogin(false)}
+                onClick={() => {
+                    setIsLogin(false);
+                    setErrorMsg("");
+                    setSuccessMsg("");
+                  }}
                 className="text-blue-600 cursor-pointer"
               >
                 Sign Up
@@ -216,7 +277,11 @@ export default function AuthPage() {
             <>
               Already have an Account?{" "}
               <span
-                onClick={() => setIsLogin(true)}
+                onClick={() => {
+                    setIsLogin(true);
+                    setErrorMsg("");
+                    setSuccessMsg("");
+                  }}
                 className="text-blue-600 cursor-pointer"
               >
                 Login
@@ -232,7 +297,16 @@ export default function AuthPage() {
           Skip for now →
         </button>
 
+        <button
+  onClick={handleGoogleLogin}
+  className="w-full mt-3 border border-gray-300 py-2 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100"
+>
+  <img src="/google.png" className="h-5 w-5" />
+  Continue with Google
+</button>
+
       </div>
+      
     </div>
 
     {/* ================= MOBILE ================= */}
@@ -245,13 +319,25 @@ export default function AuthPage() {
       <h1 className="text-2xl font-bold mb-6 text-center text-black font-sans">
         {isLogin ? "Welcome Back!!!" : "Create Account !!!"}
       </h1>
+      {errorMsg && (
+  <p className="text-red-500 text-sm mb-4 text-center">
+    {errorMsg}
+  </p>
+)}
 
+{successMsg && (
+  <p className="text-green-600 text-sm mb-4 text-center">
+    {successMsg}
+  </p>
+)}
+      
       {!isLogin && (
         <input
           type="text"
           placeholder="Your Name"
           className="border-b p-2 mb-4 outline-none text-gray-700 font-sans"
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) =>{ setName(e.target.value); setErrorMsg(""); setSuccessMsg("");}}
+          onKeyDown={handleKeyDown} 
         />
       )}
 
@@ -260,54 +346,29 @@ export default function AuthPage() {
         type="email"
         placeholder="Email ID"
         className="border-b p-2 mb-4 outline-none text-gray-700 font-sans"
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {setEmail(e.target.value); setErrorMsg(""); setSuccessMsg("");}}
+        onKeyDown={handleKeyDown} 
       />
 
       <input
         type="password"
         placeholder="Password"
         className="border-b p-2 mb-4 outline-none text-gray-700 font-sans"
-        onChange={(e) => setPassword(e.target.value)}
+        onChange={(e) =>{ setPassword(e.target.value); setErrorMsg(""); setSuccessMsg("");}}
+        onKeyDown={handleKeyDown} 
       />
 
       {!isLogin && (
         <input
           type="password"
+          onChange={(e) => {setConfirmPassword(e.target.value); setErrorMsg(""); setSuccessMsg("");}}
           placeholder="Confirm Password"
           className="border-b p-2 mb-4 outline-none text-gray-700 font-sans"
+          onKeyDown={handleKeyDown} 
         />
       )}
 
-      {!isLogin && (
-  <div className="flex mb-4 gap-2">
-
-    <button
-      type="button"
-      onClick={() => setRole("user")}
-      className={`flex-1 py-1.5 rounded-lg border 
-      ${role === "user" 
-        ? "bg-green-500 text-white border-green-500 shadow-lg/20 font-semibold font-sans " 
-        : "bg-white border-gray-400 text-black font-sans"}
-      `}
-    >
-      User
-    </button>
-
-    <button
-      type="button"
-      onClick={() => setRole("owner")}
-      className={`flex-1 py-1.5 rounded-lg border 
-      ${role === "owner" 
-        ? "bg-green-500 text-white border-green-500 shadow-lg/20 font-semibold font-sans" 
-        : "bg-white border-gray-400 text-black font-sans"}
-      `}
-    >
-      Owner
-    </button>
-
-  </div>
-)}
-
+  
 
       {isLogin && (
         <div className="flex justify-between text-sm mb-4 text-black font-sans">
@@ -321,18 +382,23 @@ export default function AuthPage() {
       )}
 
       <button
-        onClick={isLogin ? handleLogin : handleSignup}
-        className="bg-green-500 text-white py-3 rounded-lg mt-2 font-sans"
-      >
-        {isLogin ? "Sign in Now" : "Sign Up Now"}
-      </button>
+  onClick={isLogin ? handleLogin : handleSignup}
+  disabled={loading}
+  className="bg-green-500 text-white py-2 rounded-lg mt-2 disabled:opacity-50"
+>
+  {loading ? "Please wait..." : isLogin ? "Sign in Now" : "Sign Up Now"}
+</button>
 
       <p className="text-sm mt-4 text-center text-black font-sans">
         {isLogin ? (
           <>
             Don’t have an Account?{" "}
             <span
-              onClick={() => setIsLogin(false)}
+              onClick={() => {
+                  setIsLogin(false);
+                  setErrorMsg("");
+                  setSuccessMsg("");
+                }}
               className="text-blue-600 cursor-pointer"
             >
               Sign Up
@@ -342,7 +408,11 @@ export default function AuthPage() {
           <>
             Already have an Account?{" "}
             <span
-              onClick={() => setIsLogin(true)}
+              onClick={() => {
+                  setIsLogin(true);
+                  setErrorMsg("");
+                  setSuccessMsg("");
+                  }}
               className="text-blue-600 cursor-pointer font-sans"
             >
               Login
@@ -358,7 +428,18 @@ export default function AuthPage() {
         Skip for now →
       </button>
 
+
+      <button
+  onClick={handleGoogleLogin}
+  className="w-full mt-3 border border-gray-300 py-2 rounded-lg flex items-center justify-center gap-2"
+>
+  <img src="/google.png" className="h-5 w-5" />
+  Continue with Google
+</button>
+
+
     </div>
   </div>
+  
 );
 }

@@ -425,7 +425,7 @@ const barData = last7DaysData.map((d, i) => ({
           </div>
 
           {/* Bookings */}
-          <div className="bg-green-200 rounded-lg p-3 shadow-md border border-gray-300">
+          <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
             <p className="font-medium font-sans text-gray-800 text-base">Bookings</p>
             <p className="text-sm mt-1 font-medium font-sans text-gray-600">Today : <span className="text-black pl-10.5">{todayBookings.length}</span></p>
             <p className="text-sm font-medium font-sans text-gray-600">This Week : <span className="text-black pl-3">{weekBookings.length}</span></p>
@@ -434,19 +434,19 @@ const barData = last7DaysData.map((d, i) => ({
 
 
           {/* This Week */}
-          <div className="bg-green-300 rounded-lg p-3 shadow-md border border-gray-300">
+          <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
   <p className="font-medium font-sans text-gray-800 text-base">This Week</p>
 
-  <p className="text-sm mt-1 text-gray-600">
+  <p className="text-sm mt-1 text-gray-600 font-medium font-sans">
     Bookings : <span className="text-black pl-2">{thisWeekCount}</span>
   </p>
 
-  <p className="text-sm text-gray-600">
+  <p className="text-sm text-gray-600 font-medium font-sans">
     Revenue : <span className="text-black pl-2">₹{thisWeekRevenue}</span>
   </p>
 
 
-  <p className="text-sm text-gray-600">
+  <p className="text-sm text-gray-600 font-medium font-sans">
     Growth : <span className={`text-sm pl-4.5 ${thisWeekGrowth >= 0 ? "text-green-700" : "text-red-600"}`}> {thisWeekGrowth}%</span>
   </p>
 
@@ -457,18 +457,18 @@ const barData = last7DaysData.map((d, i) => ({
 
 
           {/* Past Week */}
-          <div className="bg-green-400 rounded-lg p-3 shadow-md border border-gray-300">
+          <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">
   <p className="font-medium font-sans text-gray-800 text-base">Past Week</p>
 
-  <p className="text-sm mt-1 text-gray-600">
+  <p className="text-sm mt-1 text-gray-600 font-medium font-sans">
     Bookings : <span className="text-black pl-1.5">{lastWeekCount}</span>
   </p>
 
-  <p className="text-sm text-gray-600">
+  <p className="text-sm text-gray-600 font-medium font-sans">
     Revenue : <span className="text-black pl-2">₹{lastWeekRevenue}</span>
   </p>
 
-  <p className="text-sm text-gray-600">
+  <p className="text-sm text-gray-600 font-medium font-sans">
     Growth : <span className={`text-sm pl-4.5 ${lastWeekGrowth >= 0 ? "text-green-700" : "text-red-600"}`}> {lastWeekGrowth}%</span>
   </p>
 </div>
