@@ -121,7 +121,7 @@ const completed = bookings
 
         <div className="px-4 mt-4">
 
-          <h2 className="text-base text-black font-medium font-sans mb-4">Your Bookings</h2>
+          <h2 className="text-lg text-black font-medium font-sans mb-4">Your Bookings</h2>
 
           {/* ❌ NOT LOGGED IN */}
           {!user && (
@@ -133,7 +133,7 @@ const completed = bookings
 
               <button
                 onClick={() => router.push("/login")}
-                className="bg-blue-500 text-white px-5 font-semibold py-2 rounded-lg font-sans"
+                className="bg-blue-500 text-white px-4 font-medium py-1.5 rounded-md font-sans mt-5 shadow-md/30" 
               >
                 Login Now
               </button>

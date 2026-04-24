@@ -1,9 +1,20 @@
+ "use client";
+
+import { useRouter } from "next/navigation";
+
 export default function TermsPage() {
+
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-white px-6 py-10">
       <div className="max-w-[900px] mx-auto">
 
-        <h1 className="text-3xl font-bold mb-6">Terms and Conditions</h1>
+        <div className="flex items-center gap-3 mb-7">
+          <img onClick={() => router.back()} src="/icons/back.png" className="h-5" />
+          <p className="text-2xl font-bold font-sans text-black ">Terms and Conditions</p>
+        </div>
+
 
         <Section title="1. Platform Overview">
           Turfia is an online platform that connects users with turf owners for booking sports facilities and slots on turf.

@@ -98,12 +98,12 @@ export default function ProfilePage() {
             <p className="text-gray-600 text-sm mb-5 font-sans font-medium">
               View bookings, favourites and manage your account
             </p>
-
+ 
             <button
               onClick={() => router.push("/login")}
-              className="bg-green-500 text-white px-6 py-2 rounded-full text-md font-sans font-medium"
+              className="bg-green-500 text-white px-6 py-2 rounded-full text-md font-sans font-medium shadow-md/30"
             >
-              Login
+              Login Now
             </button>
 
             </div>  

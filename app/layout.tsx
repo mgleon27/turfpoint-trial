@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
 
-// ✅ EXISTING
 import { LocationProvider } from "@/lib/locationContext";
-
-// 🔥 NEW (ADD THIS)
 import { UserProvider } from "@/lib/userContext";
+
+// ✅ ADD THIS
+import Footer from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,14 +34,24 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-screen flex flex-col">
 
-        {/* 🔥 GLOBAL PROVIDERS */}
         <UserProvider>
           <LocationProvider>
-            {children}
+
+            {/* ✅ MAIN CONTENT */}
+            <main className="flex-grow">
+              {children}
+            </main>
+
+            {/* ✅ GLOBAL FOOTER */}
+            <Footer />
+
           </LocationProvider>
         </UserProvider>
+
+        {/* Optional analytics */}
+        <Analytics />
 
       </body>
     </html>

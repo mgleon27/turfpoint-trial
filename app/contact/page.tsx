@@ -1,9 +1,19 @@
+ "use client";
+
+import { useRouter } from "next/navigation";
+
 export default function ContactPage() {
+
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-white px-6 py-10">
       <div className="max-w-[800px] mx-auto">
 
-        <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
+        <div className="flex items-center gap-3 mb-7">
+          <img onClick={() => router.back()} src="/icons/back.png" className="h-5" />
+          <p className="text-2xl font-bold font-sans text-black ">Contact us</p>
+        </div>
 
         <p className="text-gray-700 mb-4">
           If you have any questions, issues, or need assistance regarding bookings,

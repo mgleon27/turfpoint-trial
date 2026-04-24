@@ -422,20 +422,31 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
         )}
       </p>
 
+
+
+<div className="flex items-center my-6">
+  <div className="flex-grow border-t border-gray-400"></div>
+  <span className="mx-4 text-gray-500 text-xs uppercase">or</span>
+  <div className="flex-grow border-t border-gray-400"></div>
+</div>
+
+
+
+        <button
+              onClick={handleGoogleLogin}
+            className="w-full bg-gray-50 border border-gray-500 py-2 rounded-lg flex items-center justify-center gap-3 shadow-md/10"
+        >
+        <img src="/icons/google.png" className="h-5 w-5" />
+        <p className="font-sans font-normal text-black text-md ">Continue with Google</p>
+        </button>
+
+        
       <button
         onClick={() => router.push("/")}
-        className="mt-4 text-gray-600 text-sm underline font-sans"
+        className="mt-7 text-gray-600 text-sm underline font-sans"
       >
         Skip for now →
       </button>
-
-
-      <div className="flex flex-col align-center w-full justify-center items-center mt-5">
-
-        <div className="border border-black rounded-full p-2"><img src="/icons/google.png" className="h-6 w-6" /></div>
-        <p className="font-sans font-normal text-[12px] text-black mt-2">Continue with google</p>
-
-      </div>
 
     </div>
   </div>

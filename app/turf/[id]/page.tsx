@@ -427,7 +427,7 @@ const iconMap: Record<string, string> = {
           </button>
 
 
-<UserOnly>
+
           <button
   onClick={toggleFavourite}
   disabled={isFav === null || favLoading}
@@ -441,7 +441,7 @@ const iconMap: Record<string, string> = {
   }`}
 >
   {isFav === null ? (
-    "Loading..."
+    "Login to Save"
   ) : (
     <>
       <img src="/icons/heart.png" className="w-5 h-5" />
@@ -449,7 +449,6 @@ const iconMap: Record<string, string> = {
     </>
   )}
 </button>  
-</UserOnly>
 
 
 
@@ -726,7 +725,7 @@ const iconMap: Record<string, string> = {
           </button>
 
 
-<UserOnly>
+
           <button
   onClick={toggleFavourite}
   disabled={isFav === null || favLoading}
@@ -740,7 +739,7 @@ const iconMap: Record<string, string> = {
   }`}
 >
   {isFav === null ? (
-    "Loading..."
+    "Login to Save"
   ) : (
     <>
       <img src="/icons/heart.png" className="w-5 h-5" />
@@ -748,7 +747,6 @@ const iconMap: Record<string, string> = {
     </>
   )}
 </button>  
-</UserOnly>
           </div>
 
 
@@ -907,7 +905,7 @@ const iconMap: Record<string, string> = {
         {/* CANCEL */}
         <button
           onClick={() => setShowLoginPopup(false)}
-          className="flex-1 border border-black rounded-full py-2 font-sans text-black"
+          className="flex-1 border border-gray-600 rounded-full py-2 font-sans text-black shadow-md/20"
         >
           Cancel
         </button>
@@ -915,7 +913,7 @@ const iconMap: Record<string, string> = {
         {/* LOGIN */}
         <button
           onClick={() => router.push("/login")}
-          className="flex-1 bg-green-600 text-white rounded-full py-2 font-sans"
+          className="flex-1 bg-green-600 text-white rounded-full py-2 font-sans shadow-md/20"
         >
           Login
         </button>

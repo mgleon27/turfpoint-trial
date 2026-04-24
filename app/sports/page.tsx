@@ -145,8 +145,8 @@ export default function SportsPage() {
 
       <div className="px-4 mt-2 bg-white">
 
-        <p className="text-black font-medium font-sans text-base mb-3">Select Sports Category</p>
-
+        <p className="text-black font-medium font-sans text-lg mb-3">Select Sports Category</p>
+ 
         {/* SPORTS SCROLL */}
         <div className="flex gap-3 overflow-x-auto pb-5 no-scrollbar">
           {loading ? (

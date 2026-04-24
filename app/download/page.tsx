@@ -1,7 +1,18 @@
-export default function TermsPage() {
+ "use client";
+
+import { useRouter } from "next/navigation";
+
+export default function DownloadPage() {
+  const router = useRouter();
   return (
-    <div className="min-h-screen bg-white px-6 py-10">
+    <div className="min-h-screen bg-white px-6 py-4">
       <div className="max-w-[900px] mx-auto">
+
+        <div className="flex items-center gap-2 mb-3 ml-1">
+          <img onClick={() => router.back()}  
+          src="/icons/back.png" className="h-4.5" />
+          <p className="font-sans font-medium text-xl text-black" >Back</p>
+        </div>
 
         <div className="flex flex-col p-5 items-center bg-green-500 rounded-xl">
         <h1 className="text-[30px]/7 text-white font-sans font-bold pt-2 px-2">Download</h1>

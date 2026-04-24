@@ -84,16 +84,16 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
           >
             <img src="/icons/locationtop.png" className="h-4 pr-0.5" />
             {mounted ? city : "..."} ›
-          </span>
+          </span> 
         </div>
 
         {/* RIGHT */}
         <div className="flex items-center gap-5 pr-5">
 
-          <button onClick={() => router.push("/download")}
-          className="bg-green-500 text-white px-4 py-2 rounded text-xs font-sans">
-            Get App
-          </button>
+          <div onClick={() => router.push("/download")}
+          className="bg-green-500 px-3 py-1.5 rounded ">
+            <p className="text-sm font-sans font-medium text-white">Download App</p>
+          </div>
 
           <Search
             size={23}
@@ -107,8 +107,14 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
       </div>
 
       {/* SEARCH BAR */}
-      {showSearch && (
-        <div className="mt-3 relative">
+      <div
+  className={`transition-all duration-300 ease-in-out ${
+  showSearch
+    ? "max-h-96 opacity-100 mt-3 overflow-visible"
+    : "max-h-0 opacity-0 overflow-hidden"
+}`}
+>
+  <div className="relative">
 
           <input
             ref={inputRef}
@@ -119,13 +125,18 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
           />
 
           {/* 🔥 DROPDOWN */}
-          {(search || loading) && (
-            <div className="absolute top-11 left-0 w-full bg-white shadow-lg rounded-xl border z-50 max-h-60 overflow-y-auto">
+          {showSearch && (
+  <div
+    className={`absolute top-11 left-0 w-full bg-white shadow-lg rounded-xl z-50 max-h-60 overflow-y-auto
+    transform transition-all duration-200 ${
+      showSearch ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
+    }`}
+  >
 
-              {/* LOADING */}
-              {loading && (
-                <p className="p-3 text-sm font-sans text-gray-500">Searching...</p>
-              )}
+    {/* LOADING */}
+    {loading && (
+      <p className="p-3 text-sm font-sans text-gray-500">Searching...</p>
+    )}
 
               {/* RESULTS */}
               {!loading && results.map((t) => (
@@ -155,15 +166,15 @@ export default function MobileHeader({ setShowLocationModal }: Props) {
               ))}
 
               {/* NO RESULTS */}
-              {!loading && search && results.length === 0 && (
-                <p className="p-3 text-sm text-gray-500">
-                  No results found
-                </p>
-              )}
-            </div>
-          )}
+    {!loading && search && results.length === 0 && (
+      <p className="p-3 text-sm text-gray-500">
+        No results found
+      </p>
+    )}
+  </div>
+)}
         </div>
-      )}
+      </div>
     </div>
   );
 }

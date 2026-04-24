@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/userContext";
+import { useRouter } from "next/navigation";
 
 import OwnerMobileNav from "@/components/OwnerMobileNav";
 import OwnerMobileHeader from "@/components/OwnerMobileHeader";
@@ -21,6 +22,7 @@ type Booking = {
 };
 
 export default function OwnerAccount() {
+  const router = useRouter();
   const { user } = useUser();
 
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -84,22 +86,25 @@ export default function OwnerAccount() {
       <OwnerMobileHeader />
       <OwnerMobileNav />
 
-      <div className="px-4 space-y-3 pb-10">
+      <div className="px-4 space-y-3">
 
         <p className="text-lg text-black font-sans font-medium mt-2">Account</p>
 
         {/* PROFILE */}
         <div className="border rounded-2xl px-4 py-3 flex items-center gap-4 border-gray-400 shadow-sm bg-green-50">
 
-          <div className="w-14 h-14 bg-black rounded-full" />
+          <div className="w-15 h-15 bg-black rounded-full" />
 
           <div>
-            <p className="text-xl font-normal font-sans text-black -mt-4">
+            <p className="text-xl font-medium font-sans text-black -mt-1">
               {profile?.full_name || "Owner Name"}
             </p>
             <p className="text-gray-500 text-sm/3 font-medium font-sans">
               {user?.email}
             </p>
+
+             <p className="text-gray-500 text-sm/3 pt-2 font-medium font-sans">+91 9976334971</p>
+
           </div>
 
         </div>
@@ -133,32 +138,47 @@ export default function OwnerAccount() {
 
             <p>Bank Name : HDFC Bank</p>
             <p>UPI Id : owner@upi</p>
-            <p>Payment Settled : Weekly</p>
+            <p>Payment Settled : Immediately</p>
 
           </div>
 
         </div>
 
         {/* ACTION BUTTONS */}
-        {[
-          "Edit Profile",
-          "Payment Details",
-          "Contact Support",
-          "Payment Policy",
-          "Terms & Conditions"
-        ].map((text) => (
-          <div
-            key={text}
-            className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-400 shadow-sm bg-green-50"
-          >
-            {text}
-          </div>
-        ))}
+
+        <div onClick={() => router.push("/contact")}
+        className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-400 shadow-sm bg-green-50">
+          <p>Edit Profile</p>
+        </div>
+
+        <div onClick={() => router.push("/refund")}
+        className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-400 shadow-sm bg-green-50">
+          <p>Payment Details</p>
+        </div>
+
+        <div onClick={() => router.push("/contact")}
+        className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-400 shadow-sm bg-green-50">
+          <p>Contact Support</p>
+        </div>
+
+        <div onClick={() => router.push("/refund")}
+        className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-400 shadow-sm bg-green-50">
+          <p>Payment Policy</p>
+        </div>
+
+        <div onClick={() => router.push("/terms")}
+        className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-400 shadow-sm bg-green-50">
+          <p>Terms & Conditions</p>
+        </div>
+
+
+
+
 
         {/* LOGOUT */}
         <div
           onClick={logout}
-          className="flex items-center gap-3 text-red-600 text-lg font-medium font-sans mt-6 cursor-pointer ml-3"
+          className="flex items-center gap-3 text-red-600 text-lg font-medium font-sans mt-7 cursor-pointer ml-3"
         >
           <span className="text-2xl">⏻</span>
           Log Out

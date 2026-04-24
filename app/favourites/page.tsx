@@ -216,7 +216,7 @@ if (loading) {
       <div className="px-4 mt-4">
 
         {/* TITLE */}
-        <h2 className="text-base text-black font-medium font-sans mb-4">
+        <h2 className="text-lg text-black font-medium font-sans mb-4">
           Favourites 
         </h2>
 
@@ -230,7 +230,7 @@ if (loading) {
 
             <button
               onClick={() => router.push("/login")}
-              className="bg-blue-500 text-white px-5 py-2 font-semibold rounded-lg font-sans"
+              className="bg-blue-500 text-white px-4 font-medium py-1.5 rounded-md font-sans mt-5 shadow-md/30" 
             >
               Login Now
             </button>

@@ -1,9 +1,19 @@
+ "use client";
+
+import { useRouter } from "next/navigation";
+
 export default function RefundPage() {
+
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-white px-6 py-10">
       <div className="max-w-[900px] mx-auto">
 
-        <h1 className="text-3xl font-bold mb-6">Refund Policy</h1>
+        <div className="flex items-center gap-3 mb-7">
+          <img onClick={() => router.back()} src="/icons/back.png" className="h-5" />
+          <p className="text-2xl font-bold font-sans text-black ">Refund Policy</p>
+        </div>
 
         <Section title="1. Cancellation by User">
           Users cannot cancel booking once the payment is completed and booking is done.

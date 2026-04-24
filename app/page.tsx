@@ -506,7 +506,7 @@ function MobileSection({
 }) {
   return (
     <div className="px-4 mt-1 ">
-      <h2 className="font-medium font-sans text-black mb-3">{title}</h2>
+      <h2 className="font-medium text-lg font-sans text-black mb-3">{title}</h2>
 
       {loading ? (
   <div className="flex gap-4">
