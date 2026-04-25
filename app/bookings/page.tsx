@@ -147,10 +147,10 @@ const completed = bookings
               <div className="flex gap-3 mb-4">
                 <button
                   onClick={() => setActiveTab("upcoming")}
-                  className={`flex-1 py-1.5 rounded-full text-sm shadow-lg/20 border-1 border-green-400 ${
+                  className={`flex-1 py-1.5 rounded-full shadow-lg/20 border-1 border-green-400 ${
                     activeTab === "upcoming"
-                      ? "bg-emerald-500 text-white font-sans font-medium"
-                      : "bg-emerald-50 text-black font-sans font-normal"
+                      ? "bg-green-500 text-white font-sans font-medium text-base"
+                      : "bg-green-50 text-black font-sans font-normal text-base"
                   }`}
                 >
                   Upcoming
@@ -158,10 +158,10 @@ const completed = bookings
 
                 <button
                   onClick={() => setActiveTab("completed")}
-                  className={`flex-1 py-2 rounded-full text-sm shadow-lg/20 border-1 border-green-400 ${
+                  className={`flex-1 py-1.5 rounded-full shadow-lg/20 border-1 border-green-400 ${
                     activeTab === "completed"
-                      ? "bg-emerald-500 text-white font-sans font-medium"
-                      : "bg-emerald-50 text-black font-sans font-normal"
+                      ? "bg-green-600 text-white font-sans font-medium text-base"
+                      : "bg-green-50 text-black font-sans font-normal text-base"
                   }`}
                 >
                   Completed

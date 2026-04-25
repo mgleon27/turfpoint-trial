@@ -434,10 +434,10 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
 
         <button
               onClick={handleGoogleLogin}
-            className="w-full bg-gray-50 border border-gray-500 py-2 rounded-lg flex items-center justify-center gap-3 shadow-md/10"
+            className="mr-auto ml-auto px-9 bg-gray-50 border border-gray-500 py-2 rounded-lg flex items-center justify-center gap-3 shadow-md/10"
         >
         <img src="/icons/google.png" className="h-5 w-5" />
-        <p className="font-sans font-normal text-black text-md ">Continue with Google</p>
+        <p className="font-sans font-medium text-black text-md ">Continue with Google</p>
         </button>
 
         

@@ -15,6 +15,7 @@ type UserType = {
 type ProfileType = {
   full_name?: string;
   avatar_url?: string;
+  email?:string;
   role?: string;
   owner_approved?: boolean;
 };

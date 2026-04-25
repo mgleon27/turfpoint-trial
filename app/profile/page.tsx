@@ -150,10 +150,7 @@ export default function ProfilePage() {
 
             {/* MENU */}
             <div className="mt-6 flex flex-col gap-3">
-              <MenuItem title="Edit Profile" onClick={() => {
-                setShowEditToast(true);
-                setTimeout(() => setShowEditToast(false), 2000);
-              }} />
+              <MenuItem title="Edit Profile" onClick={() => router.push("/profile-edit")} />
               <MenuItem title="My Bookings" onClick={() => router.push("/bookings")} />
               <MenuItem title="Favourites" onClick={() => router.push("/favourites")} />
               <MenuItem title="Refund Policy" onClick={() => router.push("/refund")} />
@@ -388,8 +385,8 @@ function MenuItem({ title, onClick }: { title: string; onClick: () => void }) {
         clicked ? "opacity-60" : ""
       }`}
     >
-      <span className="text-sm font-medium">{title}</span>
-      <span className="text-gray-400">›</span>
+      <span className="text-base font-medium text-black font-sans">{title}</span>
+      <span className="text-gray-700">›</span>
     </div>
   );
 }
