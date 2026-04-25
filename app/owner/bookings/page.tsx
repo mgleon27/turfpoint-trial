@@ -127,7 +127,7 @@ setInactiveTurfCount(inactiveTurfs?.length || 0);
       {/* HEADER */}
       <div className="px-4">
       <div className="flex justify-between items-center mb-1.5">
-        <h1 className="text-lg text-black font-medium font-sans mb-4 pt-3">Bookings</h1>
+        <h1 className="text-lg text-black font-medium font-sans mb-4 pt-3 pl-1">Bookings</h1>
 
         <input
           type="date"

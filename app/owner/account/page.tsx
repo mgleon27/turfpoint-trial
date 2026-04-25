@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { useUser } from "@/lib/userContext";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 import OwnerMobileNav from "@/components/OwnerMobileNav";
 import OwnerMobileHeader from "@/components/OwnerMobileHeader";
 
 type Profile = {
   full_name: string;
+  created_at: string;
 };
 
 type Turf = {
@@ -21,9 +23,20 @@ type Booking = {
   price: number;
 };
 
+type BankDetails = {
+  bank_name: string;
+  account_number: string;
+  ifsc: string;
+  upi_id: string;
+};
+
 export default function OwnerAccount() {
   const router = useRouter();
   const { user } = useUser();
+
+  const [bankDetails, setBankDetails] = useState<BankDetails | null>(null);
+
+  const [showBankDetails, setShowBankDetails] = useState(false);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [turfs, setTurfs] = useState<Turf[]>([]);
@@ -37,7 +50,7 @@ export default function OwnerAccount() {
       // PROFILE
       const { data: profileData } = await supabase
         .from("profiles")
-        .select("full_name")
+        .select("full_name, created_at")
         .eq("id", user.id)
         .single();
 
@@ -51,13 +64,35 @@ export default function OwnerAccount() {
 
       setTurfs(turfData || []);
 
-      // BOOKINGS
-      const { data: bookingData } = await supabase
-        .from("bookings")
-        .select("price")
-        .eq("owner_id", user.id); // ⚠️ if not exists, tell me
 
-      setBookings(bookingData || []);
+      // BANK DETAILS
+      const { data: bankData } = await supabase
+        .from("bank_details")
+        .select("bank_name, account_number, ifsc, upi_id")
+        .eq("owner_id", user.id)
+        .single();
+
+      setBankDetails(bankData);
+
+      // BOOKINGS
+      // BOOKINGS (FIXED)
+
+// 1. Get turf IDs of this owner
+const turfIds = (turfData || []).map(t => t.id);
+
+if (turfIds.length > 0) {
+  // 2. Get bookings for those turfs
+  const { data: bookingData, error } = await supabase
+    .from("bookings")
+    .select("price")
+    .in("turf_id", turfIds);
+
+  if (error) console.log(error);
+
+  setBookings(bookingData || []);
+} else {
+  setBookings([]);
+}
     };
 
     load();
@@ -78,6 +113,14 @@ export default function OwnerAccount() {
     window.location.href = "/login";
   };
 
+  const formatDate = (date: string) => {
+  return new Date(date).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
   // ================= UI =================
 
   return (
@@ -88,7 +131,7 @@ export default function OwnerAccount() {
 
       <div className="px-4 space-y-3">
 
-        <p className="text-lg text-black font-sans font-medium mt-2">Account</p>
+        <p className="text-lg text-black font-sans font-medium mt-2 pl-1">Account</p>
 
         {/* PROFILE */}
         <div className="border rounded-2xl px-4 py-3 flex items-center gap-4 border-gray-400 shadow-sm bg-green-50">
@@ -120,7 +163,19 @@ export default function OwnerAccount() {
 
             <p>Total Turfs : {totalTurfs}</p>
             <p>Active Turfs : {activeTurfs}</p>
+
+            <div className="flex items-center gap-4">
+
             <p>Total Bookings : {totalBookings}</p>
+
+            <p className="text-gray-700 text-xs font-medium font-sans">
+            ( since {profile?.created_at ? formatDate(profile.created_at) : "-"} )
+            </p>
+
+            </div>
+
+
+            
             <p>Total Revenue : ₹{totalRevenue}</p>
 
           </div>
@@ -130,17 +185,52 @@ export default function OwnerAccount() {
         {/* PAYMENT DETAILS (STATIC) */}
         <div className="border rounded-2xl p-4 border-gray-400 shadow-sm bg-green-50">
 
-          <p className="text-base text-black font-sans font-medium mb-3">
-            Payment Details
-          </p>
+          <div className="flex justify-between items-center mb-3">
+  <p className="text-base text-black font-sans font-medium">
+    Payment Details
+  </p>
 
-          <div className="space-y-2 text-gray-700 font-sans font-normal">
+  <button
+  onClick={() => setShowBankDetails(!showBankDetails)}
+  className="text-gray-600"
+>
+  {showBankDetails ? <EyeOff size={20} /> : <Eye size={20} />}
+</button>
+</div>
 
-            <p>Bank Name : HDFC Bank</p>
-            <p>UPI Id : owner@upi</p>
-            <p>Payment Settled : Immediately</p>
+      <div className="space-y-2 text-gray-700 font-sans font-normal">
 
-          </div>
+  <p>
+    Bank Name :<span className="text-black font-medium">{" "}
+    {showBankDetails
+      ? bankDetails?.bank_name || "-------"
+      : "••••••••••"}</span>
+  </p>
+
+  <p>
+    Acc Number :<span className="text-black font-medium">{" "}
+    {showBankDetails
+      ? bankDetails?.account_number || "-------"
+      : "••••••••••"}</span>
+  </p>
+
+  <p>
+    IFSC Code :<span className="text-black font-medium">{" "}
+    {showBankDetails
+      ? bankDetails?.ifsc || "-------"
+      : "••••••"}</span>
+  </p>
+
+  <p>
+    UPI Id :<span className="text-black font-medium">{" "}
+    {showBankDetails
+      ? bankDetails?.upi_id || "-------"
+      : "••••••••"}</span>
+  </p>
+
+  <p>Payment Settled :<span className="text-black font-medium"> Day-To-Day</span></p>
+
+</div>
 
         </div>
 

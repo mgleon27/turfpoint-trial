@@ -215,7 +215,7 @@ const bookingChange =
 
       <div className="px-4">
 
-        <p className="text-lg text-black font-sans font-medium mt-2">Home</p>
+        <p className="text-lg text-black font-sans font-medium mt-2 pl-1">Home</p>
 
         {/* TOP CARDS */}
         <div className="flex gap-3 mt-3">

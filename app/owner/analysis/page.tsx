@@ -413,8 +413,11 @@ const barData = last7DaysData.map((d, i) => ({
 
       <div className="px-4">
 
+        <h1 className="text-lg text-black font-medium font-sans mb-3 pt-3 pl-1">Analytics</h1>
+
         {/* ================= TOP CARDS ================= */}
         <div className="grid grid-cols-2 gap-3 mt-3">
+          
 
           {/* Revenue */}
           <div className="bg-green-100 rounded-lg p-3 shadow-md border border-gray-300">

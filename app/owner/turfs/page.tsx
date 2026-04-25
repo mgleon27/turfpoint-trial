@@ -104,7 +104,7 @@ export default function OwnerTurfs() {
       <div className="px-4">
 
         {/* HEADER */}
-        <h1 className="text-[18px] text-black font-medium font-sans mb-4 pt-3">Turfs</h1>
+        <h1 className="text-lg text-black font-medium font-sans mb-4 pt-3 pl-1">Turfs</h1>
 
         {/* ADD BUTTON */}
         <div
