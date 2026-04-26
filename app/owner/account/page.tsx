@@ -236,7 +236,7 @@ if (turfIds.length > 0) {
 
         {/* ACTION BUTTONS */}
 
-        <div onClick={() => router.push("/contact")}
+        <div onClick={() => router.push("/owner/edit-profile")}
         className="border rounded-xl px-4 py-3 text-base font-medium font-sans text-black border-gray-400 shadow-sm bg-green-50">
           <p>Edit Profile</p>
         </div>
